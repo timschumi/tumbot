@@ -3,6 +3,7 @@ import sqlite3
 from threading import Thread
 import math
 import time
+import os
 
 class Bot(DBot):
     def __init__(self, **options):
@@ -12,15 +13,20 @@ class Bot(DBot):
         self.run_jobs = True
 
     def create_dbconn(self):
-        connection = sqlite3.connect('database.db', check_same_thread=False)
+        connection = sqlite3.connect('db/database.db', check_same_thread=False)
         connection.row_factory = sqlite3.Row
 
-        user_version = connection.execute("PRAGMA user_version").fetchone()[0]
-        if user_version < 2: # Wurde die Datenbank initialisiert?
-            with open('database.sql') as file:
-                connection.executescript(file.read())
+        self.upgrade_db(connection)
 
         return connection
+
+    def upgrade_db(self, connection):
+        user_version = connection.execute("PRAGMA user_version").fetchone()[0]
+
+        while(os.path.isfile("db/schema_{}.sql".format(user_version + 1))):
+            with open("db/schema_{}.sql".format(user_version + 1)) as file:
+                connection.executescript(file.read())
+            user_version += 1
 
     def close_dbconn(self):
         self.db.commit()

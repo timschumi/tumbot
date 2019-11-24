@@ -5,4 +5,4 @@ CREATE TABLE mensa (
   day INT
 );
 
-PRAGMA user_version = 2;
+PRAGMA user_version = 1;
