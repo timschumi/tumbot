@@ -26,7 +26,7 @@ class Prefixes(commands.Cog):
     async def on_message(self, message):
         msg = str(message.content).lower()
         if "prefix" in msg and not message.author.bot and "bot" in msg:
-            await message.channel.send("Dieser Server hat den Prefix: **" + self.get_prefix(ctx.guild.id) + "**")
+            await message.channel.send("Dieser Server hat den Prefix: **" + self.get_prefix(message.guild.id) + "**")
 
 
 def setup(client):
