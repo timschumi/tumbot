@@ -1,1 +1,8 @@
 "Der Rechner ist typischerweise - äh hat wenig Bauchgefühl, sondern relativ arbeitet nach festen Regeln" - Helmut Seidl, 2019
+"Wälder bestehen aus Bäumen" - Felix Brandt, 2019
+"PGdP ist äußerst exzellent!" - PGdP, 2019
+"Nope" - Johannes Stöhr, 2019
+"Macht erstmal nichts" - Erik Kynast, 2019
+"expected:<true> but was:<false>" - Artemis, 2019
+"expected:<false> but was:<true>" - Artemis, 2019
+"expected: but was:" - Artemis, 2019
