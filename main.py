@@ -5,7 +5,7 @@ import discord
 from bot import Bot
 
 bot = Bot(command_prefix='!')
-bot.load_extension('plugins.quotes')
-bot.load_extension('plugins.mensa')
-bot.load_extension('plugins.status')
+bot.load_extension('cogs.quotes')
+bot.load_extension('cogs.mensa')
+bot.load_extension('cogs.status')
 bot.run(os.environ['TUMBOT_TOKEN'])
