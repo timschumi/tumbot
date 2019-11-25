@@ -98,4 +98,5 @@ for filename in os.listdir('./cogs'):
                 print(F'{filename}' + ' ist fehlerhaft')
     else:
         pass
-bot.run('Token')
+
+bot.run(os.environ['TUMBOT_TOKEN'])
