@@ -12,15 +12,10 @@ db = DbMgr()
 
 # Finde den Prefix eines Servers
 def get_prefix(bot, message):
-    if message.guild is not None:
-        try:
-            with open('./data/prefixes.json', 'r') as f:
-                prefixes = json.load(f)
-            return prefixes[str(message.guild.id)]
-        except KeyError:
-            return '!'
-    else:
+    if message.guild is None:
         return '!'
+
+    return bot.dbconf_get(message.guild.id, 'prefix', '!')
 
 bot = Bot(db, command_prefix=get_prefix)
 
