@@ -15,3 +15,4 @@
 "expected:<true> but was:<false>" - Artemis, 2019
 "expected:<false> but was:<true>" - Artemis, 2019
 "expected: but was:" - Artemis, 2019
+"Sie müssen so tun als würde das schwierig sein, dann verdienen Sie mehr Geld." - Prof. Dr. Bernd Grottel. 2019
