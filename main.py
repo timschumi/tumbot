@@ -5,8 +5,10 @@ import discord
 import logging
 import json
 from bot import Bot
+from dbmgr import DbMgr
 from discord.ext import commands
 
+db = DbMgr()
 
 # Finde den Prefix eines Servers
 def get_prefix(bot, message):
@@ -20,8 +22,7 @@ def get_prefix(bot, message):
     else:
         return '!'
 
-
-bot = Bot(command_prefix=get_prefix)
+bot = Bot(db, command_prefix=get_prefix)
 
 
 # Botowner für Permissions zu manchen Commands

@@ -18,7 +18,7 @@ class Status(commands.Cog):
     @status.command()
     @commands.has_permissions(manage_channels=True)
     async def setup(self, ctx, name, url):
-        with self.bot.db as db:
+        with self.bot.db.get(ctx.guild.id) as db:
             db.execute("INSERT INTO status (name, url, channelid, status) VALUES (?, ?, ?, ?)", (name, url, ctx.channel.id, self.get_code(url)))
 
         await ctx.message.add_reaction('\U00002705')
@@ -31,18 +31,19 @@ class Status(commands.Cog):
             return err.code
 
     def status_update(self):
-        entries = self.bot.db.execute("SELECT name, url, channelid, status FROM status").fetchall()
-        for i in entries:
-            current_code = self.get_code(i[1])
-            if i[3] == current_code:
-                continue
+        for connection in self.bot.db.get_all():
+            entries = connection.execute("SELECT name, url, channelid, status FROM status").fetchall()
+            for i in entries:
+                current_code = self.get_code(i[1])
+                if i[3] == current_code:
+                    continue
 
-            with self.bot.db as db:
-                db.execute("UPDATE status SET status = ? WHERE url = ?", (current_code, i[1]))
+                with connection:
+                    connection.execute("UPDATE status SET status = ? WHERE url = ?", (current_code, i[1]))
 
-            channel = self.bot.get_channel(i[2])
+                channel = self.bot.get_channel(i[2])
 
-            asyncio.run_coroutine_threadsafe(channel.send("{} (<{}>) just changed status: `{} -> {}`".format(i[0], i[1], i[3], current_code)), self.bot.loop).result()
+                asyncio.run_coroutine_threadsafe(channel.send("{} (<{}>) just changed status: `{} -> {}`".format(i[0], i[1], i[3], current_code)), self.bot.loop).result()
 
 def setup(bot):
     bot.add_cog(Status(bot))

@@ -34,13 +34,14 @@ class Mensa(commands.Cog):
                 continue
 
             message = await ctx.send(text)
-            with self.bot.db as db:
+            with self.bot.db.get(ctx.guild.id) as db:
                 db.execute("INSERT INTO mensa (location, day, messageid, channelid) VALUES (?, ?, ?, ?)", (location, day, message.id, ctx.channel.id))
 
     def update_entries(self):
-        messages = self.bot.db.execute("SELECT location, day, messageid, channelid FROM mensa").fetchall()
-        for i in messages:
-            asyncio.run_coroutine_threadsafe(self.update_entry(i[3], i[2], i[0], i[1]), self.bot.loop).result()
+        for connection in self.bot.db.get_all():
+            messages = connection.execute("SELECT location, day, messageid, channelid FROM mensa").fetchall()
+            for i in messages:
+                asyncio.run_coroutine_threadsafe(self.update_entry(i[3], i[2], i[0], i[1]), self.bot.loop).result()
 
     async def update_entry(self, channelid, messageid, location, day):
         channel = self.bot.get_channel(channelid)
@@ -56,8 +57,9 @@ class Mensa(commands.Cog):
         await message.edit(content=self.get_content(location, day))
 
     def discard_entry(self, messageid):
-        with self.bot.db as db:
-            db.execute("DELETE FROM mensa WHERE messageid = ?", (messageid,))
+        for connection in self.bot.db.get_all():
+            with connection:
+                connection.execute("DELETE FROM mensa WHERE messageid = ?", (messageid,))
 
     def get_content(self, location, day):
         now = datetime.datetime.now().isocalendar()

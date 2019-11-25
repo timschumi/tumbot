@@ -6,38 +6,17 @@ import time
 import os
 
 class Bot(DBot):
-    def __init__(self, **options):
+    def __init__(self, db, **options):
         super().__init__(**options)
-        self.db = self.create_dbconn()
+        self.db = db
         self.jobs = {}
         self.run_jobs = True
-
-    def create_dbconn(self):
-        connection = sqlite3.connect('db/database.db', check_same_thread=False)
-        connection.row_factory = sqlite3.Row
-
-        self.upgrade_db(connection)
-
-        return connection
-
-    def upgrade_db(self, connection):
-        user_version = connection.execute("PRAGMA user_version").fetchone()[0]
-
-        while(os.path.isfile("db/schema_{}.sql".format(user_version + 1))):
-            with open("db/schema_{}.sql".format(user_version + 1)) as file:
-                connection.executescript(file.read())
-            user_version += 1
-
-    def close_dbconn(self):
-        self.db.commit()
-        self.db.close()
-        self.db = None
 
     async def close(self):
         print("Shutting down!")
         self.run_jobs = False
         await super().close()
-        self.close_dbconn()
+        self.db.close_all()
 
     def run(self, token):
         self.job_runner = Thread(target=self.job_runner_func)
@@ -59,3 +38,25 @@ class Bot(DBot):
     def register_job(self, timer, f):
         print("Registering job {} to run every {} seconds".format(f.__name__, timer))
         self.jobs.setdefault(timer, []).append(f)
+
+    def dbconf_get(self, guild_id, name, default=None):
+        result = self.db.get(guild_id).execute("SELECT value FROM config WHERE name = ?", (name,)).fetchall()
+
+        if len(result) < 1:
+            return default
+
+        return str(result[0][0])
+
+    def dbconf_set(self, guild_id, name, value):
+        saved = self.dbconf_get(guild_id, name)
+
+        if saved == None:
+            with self.db.get(guild_id) as db:
+                db.execute("INSERT INTO config(name, value) VALUES(?, ?)", (name, value))
+            return
+
+        if str(saved) == str(value):
+            return
+
+        with self.db.get(guild_id) as db:
+            db.execute("UPDATE config SET value = ? WHERE name = ?", (value, name))
