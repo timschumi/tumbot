@@ -6,6 +6,7 @@ import asyncio
 import calendar
 from discord.ext import commands
 
+
 class Mensa(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
