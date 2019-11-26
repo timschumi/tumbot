@@ -1,5 +1,3 @@
-import json
-
 from discord.ext import commands
 
 class Prefixes(commands.Cog):

@@ -3,7 +3,6 @@
 import os
 import discord
 import logging
-import json
 from bot import Bot
 from dbmgr import DbMgr
 from discord.ext import commands
