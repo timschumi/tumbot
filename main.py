@@ -3,6 +3,7 @@
 import os
 import discord
 import logging
+from subprocess import call
 from bot import Bot
 from dbmgr import DbMgr
 from discord.ext import commands
@@ -35,6 +36,14 @@ async def shutdown(ctx):
     await ctx.send("Bot wird heruntergefahren...")
     await bot.logout()
 
+# Bot updaten
+@bot.command()
+@commands.check(botowner)
+async def update(ctx):
+    call(["git", "pull", "origin", "master"])
+
+    await shutdown(ctx)
+    os.execv(__file__, sys.argv)
 
 @bot.command()
 async def ping(ctx):
