@@ -25,7 +25,7 @@ def botowner(ctx):
     if ctx.author.id == 296323983819669514 or ctx.author.id == 137291894953607168:
         return True
     else:
-        return False
+        raise commands.errors.MissingPermissions('You need to be thebot owner to use this.')
 
 
 # Bot herunterfahren
