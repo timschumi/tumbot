@@ -28,6 +28,7 @@ class ErrorHandler(commands.Cog):
         # Standard handler: Einfach den Traceback ausgeben
         print('Fehler beim Ausführen des Befehls `{}`:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        await ctx.message.add_reaction('\U0001F525')
 
 def setup(bot):
     bot.add_cog(ErrorHandler(bot))
