@@ -1,25 +1,21 @@
-import json
-
 from discord.ext import commands
 
 
 class Logging(commands.Cog):
-
     def __init__(self, bot):
         self.bot = bot
+
+    def get_logchannel(self, guild):
+        return self.client.dbconf_get(guild, 'logchannel')
+
+    def set_logchannel(self, guild, logchannel):
+        return self.client.dbconf_set(guild, 'logchannel', logchannel)
 
     # LogChannel setzen
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def setlogchannel(self, ctx, lchannelid):
-        guild = ctx.guild
-        with open('./data/logchannel.json', 'r') as f:
-            logs = json.load(f)
-
-        logs[str(guild.id)] = str(lchannelid)
-
-        with open('./data/logchannel.json', 'w') as f:
-            json.dump(logs, f, indent=4)
+        self.set_logchannel(ctx.guild.id, lchannelid)
         await ctx.channel.purge(limit=1)
         await ctx.send("Channel <#" + lchannelid + "> ist jetzt der Channel für den Log.")
 
@@ -28,10 +24,9 @@ class Logging(commands.Cog):
     async def on_member_join(self, member):
         try:
             if member.bot:
-                guild = member.guild
-                with open('./data/logchannel.json', 'r') as f:
-                    logs = json.load(f)
-                logchannelid = logs[str(guild.id)]
+                logchannelid = self.get_logchannel(member.guild.id)
+                if logchannelid is None:
+                    return
                 logch = self.bot.get_channel(int(logchannelid))
                 await logch.send(":inbox_tray: **" + str(member) + "(" + str(member.id) + ")** ist dem Sever beigetreten.")
             else:
@@ -44,10 +39,9 @@ class Logging(commands.Cog):
     async def on_member_remove(self, member):
         try:
             if member.bot:
-                guild = member.guild
-                with open('./data/logchannel.json', 'r') as f:
-                    logs = json.load(f)
-                logchannelid = logs[str(guild.id)]
+                logchannelid = self.get_logchannel(member.guild.id)
+                if logchannelid is None:
+                    return
                 logch = self.bot.get_channel(int(logchannelid))
                 await logch.send(":outbox_tray: **" + str(member) + " (" + str(member.id) + ")** hat den Server verlassen.")
             else:
@@ -60,9 +54,9 @@ class Logging(commands.Cog):
     async def on_member_ban(self, guild, member):
         try:
             if not member.bot:
-                with open('./data/logchannel.json', 'r') as f:
-                    logs = json.load(f)
-                logchannelid = logs[str(guild.id)]
+                logchannelid = self.get_logchannel(member.guild.id)
+                if logchannelid is None:
+                    return
                 logch = self.bot.get_channel(int(logchannelid))
                 await logch.send(":no_entry_sign: **" + str(member) + " (" + str(member.id) + ")** wurde gebannt.")
             else:
@@ -75,9 +69,9 @@ class Logging(commands.Cog):
     async def on_member_unban(self, guild, member):
         try:
             if not member.bot:
-                with open('./data/logchannel.json', 'r') as f:
-                    logs = json.load(f)
-                logchannelid = logs[str(guild.id)]
+                logchannelid = self.get_logchannel(member.guild.id)
+                if logchannelid is None:
+                    return
                 logch = self.bot.get_channel(int(logchannelid))
                 await logch.send(":white_check_mark: **" + str(member) + " (" + str(member.id) + ")** wurde entgebannt.")
             else:
@@ -95,9 +89,9 @@ class Logging(commands.Cog):
                 msg = payload.message_id
                 content = payload.cached_message.content
                 member = payload.cached_message.author
-                with open('./data/logchannel.json', 'r') as f:
-                    logs = json.load(f)
-                logchannelid = logs[str(guild)]
+                logchannelid = self.get_logchannel(member.guild.id)
+                if logchannelid is None:
+                    return
                 logch = self.bot.get_channel(int(logchannelid))
                 await logch.send(':recycle: **Nachricht:** "' + str(content) + '" von User: ' + str(member) + ' (' +
                                  str(member.id) + ") gelöscht.")
@@ -109,9 +103,9 @@ class Logging(commands.Cog):
         try:
             guild = member.guild
             if not member.bot:
-                with open('./data/logchannel.json', 'r') as f:
-                    logs = json.load(f)
-                logchannelid = logs[str(guild.id)]
+                logchannelid = self.get_logchannel(member.guild.id)
+                if logchannelid is None:
+                    return
                 logch = self.bot.get_channel(int(logchannelid))
                 if before.channel is None:
                     await logch.send(":mega: **" + str(member) + " (" + str(member.id) + ")** hat den Voice Channel **" +
