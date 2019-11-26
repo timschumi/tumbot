@@ -8,6 +8,7 @@
 "Wälder bestehen aus Bäumen" - Felix Brandt, 2019
 "Das ist das Schönste, was es gibt!" - Felix Brandt, 2019
 "Wir fangen jetzt mit der Hinrichtung an!" - Felix Brandt, 2019
+"Sie müssen so tun als würde das schwierig sein, dann verdienen Sie mehr Geld." - Bernd Grottel, 2019
 "Nutze dein Wischtelefon!" - Carsten Trinitis, 2019
 "PGdP ist äußerst exzellent!" - PGdP, 2019
 "Nope" - Johannes Stöhr, 2019
@@ -15,4 +16,4 @@
 "expected:<true> but was:<false>" - Artemis, 2019
 "expected:<false> but was:<true>" - Artemis, 2019
 "expected: but was:" - Artemis, 2019
-"Sie müssen so tun als würde das schwierig sein, dann verdienen Sie mehr Geld." - Prof. Dr. Bernd Grottel. 2019
+"Esst mehr Pinguinfleisch!" - Pinguinfleisch.com, 2019
