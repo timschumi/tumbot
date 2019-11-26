@@ -21,7 +21,9 @@ class Userinfo(commands.Cog):
         userinfoembed.add_field(name='Name:', value=str(member.display_name))
 
         userinfoembed.add_field(name='Status:', value=str(member.status))
-        userinfoembed.add_field(name='Aktivität:', value=str(member.activity.name))
+
+        if member.activity is not None:
+            userinfoembed.add_field(name='Aktivität:', value=str(member.activity.name))
 
         userinfoembed.add_field(name='Account erstellt:',
                                 value=member.created_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"))
