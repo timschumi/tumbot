@@ -40,6 +40,11 @@ class Userinfo(commands.Cog):
             errorcu01embed = discord.Embed(title="Error #CU01",
                                            description="Fehlende NutzerID! Syntax: userinfo <userid>", color=0xff0000)
             await ctx.send(embed=errorcu01embed)
+            return
+
+        handler = self.bot.get_cog('ErrorHandler')
+        if handler is not None:
+            await handler.on_command_error(ctx, error, force=True)
 
 
 def setup(bot):
