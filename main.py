@@ -32,10 +32,10 @@ def botowner(ctx):
 @bot.command()
 @commands.check(botowner)
 async def shutdown(ctx):
+    await ctx.channel.purge(limit=1)
     await _shutdown(ctx)
 
 async def _shutdown(ctx):
-    await ctx.channel.purge(limit=1)
     await ctx.send("Bot wird heruntergefahren...")
     await bot.logout()
 
@@ -43,6 +43,7 @@ async def _shutdown(ctx):
 @bot.command()
 @commands.check(botowner)
 async def update(ctx):
+    await ctx.channel.purge(limit=1)
     call(["git", "pull", "origin", "master"])
 
     await _shutdown(ctx)
