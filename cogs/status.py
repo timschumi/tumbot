@@ -5,6 +5,7 @@ import calendar
 from discord.ext import commands
 import discord
 
+
 class Status(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -19,7 +20,8 @@ class Status(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     async def setup(self, ctx, name, url):
         with self.bot.db.get(ctx.guild.id) as db:
-            db.execute("INSERT INTO status (name, url, channelid, status) VALUES (?, ?, ?, ?)", (name, url, ctx.channel.id, self.get_code(url)))
+            db.execute("INSERT INTO status (name, url, channelid, status) VALUES (?, ?, ?, ?)",
+                       (name, url, ctx.channel.id, self.get_code(url)))
 
         await ctx.message.add_reaction('\U00002705')
 
@@ -43,7 +45,10 @@ class Status(commands.Cog):
 
                 channel = self.bot.get_channel(i[2])
 
-                asyncio.run_coroutine_threadsafe(channel.send("{} (<{}>) just changed status: `{} -> {}`".format(i[0], i[1], i[3], current_code)), self.bot.loop).result()
+                asyncio.run_coroutine_threadsafe(
+                    channel.send("{} (<{}>) just changed status: `{} -> {}`".format(i[0], i[1], i[3], current_code)),
+                    self.bot.loop).result()
+
 
 def setup(bot):
     bot.add_cog(Status(bot))

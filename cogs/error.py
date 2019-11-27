@@ -3,6 +3,7 @@ from discord.ext import commands
 import sys
 import traceback
 
+
 class ErrorHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -29,6 +30,7 @@ class ErrorHandler(commands.Cog):
         print('Fehler beim Ausführen des Befehls `{}`:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
         await ctx.message.add_reaction('\U0001F525')
+
 
 def setup(bot):
     bot.add_cog(ErrorHandler(bot))

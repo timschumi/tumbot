@@ -1,15 +1,16 @@
 from discord.ext import commands
 
+
 class Prefixes(commands.Cog):
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     def get_prefix(self, guild):
-        return self.client.dbconf_get(guild, 'prefix', '!')
+        return self.bot.dbconf_get(guild, 'prefix', '!')
 
     def set_prefix(self, guild, prefix):
-        return self.client.dbconf_set(guild, 'prefix', prefix)
+        return self.bot.dbconf_set(guild, 'prefix', prefix)
 
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -27,5 +28,5 @@ class Prefixes(commands.Cog):
             await message.channel.send("Dieser Server hat den Prefix: **" + self.get_prefix(message.guild.id) + "**")
 
 
-def setup(client):
-    client.add_cog(Prefixes(client))
+def setup(bot):
+    bot.add_cog(Prefixes(bot))

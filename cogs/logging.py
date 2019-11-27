@@ -6,10 +6,10 @@ class Logging(commands.Cog):
         self.bot = bot
 
     def get_logchannel(self, guild):
-        return self.client.dbconf_get(guild, 'logchannel')
+        return self.bot.dbconf_get(guild, 'logchannel')
 
     def set_logchannel(self, guild, logchannel):
-        return self.client.dbconf_set(guild, 'logchannel', logchannel)
+        return self.bot.dbconf_set(guild, 'logchannel', logchannel)
 
     # LogChannel setzen
     @commands.command()
@@ -28,7 +28,8 @@ class Logging(commands.Cog):
                 if logchannelid is None:
                     return
                 logch = self.bot.get_channel(int(logchannelid))
-                await logch.send(":inbox_tray: **" + str(member) + "(" + str(member.id) + ")** ist dem Sever beigetreten.")
+                await logch.send(
+                    ":inbox_tray: **" + str(member) + "(" + str(member.id) + ")** ist dem Sever beigetreten.")
             else:
                 pass
         except Exception:
@@ -43,7 +44,8 @@ class Logging(commands.Cog):
                 if logchannelid is None:
                     return
                 logch = self.bot.get_channel(int(logchannelid))
-                await logch.send(":outbox_tray: **" + str(member) + " (" + str(member.id) + ")** hat den Server verlassen.")
+                await logch.send(
+                    ":outbox_tray: **" + str(member) + " (" + str(member.id) + ")** hat den Server verlassen.")
             else:
                 pass
         except Exception:
@@ -73,7 +75,8 @@ class Logging(commands.Cog):
                 if logchannelid is None:
                     return
                 logch = self.bot.get_channel(int(logchannelid))
-                await logch.send(":white_check_mark: **" + str(member) + " (" + str(member.id) + ")** wurde entgebannt.")
+                await logch.send(
+                    ":white_check_mark: **" + str(member) + " (" + str(member.id) + ")** wurde entgebannt.")
             else:
                 pass
         except Exception:
@@ -108,11 +111,13 @@ class Logging(commands.Cog):
                     return
                 logch = self.bot.get_channel(int(logchannelid))
                 if before.channel is None:
-                    await logch.send(":mega: **" + str(member) + " (" + str(member.id) + ")** hat den Voice Channel **" +
-                                     str(after.channel) + "** betreten.")
+                    await logch.send(
+                        ":mega: **" + str(member) + " (" + str(member.id) + ")** hat den Voice Channel **" +
+                        str(after.channel) + "** betreten.")
                 elif before.channel is not None and after.channel is None:
-                    await logch.send(":mega: **" + str(member) + " (" + str(member.id) + ")** hat den Voice Channel **" +
-                                     str(before.channel) + "** verlassen.")
+                    await logch.send(
+                        ":mega: **" + str(member) + " (" + str(member.id) + ")** hat den Voice Channel **" +
+                        str(before.channel) + "** verlassen.")
                 elif before.channel is not None and after.channel is not None:
                     await logch.send(
                         ":mega: **" + str(member) + " (" + str(member.id) + ")** hat den Voice Channel von **" +

@@ -10,7 +10,7 @@ from discord.ext import commands
 class Mensa(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.bot.register_job(60*60*12, self.update_entries)
+        self.bot.register_job(60 * 60 * 12, self.update_entries)
 
     def fillURL(self, location, year, week):
         return "https://srehwald.github.io/eat-api/{}/{}/{}.json".format(location, year, week)
@@ -25,7 +25,8 @@ class Mensa(commands.Cog):
     async def setup(self, ctx, location):
         text = self.get_content(location, 0)
         if text is False:
-            await ctx.send("Speiseplan für Tag 1 konnte nicht abgerufen werden, vermutlich existiert die Location nicht.")
+            await ctx.send(
+                "Speiseplan für Tag 1 konnte nicht abgerufen werden, vermutlich existiert die Location nicht.")
             return
 
         for day in range(1, 6):
@@ -35,7 +36,8 @@ class Mensa(commands.Cog):
 
             message = await ctx.send(text)
             with self.bot.db.get(ctx.guild.id) as db:
-                db.execute("INSERT INTO mensa (location, day, messageid, channelid) VALUES (?, ?, ?, ?)", (location, day, message.id, ctx.channel.id))
+                db.execute("INSERT INTO mensa (location, day, messageid, channelid) VALUES (?, ?, ?, ?)",
+                           (location, day, message.id, ctx.channel.id))
 
     def update_entries(self):
         for connection in self.bot.db.get_all():
@@ -87,6 +89,7 @@ class Mensa(commands.Cog):
                 text += "\n"
 
         return text
+
 
 def setup(bot):
     bot.add_cog(Mensa(bot))

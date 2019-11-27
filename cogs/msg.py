@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord
 import re
 
+
 class MessageStore(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -37,6 +38,7 @@ class MessageStore(commands.Cog):
             return
 
         await message.channel.send(result[0][1])
+
 
 def setup(bot):
     bot.add_cog(MessageStore(bot))

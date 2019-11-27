@@ -10,12 +10,14 @@ from discord.ext import commands
 
 db = DbMgr()
 
+
 # Finde den Prefix eines Servers
 def get_prefix(bot, message):
     if message.guild is None:
         return '!'
 
     return bot.dbconf_get(message.guild.id, 'prefix', '!')
+
 
 bot = Bot(db, command_prefix=get_prefix)
 
@@ -36,8 +38,10 @@ async def shutdown(ctx):
     await ctx.send("Bot wird heruntergefahren...")
     await _shutdown(ctx)
 
+
 async def _shutdown(ctx):
     await bot.logout()
+
 
 # Bot updaten
 @bot.command()
@@ -49,6 +53,7 @@ async def update(ctx):
 
     await _shutdown(ctx)
     os.execv(__file__, sys.argv)
+
 
 @bot.command()
 async def ping(ctx):
