@@ -20,8 +20,8 @@ class Exzellenz(commands.Cog):
     async def exzellenz(self, ctx):
         await ctx.send(random.choice(
             random.choice(open("UserGeneratedContent/excellence_noAutocompletion.txt").readlines()),
-            self.excellence_formating(self),
-            self.trivial_formating(self)))
+            self.excellence_formating(),
+            self.trivial_formating()))
 
     def excellence_formating(self):
         return "%s ist sehr exzellent.", random.choice(
