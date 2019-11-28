@@ -1,7 +1,11 @@
 Die TUM
 PGdP
 EidI
+Lamda-Expressions
+MiniJava
 DS
+Graphentheorie
+Induktion
 ERA
 Die Mensa
 Die Bockabfertigung in der Mensa
