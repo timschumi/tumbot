@@ -43,8 +43,10 @@ async def shutdown(ctx):
 @bot.command()
 @commands.check(botowner)
 async def update(ctx):
-    call(["git", "pull", "origin", "master"])
-    await ctx.message.add_reaction('\U00002705')
+    if call(["git", "pull", "origin", "master"]) == 0:
+        await ctx.message.add_reaction('\U00002705')
+    else:
+        await ctx.message.add_reaction('\U0001F525')
 
 
 @bot.command()
