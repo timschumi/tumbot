@@ -1,2 +1,6 @@
 151 Jahre Exzellenz.
 Die Vorlesungssäle im MW sind sehr exzellent.
+Lamda-Expressions sind trivial.
+MiniJava ist trivial.
+Graphentheorie ist trivial.
+Induktion ist trivial.
