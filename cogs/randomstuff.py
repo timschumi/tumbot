@@ -15,17 +15,10 @@ class Randomstuff(commands.Cog):
 
     @commands.command()
     async def exzellenz(self, ctx):
-        await ctx.send(random.choice(
-            random.choice(self.randomstring("exzellence_noAutocompletion")),
-            self.excellence_formating(),
-            self.trivial_formating()))
+        await ctx.send(random.choice(self.randomstring("exzellenz_extra"), self.excellentstring())
 
-    def excellence_formating(self):
-        return "%s ist sehr exzellent.", self.randomstring("exzellenz_autocomplete"))
-
-    def trivial_formating(self):
-        return "%s ist trivial.", self.randomstring("exzellenz_autocomplete"))
-
+    def excellentstring(self):
+        return "{} ist {}.".format(self.randomstring("exzellenz_trivial"), random.choice("trivial", "sehr exzellent"))
 
 def setup(bot):
     bot.add_cog(Randomstuff(bot))
