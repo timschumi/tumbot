@@ -34,8 +34,7 @@ def botowner(ctx):
 @bot.command()
 @commands.check(botowner)
 async def shutdown(ctx):
-    await ctx.channel.purge(limit=1)
-    await ctx.send("Bot wird heruntergefahren...")
+    await ctx.message.add_reaction('\U00002705')
     await bot.logout()
 
 
@@ -59,10 +58,9 @@ async def ping(ctx):
 @bot.command()
 @commands.check(botowner)
 async def load(ctx, extension):
-    await ctx.channel.purge(limit=1)
     e = extension.lower()
     bot.load_extension(f'cogs.{e}')
-    await ctx.send(e + "aktiviert")
+    await ctx.message.add_reaction('\U00002705')
     print(e + ' aktiviert')
 
 
@@ -70,22 +68,20 @@ async def load(ctx, extension):
 @bot.command()
 @commands.check(botowner)
 async def unload(ctx, extension):
-    await ctx.channel.purge(limit=1)
     e = extension.lower()
     bot.unload_extension(f'cogs.{e}')
     print(e + ' deaktiviert')
-    await ctx.send(e + ' deaktiviert')
+    await ctx.message.add_reaction('\U00002705')
 
 
 # Modul neuladen
 @bot.command()
 @commands.check(botowner)
 async def reload(ctx, extension):
-    await ctx.channel.purge(limit=1)
     e = extension.lower()
     bot.reload_extension(f'cogs.{e}')
     print(e + ' neugeladen')
-    await ctx.send(e + ' neugeladen')
+    await ctx.message.add_reaction('\U00002705')
 
 
 # Beim start alle module laden die nicht mit test starten
