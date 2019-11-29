@@ -9,7 +9,7 @@ class Quotes(commands.Cog):
 
     @commands.command()
     async def quote(self, ctx):
-        await ctx.send(random.choice(open("UserGeneratedContent/quotes.txt").readlines()))
+        await ctx.send(random.choice(open("strings/quotes.txt").readlines()))
 
 
 class Exzellenz(commands.Cog):
@@ -19,16 +19,16 @@ class Exzellenz(commands.Cog):
     @commands.command()
     async def exzellenz(self, ctx):
         await ctx.send(random.choice(
-            random.choice(open("UserGeneratedContent/excellence_noAutocompletion.txt").readlines()),
+            random.choice(open("strings/excellence_noAutocompletion.txt").readlines()),
             self.excellence_formating(),
             self.trivial_formating()))
 
     def excellence_formating(self):
         return "%s ist sehr exzellent.", random.choice(
-            open("UserGeneratedContent/exzellenz_autocomplete.txt").readlines())
+            open("strings/exzellenz_autocomplete.txt").readlines())
 
     def trivial_formating(self):
-        return "%s ist trivial.", random.choice(open("UserGeneratedContent/exzellenz_autocomplete.txt").readlines())
+        return "%s ist trivial.", random.choice(open("strings/exzellenz_autocomplete.txt").readlines())
 
 
 def setup(bot):
