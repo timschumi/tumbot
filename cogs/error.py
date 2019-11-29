@@ -17,9 +17,14 @@ class ErrorHandler(commands.Cog):
         error = getattr(error, 'original', error)
 
         # Manche Fehler einfach ignorieren
-        ignored = (commands.CommandNotFound, commands.UserInputError)
+        ignored = (commands.UserInputError)
         if isinstance(error, ignored):
             return
+
+        if isinstance(error, commands.CommandNotFound):
+            await ctx.message.add_reaction('\U0001F44F')
+            return
+
 
         # Hat der Aufrufer nicht genug Rechte?
         if isinstance(error, commands.errors.MissingPermissions):
