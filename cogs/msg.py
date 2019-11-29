@@ -25,7 +25,7 @@ class MessageStore(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        search = re.search(r'#(\w+)', message.content)
+        search = re.search(r'#(\w+)', message.clean_content)
         if search is None:
             return
 
