@@ -4,14 +4,12 @@ import re
 
 
 class MessageStore(commands.Cog):
-    """Allows for saving larger chunks of text using a shorthand"""
-
     def __init__(self, bot):
         self.bot = bot
 
     @commands.group()
     async def msg(self, ctx):
-        """Does nothing by itself at the moment"""
+        """Allows for saving larger chunks of text using a shorthand"""
 
         if ctx.invoked_subcommand is None:
             await ctx.send("Ungültiger command!")
