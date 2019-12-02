@@ -2,6 +2,7 @@ import random
 
 from discord.ext import commands
 
+
 class Randomstuff(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -15,7 +16,7 @@ class Randomstuff(commands.Cog):
 
     @commands.command()
     async def exzellenz(self, ctx):
-        await ctx.send(random.choice(self.randomstring("exzellenz_extra"), self.excellentstring())
+        await ctx.send(random.choice(self.randomstring("exzellenz_extra"), self.excellentstring()))
 
     def excellentstring(self):
         return "{} ist {}.".format(self.randomstring("exzellenz_trivial"), random.choice("trivial", "sehr exzellent"))
