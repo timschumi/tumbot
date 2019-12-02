@@ -42,6 +42,16 @@ class MessageStore(commands.Cog):
 
         await ctx.message.add_reaction('\U00002705')
 
+    @msg.command()
+    @commands.has_permissions(manage_channels=True)
+    async def delete(self, ctx, name):
+        """Removes a shorthand"""
+
+        with self.bot.db.get(ctx.guild.id) as db:
+            db.execute("DELETE FROM msg WHERE name = ?", (name.lower(),))
+
+        await ctx.message.add_reaction('\U00002705')
+
     @commands.Cog.listener()
     async def on_message(self, message):
         search = re.search(r'#(\w+)', message.clean_content)
