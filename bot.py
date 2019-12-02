@@ -61,11 +61,3 @@ class Bot(DBot):
 
         with self.db.get(guild_id) as db:
             db.execute("UPDATE config SET value = ? WHERE name = ?", (value, name))
-
-    # Botowner für Permissions zu manchen Commands
-    @staticmethod
-    def botowner(ctx):
-        if ctx.author.id == 296323983819669514 or ctx.author.id == 137291894953607168:
-            return True
-        else:
-            raise commands.errors.MissingPermissions('You need to be the bot owner to use this.')
