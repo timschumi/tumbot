@@ -4,17 +4,23 @@ import re
 
 
 class MessageStore(commands.Cog):
+    """Allows for saving larger chunks of text using a shorthand"""
+
     def __init__(self, bot):
         self.bot = bot
 
     @commands.group()
     async def msg(self, ctx):
+        """Does nothing by itself at the moment"""
+
         if ctx.invoked_subcommand is None:
             await ctx.send("Ungültiger command!")
 
     @msg.command()
     @commands.has_permissions(manage_channels=True)
     async def set(self, ctx, name, *, content):
+        """Stores the `content` behind the shorthand in `name`"""
+
         with self.bot.db.get(ctx.guild.id) as db:
             if len(db.execute("SELECT name, content FROM msg WHERE name = ?", (name.lower(),)).fetchall()) > 0:
                 db.execute("UPDATE msg SET content = ? WHERE name = ?", (content, name.lower()))
