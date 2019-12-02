@@ -19,7 +19,7 @@ class Prefixes(commands.Cog):
 
         self.set_prefix(ctx.guild.id, prefix)
 
-        await ctx.send(f'Prefix zu:** {prefix} **geändert', delete_after=bp.deltime)
+        await ctx.send(f'Prefix zu:** {prefix} **geändert', delete_after=5)
 
     @commands.Cog.listener()
     async def on_message(self, message):
