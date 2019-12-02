@@ -4,3 +4,5 @@ Lamda-Expressions sind trivial.
 MiniJava ist trivial.
 Graphentheorie ist trivial.
 Induktion ist trivial.
+Die Mensa ist exzellent.
+Die Blockabfertigung in der Mensa ist exzellent.

@@ -21,5 +21,6 @@ class Randomstuff(commands.Cog):
     def excellentstring(self):
         return "{} ist {}.".format(self.randomstring("exzellenz_trivial"), random.choice("trivial", "sehr exzellent"))
 
+
 def setup(bot):
     bot.add_cog(Randomstuff(bot))
