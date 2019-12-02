@@ -7,12 +7,27 @@ class MessageStore(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group()
+    @commands.group(invoke_without_command=True)
     async def msg(self, ctx):
         """Allows for saving larger chunks of text using a shorthand"""
 
-        if ctx.invoked_subcommand is None:
-            await ctx.send("Ungültiger command!")
+        with self.bot.db.get(ctx.guild.id) as db:
+            result = db.execute("SELECT name, content FROM msg ORDER BY name ASC").fetchall()
+
+        name_len = 0
+        value_len = 0
+
+        for row in result:
+            name_len = max(name_len, len(str(row[0])))
+            value_len = max(value_len, len(str(row[1])))
+
+        text = ""
+
+        for row in result:
+            text += "| {} | {} |\n".format(str(row[0]).ljust(name_len), str(row[1]).ljust(value_len))
+
+        await ctx.send("Available shorthands:\n```{}```".format(text))
+
 
     @msg.command()
     @commands.has_permissions(manage_channels=True)
