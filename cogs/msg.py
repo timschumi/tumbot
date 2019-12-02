@@ -32,7 +32,7 @@ class MessageStore(commands.Cog):
     @msg.command()
     @commands.has_permissions(manage_channels=True)
     async def set(self, ctx, name, *, content):
-        """Stores the `content` behind the shorthand in `name`"""
+        """Assigns content to a shorthand"""
 
         with self.bot.db.get(ctx.guild.id) as db:
             if len(db.execute("SELECT name, content FROM msg WHERE name = ?", (name.lower(),)).fetchall()) > 0:
