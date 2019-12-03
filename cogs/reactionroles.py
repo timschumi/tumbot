@@ -35,13 +35,13 @@ class ReactionRoles(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        if payload.user_id == self.bot.user.id:
-            return
-
         guild = self.bot.get_guild(payload.guild_id)
         channel = self.bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
         member = guild.get_member(payload.user_id)
+
+        if member == guild.me:
+            return
 
         if member.id in self.active:
             if self.active[member.id] is None:
