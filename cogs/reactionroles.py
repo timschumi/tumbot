@@ -43,8 +43,6 @@ class ReactionRoles(commands.Cog):
         if member == guild.me:
             return
 
-        await message.remove_reaction(payload.emoji, member)
-
         if member.id in self.active:
             if self.active[member.id] is None:
                 with self.bot.db.get(guild.id) as db:
@@ -57,6 +55,7 @@ class ReactionRoles(commands.Cog):
                                (message.id, str(payload.emoji), self.active[member.id]))
                 await message.add_reaction(payload.emoji)
 
+            await message.remove_reaction(payload.emoji, member)
             self.active.pop(member.id)
             return
 
@@ -70,6 +69,8 @@ class ReactionRoles(commands.Cog):
         for entry in result:
             role = discord.utils.get(guild.roles, id=int(entry[0]))
             await member.add_roles(role)
+
+        await message.remove_reaction(payload.emoji, member)
 
 
 def setup(bot):
