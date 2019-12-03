@@ -40,6 +40,9 @@ class ReactionRoles(commands.Cog):
         message = await channel.fetch_message(payload.message_id)
         member = guild.get_member(payload.user_id)
 
+        if member == guild.me:
+            return
+
         await message.remove_reaction(payload.emoji, member)
 
         if member.id in self.active:
