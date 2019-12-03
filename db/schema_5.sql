@@ -1,6 +1,6 @@
 CREATE TABLE reactionroles (
   message TEXT,
-  reaction TEXT,
+  emoji TEXT,
   role TEXT
 );
 
