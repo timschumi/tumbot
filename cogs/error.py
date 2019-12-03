@@ -27,7 +27,7 @@ class ErrorHandler(commands.Cog):
 
 
         # Hat der Aufrufer nicht genug Rechte?
-        if isinstance(error, commands.errors.MissingPermissions):
+        if isinstance(error, (commands.errors.MissingPermissions, commands.errors.NotOwner)):
             await ctx.message.add_reaction('\U0001F6AB')
             return
 
