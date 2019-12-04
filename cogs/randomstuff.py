@@ -8,7 +8,7 @@ class Randomstuff(commands.Cog):
         self.bot = bot
 
     def randomstring(self, file):
-        return random.choice(open(f"strings/{file}.txt").readlines())
+        return random.choice(open(f"strings/{file}.txt").read().splitlines())
 
     @commands.command()
     async def quote(self, ctx):
