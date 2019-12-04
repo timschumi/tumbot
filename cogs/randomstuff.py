@@ -16,10 +16,10 @@ class Randomstuff(commands.Cog):
 
     @commands.command()
     async def exzellenz(self, ctx):
-        await ctx.send(random.choice(self.randomstring("exzellenz_extra"), self.excellentstring()))
+        await ctx.send(random.choice((self.randomstring("exzellenz_extra"), self.excellentstring())))
 
     def excellentstring(self):
-        return "{} ist {}.".format(self.randomstring("exzellenz_trivial"), random.choice("trivial", "sehr exzellent"))
+        return "{} ist {}.".format(self.randomstring("exzellenz_trivial"), random.choice(("trivial", "sehr exzellent")))
 
 
 def setup(bot):
