@@ -8,6 +8,7 @@
 "So wenn man das lesen könnte, wärs vielleicht korrekt" - Helmut Seidl, 2019
 "PGdP ist äußerst exzellent!" - PGdP, 2019
 "Nope" - Johannes Stöhr, 2019
+"*böses Lachen*" - Johannes Stöhr, Woche 07 H01
 "Macht erstmal nichts" - Erik Kynast, 2019
 "Die Zeitbeschränkung war mir total egal" - Erik Kynast, über W06H03, 2019
 "expected:<true> but was:<false>" - Artemis, 2019
