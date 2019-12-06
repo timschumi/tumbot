@@ -14,7 +14,7 @@ class Randomstuff(commands.Cog):
     async def quote(self, ctx):
         await ctx.send(self.randomstring("quotes"))
 
-    @commands.command()
+    @commands.command(aliases=['exzellent'])
     async def exzellenz(self, ctx):
         await ctx.send(random.choice((self.randomstring("exzellenz_extra"), self.excellentstring())))
 
