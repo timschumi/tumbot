@@ -6,11 +6,13 @@
 "Das ist Daten-Müll!" - Helmut Seidl, 2019
 "Das können sie schon machen, wird dann aber teuer!" - Helmut Seidl, 2019
 "So wenn man das lesen könnte, wärs vielleicht korrekt" - Helmut Seidl, 2019
+"Das Objekt wird sozusagen von niemandem geliebt. Und dann kommt der Garbage Collector!" - Helmut Seidl, 2019
 "PGdP ist äußerst exzellent!" - PGdP, 2019
 "Nope" - Johannes Stöhr, 2019
-"*böses Lachen*" - Johannes Stöhr, Woche 07 H01
+"\*böses Lachen\*" - Johannes Stöhr, über W07H01, 2019
 "Macht erstmal nichts" - Erik Kynast, 2019
 "Die Zeitbeschränkung war mir total egal" - Erik Kynast, über W06H03, 2019
+"Pinguine nehmen es nicht so genau" - PGdP Übungsleitung, 2019
 "expected:<true> but was:<false>" - Artemis, 2019
 "expected:<false> but was:<true>" - Artemis, 2019
 "expected: but was:" - Artemis, 2019
