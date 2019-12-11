@@ -7,6 +7,7 @@
 "Das können sie schon machen, wird dann aber teuer!" - Helmut Seidl, 2019
 "So wenn man das lesen könnte, wärs vielleicht korrekt" - Helmut Seidl, 2019
 "Das Objekt wird sozusagen von niemandem geliebt. Und dann kommt der Garbage Collector!" - Helmut Seidl, 2019
+"Ein aufgegessenes Mittagessen können Sie nicht nochmal essen." - Helmut Seidl, 2019
 "PGdP ist äußerst exzellent!" - PGdP, 2019
 "Nope" - Johannes Stöhr, 2019
 "\*böses Lachen\*" - Johannes Stöhr, über W07H01, 2019
@@ -29,3 +30,4 @@
 "Nutze dein Wischtelefon!" - Carsten Trinitis, 2019
 "Ich würde sogar soweit gehen, dass es garantiert weniger als 1782 Blätter geben wird." - Christian Fermers, 2019
 "B-Bäume haben die Weltherrschaft übernommen - das ist wahr" - Thomas Neumann, 2019
+"Wenn Sie bei sich zuhause Windows laufen lassen, was Sie vielleicht nicht sollten, aber egal..." - Thomas Neumann, 2019
