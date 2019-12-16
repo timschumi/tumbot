@@ -12,21 +12,14 @@ class MessageStore(commands.Cog):
         """Allows for saving larger chunks of text using a shorthand"""
 
         with self.bot.db.get(ctx.guild.id) as db:
-            result = db.execute("SELECT name, content FROM msg ORDER BY name ASC").fetchall()
-
-        name_len = 0
-        value_len = 0
-
-        for row in result:
-            name_len = max(name_len, len(str(row[0])))
-            value_len = max(value_len, len(str(row[1])))
+            result = db.execute("SELECT name FROM msg ORDER BY name ASC").fetchall()
 
         text = ""
 
         for row in result:
-            text += "| {} | {} |\n".format(str(row[0]).ljust(name_len), str(row[1]).ljust(value_len))
+            text += "`{}`\n".format(row[0])
 
-        await ctx.send("Available shorthands:\n```{}```".format(text))
+        await ctx.send("Available shorthands:\n{}".format(text))
 
 
     @msg.command()
