@@ -9,13 +9,13 @@ class ShutTheBox(commands.Cog):
         self.client = client
 
     @commands.command()
-    async def challenge(self, ctx, playerid):
+    async def challenge(self, ctx, opponent: discord.Member):
         if not self.client.botowner(ctx):
             return
 
         channel = ctx.channel
         player1 = ctx.author
-        player2 = self.client.get_user(int(playerid))
+        player2 = opponent
         playerpkt = [0, 0]
         boxes = [0, 0, 0, 0, 0, 0, 0, 0]
         runde = 1
@@ -71,7 +71,7 @@ class ShutTheBox(commands.Cog):
                 await ctx.send("Error #SB01 Unerwarteter Fehler bei der Ausgabe kontaktiere bitte den Botbesitzer")
 
         if player1.id is not player2.id:
-            await ctx.send("Hey <@" + str(playerid) + '> du wurdest herausgefordert zu ShuttheBox! Schreibe "accept" '
+            await ctx.send("Hey " + opponent.mention + ' du wurdest herausgefordert zu ShuttheBox! Schreibe "accept" '
                                                       'um die Challegenge zu akzeptieren')
             msg1 = await self.client.wait_for('message', check=lambda message: message.author == player2, timeout=60)
             await channel.send('Spieler <@' + str(player2.id) +
