@@ -10,9 +10,6 @@ class ShutTheBox(commands.Cog):
 
     @commands.command()
     async def challenge(self, ctx, opponent: discord.Member):
-        if not self.client.botowner(ctx):
-            return
-
         channel = ctx.channel
         player1 = ctx.author
         player2 = opponent
