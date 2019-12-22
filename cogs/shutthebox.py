@@ -20,6 +20,13 @@ class ShutTheBox(commands.Cog):
         boxes = [0, 0, 0, 0, 0, 0, 0, 0]
         runde = 1
 
+        def checkboxes():
+            sumtemp = 0
+            for box in range(len(boxes)):
+                if boxes[box] == 0:
+                    sumtemp = sumtemp + box + 1
+            return sumtemp
+
         def dice():
             return r.randint(1, 6)
 
@@ -90,6 +97,10 @@ class ShutTheBox(commands.Cog):
                             break
                     else:
                         await ctx.send(f'Ungültige Eingabe!')
+                if checkboxes() == 0:
+                    await ctx.send(f'{player1} hat gewonnen!')
+                    return
+
                 await boxesmsg(runde, boxes)
                 dice1 = dice()
                 dice2 = dice()
@@ -109,6 +120,10 @@ class ShutTheBox(commands.Cog):
                             break
                     else:
                         await ctx.send(f'Ungültige Eingabe!')
+                if checkboxes() == 0:
+                    await ctx.send(f'{player2} hat gewonnen!')
+                    return
+
                 runde += 1
             await spielstand_ausgeben()
         else:
