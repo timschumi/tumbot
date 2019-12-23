@@ -42,7 +42,6 @@ async def update(ctx):
 
 @bot.command()
 async def ping(ctx):
-    await ctx.channel.purge(limit=1)
     await ctx.send(f'Pong! Meine Latenz sind aktuell {round(bot.latency * 1000)} ms.')
 
 
