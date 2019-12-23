@@ -90,7 +90,7 @@ class Logging(commands.Cog):
                 ch = payload.channel_id
                 guild = payload.guild_id
                 msg = payload.message_id
-                content = payload.cached_message.content
+                content = payload.cached_message.clean_content
                 member = payload.cached_message.author
                 logchannelid = self.get_logchannel(member.guild.id)
                 if logchannelid is None:
