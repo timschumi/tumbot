@@ -67,65 +67,67 @@ class ShutTheBox(commands.Cog):
             else:
                 await ctx.send("Error #SB01 Unerwarteter Fehler bei der Ausgabe kontaktiere bitte den Botbesitzer")
 
-        if player1.id is not player2.id:
-            await ctx.send("Hey " + opponent.mention + ' du wurdest herausgefordert zu ShuttheBox! Schreibe "accept" '
-                                                      'um die Challegenge zu akzeptieren')
-            await self.client.wait_for('message', check=lambda message: message.author == player2 and message.content == "accept", timeout=60)
-            await channel.send(f"Spieler {player2.mention} hat die Herausforderung angenommen! \n Challenge startet!")
-            # Runde starten
-            while runde <= 8:
-                await boxesmsg(runde, boxes)
-                dice1 = dice()
-                dice2 = dice()
-                await ctx.send(f'{player1} hat folgende zwei Zahlen gewürfelt: **{dice1}** und **{dice2}**')
-                while True:
-                    await ctx.send("Bitte gebe eine Box zum schließen ein")
-                    box1 = await self.client.wait_for('message', check=lambda message: message.author == player1,
-                                                      timeout=60)
-                    box1 = str(box1.content)
-                    await ctx.send("Bitte gebe eine zweite Box zum schließen ein")
-                    box2 = await self.client.wait_for('message', check=lambda message: message.author == player1,
-                                                      timeout=60)
-                    box2 = str(box2.content)
-                    if box1.isdigit() and box2.isdigit():
-                        checker1 = await close_boxes(int(box1), int(box2), summe=dice1 + dice2, player=0)
-                        if checker1 is True:
-                            break
-                    else:
-                        await ctx.send(f'Ungültige Eingabe!')
-                if checkboxes() == 0:
-                    await ctx.send(f'{player1} hat gewonnen!')
-                    return
-
-                await boxesmsg(runde, boxes)
-                dice1 = dice()
-                dice2 = dice()
-                await ctx.send(f'{player2} hat folgende zwei Zahlen gewürfelt: **{dice1}** und **{dice2}**')
-                while True:
-                    await ctx.send("Bitte gebe eine Box zum schließen ein")
-                    box1 = await self.client.wait_for('message', check=lambda message: message.author == player2,
-                                                      timeout=60)
-                    box1 = str(box1.content)
-                    await ctx.send("Bitte gebe eine zweite Box zum schließen ein")
-                    box2 = await self.client.wait_for('message', check=lambda message: message.author == player2,
-                                                      timeout=60)
-                    box2 = str(box2.content)
-                    if box1.isdigit() and box2.isdigit():
-                        checker2 = await close_boxes(int(box1), int(box2), summe=dice1 + dice2, player=1)
-                        if checker2 is True:
-                            break
-                    else:
-                        await ctx.send(f'Ungültige Eingabe!')
-                if checkboxes() == 0:
-                    await ctx.send(f'{player2} hat gewonnen!')
-                    return
-
-                runde += 1
-            await spielstand_ausgeben()
-        else:
+        if player1.id is player2.id:
             errorsb02embed = discord.Embed(title="Error #SB02",
                                            description="Du kannst dich nicht selbst herausfordern", color=0xff0000)
             await channel.send(embed=errorsb02embed)
+            return
+
+        await ctx.send("Hey " + opponent.mention + ' du wurdest herausgefordert zu ShuttheBox! Schreibe "accept" '
+                                                      'um die Challegenge zu akzeptieren')
+        await self.client.wait_for('message', check=lambda message: message.author == player2 and message.content == "accept", timeout=60)
+        await channel.send(f"Spieler {player2.mention} hat die Herausforderung angenommen! \n Challenge startet!")
+        # Runde starten
+        while runde <= 8:
+            await boxesmsg(runde, boxes)
+            dice1 = dice()
+            dice2 = dice()
+            await ctx.send(f'{player1} hat folgende zwei Zahlen gewürfelt: **{dice1}** und **{dice2}**')
+            while True:
+                await ctx.send("Bitte gebe eine Box zum schließen ein")
+                box1 = await self.client.wait_for('message', check=lambda message: message.author == player1,
+                                                  timeout=60)
+                box1 = str(box1.content)
+                await ctx.send("Bitte gebe eine zweite Box zum schließen ein")
+                box2 = await self.client.wait_for('message', check=lambda message: message.author == player1,
+                                                  timeout=60)
+                box2 = str(box2.content)
+                if box1.isdigit() and box2.isdigit():
+                    checker1 = await close_boxes(int(box1), int(box2), summe=dice1 + dice2, player=0)
+                    if checker1 is True:
+                        break
+                else:
+                    await ctx.send(f'Ungültige Eingabe!')
+            if checkboxes() == 0:
+                await ctx.send(f'{player1} hat gewonnen!')
+                return
+
+            await boxesmsg(runde, boxes)
+            dice1 = dice()
+            dice2 = dice()
+            await ctx.send(f'{player2} hat folgende zwei Zahlen gewürfelt: **{dice1}** und **{dice2}**')
+            while True:
+                await ctx.send("Bitte gebe eine Box zum schließen ein")
+                box1 = await self.client.wait_for('message', check=lambda message: message.author == player2,
+                                                  timeout=60)
+                box1 = str(box1.content)
+                await ctx.send("Bitte gebe eine zweite Box zum schließen ein")
+                box2 = await self.client.wait_for('message', check=lambda message: message.author == player2,
+                                                  timeout=60)
+                box2 = str(box2.content)
+                if box1.isdigit() and box2.isdigit():
+                    checker2 = await close_boxes(int(box1), int(box2), summe=dice1 + dice2, player=1)
+                    if checker2 is True:
+                        break
+                else:
+                    await ctx.send(f'Ungültige Eingabe!')
+            if checkboxes() == 0:
+                await ctx.send(f'{player2} hat gewonnen!')
+                return
+
+            runde += 1
+        await spielstand_ausgeben()
+
 
     @challenge.error
     async def challenge_error(self, ctx, error):
