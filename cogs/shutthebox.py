@@ -7,6 +7,7 @@ from discord.ext import commands
 class ShutTheBox(commands.Cog):
     def __init__(self, client):
         self.client = client
+        self.running_games = []
 
     @commands.command()
     async def challenge(self, ctx, opponent: discord.Member):
@@ -67,6 +68,12 @@ class ShutTheBox(commands.Cog):
             else:
                 await ctx.send("Error #SB01 Unerwarteter Fehler bei der Ausgabe kontaktiere bitte den Botbesitzer")
 
+        if player1.id in self.running_games:
+            await ctx.send("Ein Spiel ist bereits aktiv!")
+            return
+
+        self.running_games.append(player1.id)
+
         if player1.id is player2.id:
             errorsb02embed = discord.Embed(title="Error #SB02",
                                            description="Du kannst dich nicht selbst herausfordern", color=0xff0000)
@@ -104,6 +111,7 @@ class ShutTheBox(commands.Cog):
                     await ctx.send(f'Ungültige Eingabe!')
             if checkboxes() == 0:
                 await ctx.send(f'{player1} hat gewonnen!')
+                self.running_games.remove(ctx.author.id)
                 return
 
             await boxesmsg(runde, boxes)
@@ -127,10 +135,12 @@ class ShutTheBox(commands.Cog):
                     await ctx.send(f'Ungültige Eingabe!')
             if checkboxes() == 0:
                 await ctx.send(f'{player2} hat gewonnen!')
+                self.running_games.remove(ctx.author.id)
                 return
 
             runde += 1
         await spielstand_ausgeben()
+        self.running_games.remove(ctx.author.id)
 
 
     @challenge.error
@@ -139,6 +149,13 @@ class ShutTheBox(commands.Cog):
             errorsb01embed = discord.Embed(title="Error #SB01",
                                            description="Fehlende NutzerID! Syntax: challenge <userid>", color=0xff0000)
             await ctx.send(embed=errorsb01embed)
+            return
+
+        if isinstance(error, asyncio.TimeoutError):
+            await ctx.send("Game timed out after 60s! Try typing a little faster next time!")
+            self.running_games.remove(ctx.author.id)
+            return
+
 
         await self.client.get_cog('ErrorHandler').on_command_error(ctx, error, force=True)
 
