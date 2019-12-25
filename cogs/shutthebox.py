@@ -3,7 +3,6 @@ import asyncio
 import discord
 from discord.ext import commands
 
-
 class ShutTheBox(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -145,17 +144,18 @@ class ShutTheBox(commands.Cog):
 
     @challenge.error
     async def challenge_error(self, ctx, error):
+        error = getattr(error, 'original', error)
+
         if isinstance(error, commands.MissingRequiredArgument):
             errorsb01embed = discord.Embed(title="Error #SB01",
                                            description="Fehlende NutzerID! Syntax: challenge <userid>", color=0xff0000)
             await ctx.send(embed=errorsb01embed)
             return
 
-        if isinstance(error, asyncio.TimeoutError):
+        if isinstance(error, asyncio.exceptions.TimeoutError):
             await ctx.send("Game timed out after 60s! Try typing a little faster next time!")
             self.running_games.remove(ctx.author.id)
             return
-
 
         await self.client.get_cog('ErrorHandler').on_command_error(ctx, error, force=True)
 
