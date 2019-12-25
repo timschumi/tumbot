@@ -71,8 +71,7 @@ class ShutTheBox(commands.Cog):
             await ctx.send("Hey " + opponent.mention + ' du wurdest herausgefordert zu ShuttheBox! Schreibe "accept" '
                                                       'um die Challegenge zu akzeptieren')
             await self.client.wait_for('message', check=lambda message: message.author == player2 and message.content == "accept", timeout=60)
-            await channel.send('Spieler <@' + str(player2.id) +
-                               '> hat die Herausforderung angenommen! \n Challenge startet!')
+            await channel.send(f"Spieler {player2.mention} hat die Herausforderung angenommen! \n Challenge startet!")
             # Runde starten
             while runde <= 8:
                 await boxesmsg(runde, boxes)
