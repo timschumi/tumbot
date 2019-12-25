@@ -68,12 +68,6 @@ class ShutTheBox(commands.Cog):
             else:
                 await ctx.send("Error #SB01 Unerwarteter Fehler bei der Ausgabe kontaktiere bitte den Botbesitzer")
 
-        if player1.id in self.running_games:
-            await ctx.send("Ein Spiel ist bereits aktiv!")
-            return
-
-        self.running_games.append(player1.id)
-
         if player1.id is player2.id:
             errorsb02embed = discord.Embed(title="Error #SB02",
                                            description="Du kannst dich nicht selbst herausfordern", color=0xff0000)
@@ -83,6 +77,12 @@ class ShutTheBox(commands.Cog):
         if player2.bot:
             await ctx.send(f"{player2.mention} gewinnt, da er die beste Strategie bereits vorberechnet hat!")
             return
+
+        if player1.id in self.running_games:
+            await ctx.send("Ein Spiel ist bereits aktiv!")
+            return
+
+        self.running_games.append(player1.id)
 
         await ctx.send("Hey " + opponent.mention + ' du wurdest herausgefordert zu ShuttheBox! Schreibe "accept" '
                                                       'um die Challegenge zu akzeptieren')
