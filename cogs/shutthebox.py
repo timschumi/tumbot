@@ -73,6 +73,10 @@ class ShutTheBox(commands.Cog):
             await channel.send(embed=errorsb02embed)
             return
 
+        if player2.bot:
+            await ctx.send(f"{player2.mention} gewinnt, da er die beste Strategie bereits vorberechnet hat!")
+            return
+
         await ctx.send("Hey " + opponent.mention + ' du wurdest herausgefordert zu ShuttheBox! Schreibe "accept" '
                                                       'um die Challegenge zu akzeptieren')
         await self.client.wait_for('message', check=lambda message: message.author == player2 and message.content == "accept", timeout=60)
