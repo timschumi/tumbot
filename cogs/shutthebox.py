@@ -152,7 +152,7 @@ class ShutTheBox(commands.Cog):
             await ctx.send(embed=errorsb01embed)
             return
 
-        if isinstance(error, asyncio.exceptions.TimeoutError):
+        if isinstance(error, asyncio.TimeoutError):
             await ctx.send("Game timed out after 60s! Try typing a little faster next time!")
             self.running_games.remove(ctx.author.id)
             return
