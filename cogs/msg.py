@@ -14,6 +14,10 @@ class MessageStore(commands.Cog):
         with self.bot.db.get(ctx.guild.id) as db:
             result = db.execute("SELECT name FROM msg WHERE name NOT LIKE '-%' ORDER BY name ASC").fetchall()
 
+        if len(result) <= 0:
+            await ctx.send("No shorthands available.")
+            return
+
         text = ""
 
         for row in result:
