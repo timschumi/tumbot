@@ -12,14 +12,11 @@ class MessageStore(commands.Cog):
         """Allows for saving larger chunks of text using a shorthand"""
 
         with self.bot.db.get(ctx.guild.id) as db:
-            result = db.execute("SELECT name FROM msg ORDER BY name ASC").fetchall()
+            result = db.execute("SELECT name FROM msg WHERE name NOT LIKE '-%' ORDER BY name ASC").fetchall()
 
         text = ""
 
         for row in result:
-            if (row[0].startswith("-")):
-                continue
-
             text += "`{}`\n".format(row[0])
 
         await ctx.send("Available shorthands:\n{}".format(text))
