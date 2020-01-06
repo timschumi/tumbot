@@ -25,6 +25,9 @@ class ErrorHandler(commands.Cog):
             await ctx.message.add_reaction('\U0001F44F')
             return
 
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send('Dieser Befehl kann nicht in DMs benutzt werden.')
+            return
 
         # Hat der Aufrufer nicht genug Rechte?
         if isinstance(error, (commands.errors.MissingPermissions, commands.errors.NotOwner)):
