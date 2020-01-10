@@ -22,7 +22,12 @@ class ErrorHandler(commands.Cog):
             return
 
         if isinstance(error, commands.CommandNotFound):
-            await ctx.message.add_reaction('\U0001F44F')
+            if "ban" in ctx.message.content:
+                await ctx.message.add_reaction('\U0001F528')
+            elif "kick" in ctx.message.content:
+                await ctx.message.add_reaction('\U0001F97E')
+            else:
+                await ctx.message.add_reaction('\U0001F44F')
             return
 
         if isinstance(error, commands.NoPrivateMessage):
