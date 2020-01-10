@@ -1,5 +1,4 @@
 from discord.ext import commands
-import discord
 import re
 
 class Admin(commands.Cog):
@@ -7,10 +6,8 @@ class Admin(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.is_owner()
     async def sql(self, ctx, *, query):
-        if not self.bot.botowner(ctx):
-            return
-
         matches = re.match(r'`(.*)`', query)
         if not matches:
             await ctx.send("Couldn't filter out the query that should be executed.")

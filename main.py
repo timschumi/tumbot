@@ -24,7 +24,7 @@ bot = Bot(db, command_prefix=get_prefix)
 
 # Bot herunterfahren
 @bot.command()
-@commands.check(Bot.botowner)
+@commands.is_owner()
 async def shutdown(ctx):
     await ctx.message.add_reaction('\U00002705')
     await bot.logout()
@@ -32,7 +32,7 @@ async def shutdown(ctx):
 
 # Bot updaten
 @bot.command()
-@commands.check(Bot.botowner)
+@commands.is_owner()
 async def update(ctx):
     if call(["git", "pull", "origin", "master"]) == 0:
         await ctx.message.add_reaction('\U00002705')
@@ -47,7 +47,7 @@ async def ping(ctx):
 
 # Modul laden
 @bot.command()
-@commands.check(Bot.botowner)
+@commands.is_owner()
 async def load(ctx, extension):
     e = extension.lower()
     bot.load_extension(f'cogs.{e}')
@@ -57,7 +57,7 @@ async def load(ctx, extension):
 
 # Modul deaktivieren
 @bot.command()
-@commands.check(Bot.botowner)
+@commands.is_owner()
 async def unload(ctx, extension):
     e = extension.lower()
     bot.unload_extension(f'cogs.{e}')
@@ -67,7 +67,7 @@ async def unload(ctx, extension):
 
 # Modul neuladen
 @bot.command()
-@commands.check(Bot.botowner)
+@commands.is_owner()
 async def reload(ctx, extension):
     e = extension.lower()
     bot.reload_extension(f'cogs.{e}')
