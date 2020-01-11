@@ -32,3 +32,4 @@
 "B-Bäume haben die Weltherrschaft übernommen - das ist wahr" - Thomas Neumann, 2019
 "Wenn Sie bei sich zuhause Windows laufen lassen, was Sie vielleicht nicht sollten, aber egal..." - Thomas Neumann, 2019
 "Ich trinke keinen Kaffee, nur Alkohol" - ein ERA-Tutor, 2019
+"Lassen Sie die Klasse Stream<OUT> und StreamOperable<IN> implementieren, und dann einen Moment pausieren und überlegen, was wir damit erreichen wollen und was das jetzt bedeutet." - Artemis, 2019
