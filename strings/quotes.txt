@@ -18,6 +18,7 @@
 "expected:<false> but was:<true>" - Artemis, 2019
 "expected: but was:" - Artemis, 2019
 "Please try again later." - The Artemis Team, 2019
+"500 Internal Server Error" - RocketChat W10 Sonntag abend, 2020
 "gut - 60%" - unknown Tutor, 2019
 "Sorry, Artemis is currently unavailable" - Artemis, Montag 4:00
 "Esst mehr Pinguinfleisch!" - Pinguinfleisch.com, 2019
