@@ -76,11 +76,11 @@ class Mensa(commands.Cog):
             with urllib.request.urlopen(self.fillURL(location, year, week)) as url:
                 if url.getcode() == 404:
                     return False
+
+                data = json.loads(url.read().decode())["days"][day - 1]
         except urllib.error.HTTPError:
             print(f"mensa: Got HTTPError while trying to access {self.fillURL(location, year, week)}")
             return False
-
-        data = json.loads(url.read().decode())["days"][day - 1]
 
         text = "Speiseplan {}/{} ({}):\n".format(location, data["date"], calendar.day_abbr[day - 1])
 
