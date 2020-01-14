@@ -13,7 +13,7 @@ class Mensa(commands.Cog):
         self.bot.register_job(60 * 60 * 12, self.update_entries)
 
     def fillURL(self, location, year, week):
-        return "https://srehwald.github.io/eat-api/{}/{}/{}.json".format(location, year, week)
+        return f"https://srehwald.github.io/eat-api/{location}/{year}/{week:02d}.json"
 
     @commands.group()
     async def mensa(self, ctx):
