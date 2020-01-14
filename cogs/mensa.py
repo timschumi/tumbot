@@ -72,21 +72,25 @@ class Mensa(commands.Cog):
         if weekday > 5:
             week += 1
 
-        with urllib.request.urlopen(self.fillURL(location, year, week)) as url:
-            if url.getcode() == 404:
-                return False
+        try:
+            with urllib.request.urlopen(self.fillURL(location, year, week)) as url:
+                if url.getcode() == 404:
+                    return False
+        except urllib.error.HTTPError:
+            print(f"mensa: Got HTTPError while trying to access {self.fillURL(location, year, week)}")
+            return False
 
-            data = json.loads(url.read().decode())["days"][day - 1]
+        data = json.loads(url.read().decode())["days"][day - 1]
 
-            text = "Speiseplan {}/{} ({}):\n".format(location, data["date"], calendar.day_abbr[day - 1])
+        text = "Speiseplan {}/{} ({}):\n".format(location, data["date"], calendar.day_abbr[day - 1])
 
-            for i in data["dishes"]:
-                text += "    **{}**".format(i["name"])
+        for i in data["dishes"]:
+            text += "    **{}**".format(i["name"])
 
-                if len(i["ingredients"]) != 0:
-                    text += " ({})".format(','.join(i["ingredients"]))
+            if len(i["ingredients"]) != 0:
+                text += " ({})".format(','.join(i["ingredients"]))
 
-                text += "\n"
+            text += "\n"
 
         return text
 
