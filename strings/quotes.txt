@@ -36,3 +36,10 @@
 "Ich trinke keinen Kaffee, nur Alkohol" - ein ERA-Tutor, 2019
 "Lassen Sie die Klasse Stream<OUT> und StreamOperable<IN> implementieren, und dann einen Moment pausieren und überlegen, was wir damit erreichen wollen und was das jetzt bedeutet." - Artemis W10H02, 2020
 "die Aufgabe [ist] etwas größer geworden [...], als angedacht war" - Christian Femers über W10H02, 2020
+"Wunderschönen Vornachmittag!" - Michael Luttenberger, 2020
+"Der Herr Brandt hat keine Lust mehr auf die Vorlesung."  - Michael Luttenberger, 2020
+"Sehe ich aus wie Oracle?" - Michael Luttenberger, 2020
+"Ada ist sehr wichtig, da Sie damit Lenkflugkörper für friedliche und nicht-friedliche Zwecke entwickeln können." - Michael Luttenberger, 2020
+"VHDL ist wichtig, damit ihr Fluglenkkörper die Ziele trifft" - Michael Luttenberger, 2020
+"Passen Sie auf, ich habe einen Doktortitel, dass heißt, ich bin darin geschult, auch auf Fragen wo ich keine Ahnung hab, unglaublich selbstbewusst zu antworten" - Michael Luttenberger, 2020
+"Wieso lachen Sie? Ich habe noch gar nicht trivial gesagt!" - Michael Luttenberger, 2020
