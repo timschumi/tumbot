@@ -11,10 +11,13 @@ class Johannes(commands.Cog):
         if message.author.bot:
             return
 
-        if "johannes" not in message.content.lower() and "stöhr" not in message.content.lower():
-            return
+        if "johannes" in message.content.lower() or "stöhr" in message.content.lower():
+            await message.add_reaction('\U0001F427')
+        elif "eidi" in message.content.lower() and ("cheat" in message.content.lower() or
+                                                    "sheet" in message.content.lower()):
+            await message.channel.send("Ja wir dürfen in der Eidi-Klausur ein Cheat-Sheet verwenden. "
+                                       "Dieses ist ein doppelseitig beschreibbares Din-A4-Blatt!")
 
-        await message.add_reaction('\U0001F427')
 
 def setup(bot):
     bot.add_cog(Johannes(bot))
