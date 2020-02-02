@@ -16,7 +16,7 @@ class Johannes(commands.Cog):
         elif "eidi" in message.content.lower() and ("cheat" in message.content.lower() or
                                                     "sheet" in message.content.lower()):
             await message.channel.send("Ja wir dürfen in der Eidi-Klausur ein Cheat-Sheet verwenden. "
-                                       "Dieses ist ein doppelseitig beschreibbares Din-A4-Blatt!")
+                                       "Dieses ist ein doppelseitig handbeschriebenes Din-A4-Blatt!")
 
 
 def setup(bot):
