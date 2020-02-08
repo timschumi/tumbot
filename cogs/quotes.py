@@ -7,9 +7,11 @@ class Quotes(commands.Cog):
         self.bot = bot
 
     @commands.group(invoke_without_command=True)
-    async def quote(self, ctx):
+    async def quote(self, ctx, search=""):
+        search = "%" + search + "%"
+
         with self.bot.db.get(ctx.guild.id) as db:
-            quote = db.execute("SELECT content FROM quotes ORDER BY RANDOM() LIMIT 1").fetchall()
+            quote = db.execute("SELECT content FROM quotes WHERE LOWER(content) LIKE ? ORDER BY RANDOM() LIMIT 1", (search,)).fetchall()
 
         if len(quote) == 0:
             await ctx.send("No quotes found!")
