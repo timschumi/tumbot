@@ -38,9 +38,15 @@ class Admin(commands.Cog):
         text += "\n" + '-' * len(text)
 
         for row in result:
-            text += "\n|"
+            newtext = "\n|"
             for key in keys:
-                text += " {} |".format(str(row[key]).ljust(key_length[key]))
+                newtext += " {} |".format(str(row[key]).ljust(key_length[key]))
+
+            if len(text) + len(newtext) >= 2000:
+                await ctx.send("```{}```".format(text))
+                text = ""
+
+            text += newtext
 
         await ctx.send("```{}```".format(text))
 
