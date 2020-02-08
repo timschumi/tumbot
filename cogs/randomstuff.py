@@ -10,10 +10,6 @@ class Randomstuff(commands.Cog):
     def randomstring(self, file):
         return random.choice(open(f"strings/{file}.txt").read().splitlines())
 
-    @commands.command()
-    async def quote(self, ctx):
-        await ctx.send(self.randomstring("quotes"))
-
     @commands.command(aliases=['exzellent'])
     async def exzellenz(self, ctx):
         await ctx.send(random.choice((self.randomstring("exzellenz_extra"), self.excellentstring())))
