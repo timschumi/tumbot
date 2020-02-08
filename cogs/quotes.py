@@ -22,7 +22,7 @@ class Quotes(commands.Cog):
     @quote.command()
     @commands.has_permissions(administrator=True)
     async def add(self, ctx, *, content):
-        content = commands.clean_content(fix_channel_mentions=True).convert(ctx, content)
+        content = await commands.clean_content(fix_channel_mentions=True).convert(ctx, content)
 
         with self.bot.db.get(ctx.guild.id) as db:
             db.execute("INSERT INTO quotes (content) VALUES (?)", (content, ))
