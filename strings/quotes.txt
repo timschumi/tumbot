@@ -51,3 +51,4 @@
 "Ich wähle 2 Singles oder einen Dreier aus" - Nils Harmsen
 "Die Kombinatorikaufaben sind bei 5, 6, 7 punkt mit Notenbonus schafft mans dann doch noch auf 1,4 mit Notenbonus." - Nils Harmsen
 "Brüche tun mir nicht weh" - Nils Harmsen
+"Das ist Progress, dass es nicht mehr funktioniert" - Valentin Metz
