@@ -81,8 +81,12 @@ class YTDLSource(discord.PCMVolumeTransformer):
     async def create_source(cls, ctx, search: str, *, loop, download=False):
         loop = loop or asyncio.get_event_loop()
 
-        to_run = partial(ytdl.extract_info, url=search, download=download)
-        data = await loop.run_in_executor(None, to_run)
+        try:
+            to_run = partial(ytdl.extract_info, url=search, download=download)
+            data = await loop.run_in_executor(None, to_run)
+        except youtube_dl.utils.ExtractorError as e:
+            await ctx.send(f'```ini\n[Error while adding to queue: {e}]\n```', delete_after=15)
+            return None
 
         if 'entries' in data:
             # take first item from a playlist
@@ -281,6 +285,9 @@ class Music(commands.Cog):
         # If download is False, source will be a dict which will be used later to regather the stream.
         # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=True)
+
+        if source is None:
+            return
 
         await player.queue.put(source)
 
