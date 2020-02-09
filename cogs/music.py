@@ -94,10 +94,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         await ctx.send(f'```ini\n[Added {data["title"]} to the Queue.]\n```', delete_after=15)
 
+        entry = {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
         if download:
-            return {'filename': ytdl.prepare_filename(data), 'data': data, 'requester': ctx.author}
-        else:
-            return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
+            entry['filename'] = ytdl.prepare_filename(data)
+            entry['data'] = data
+        return entry
 
     @classmethod
     async def regather_stream(cls, data, *, loop):
