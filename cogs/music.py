@@ -252,6 +252,11 @@ class Music(commands.Cog):
         if vc:
             if vc.channel.id == channel.id:
                 return
+
+            if vc.is_playing():
+                await ctx.send("TUMbot is currently active in a different channel!")
+                return
+
             try:
                 await vc.move_to(channel)
             except asyncio.TimeoutError:
@@ -274,12 +279,20 @@ class Music(commands.Cog):
         search: str [Required]
             The song to search and retrieve using YTDL. This could be a simple search, an ID or URL.
         """
+        if ctx.author.voice is None:
+            await ctx.send("You are not connected to a voice channel!")
+            return
+
         await ctx.trigger_typing()
 
         vc = ctx.voice_client
 
         if not vc:
             await ctx.invoke(self.connect_)
+
+        if ctx.author.voice.channel != vc.channel:
+            await ctx.send("TUMbot is currently playing music in a different channel!")
+            return
 
         player = self.get_player(ctx)
 
