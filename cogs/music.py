@@ -12,6 +12,8 @@ e.g You might like to implement a vote before skipping the song or only allow ad
 Music bots require lots of work, and tuning. Goodluck.
 If you find any bugs feel free to ping me on discord. @Eviee#0666
 """
+import os
+
 import discord
 from discord.ext import commands
 
@@ -157,7 +159,8 @@ class MusicPlayer:
                     # So we should regather to prevent stream expiration
                     source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
                 else:
-                    source = YTDLSource(discord.FFmpegPCMAudio(source['filename']), data=source['data'], requester=source['requester'])
+                    filename = source['filename']
+                    source = YTDLSource(discord.FFmpegPCMAudio(filename), data=source['data'], requester=source['requester'])
             except Exception as e:
                 await self._channel.send(f'There was an error processing your song.\n'
                                          f'```css\n[{e}]\n```')
@@ -174,6 +177,10 @@ class MusicPlayer:
             # Make sure the FFmpeg process is cleaned up.
             source.cleanup()
             self.current = None
+
+            if filename is not None:
+                os.remove(filename)
+                filename = None
 
             try:
                 # We are no longer playing this song...
