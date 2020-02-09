@@ -323,6 +323,11 @@ class Music(commands.Cog):
         elif not vc.is_playing():
             return
 
+        requester = self.get_player(ctx).current.requester
+        if ctx.author != requester:
+            await ctx.send(f'Only **`{requester}`** can skip the current song!')
+            return
+
         vc.stop()
         await ctx.send(f'**`{ctx.author}`**: has skipped the song!')
 
