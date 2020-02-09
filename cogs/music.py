@@ -313,6 +313,7 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Resumed the song!')
 
     @commands.command(name='skip')
+    @commands.has_permissions(manage_channels=True)
     async def skip_(self, ctx):
         """Skip the song."""
         vc = ctx.voice_client
