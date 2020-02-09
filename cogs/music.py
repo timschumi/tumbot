@@ -95,11 +95,9 @@ class YTDLSource(discord.PCMVolumeTransformer):
         await ctx.send(f'```ini\n[Added {data["title"]} to the Queue.]\n```', delete_after=15)
 
         if download:
-            source = ytdl.prepare_filename(data)
+            return {'filename': ytdl.prepare_filename(data), 'data': data, 'requester': ctx.author}
         else:
             return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
-
-        return cls(discord.FFmpegPCMAudio(source), data=data, requester=ctx.author)
 
     @classmethod
     async def regather_stream(cls, data, *, loop):
@@ -152,15 +150,17 @@ class MusicPlayer:
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
 
-            if not isinstance(source, YTDLSource):
-                # Source was probably a stream (not downloaded)
-                # So we should regather to prevent stream expiration
-                try:
+            try:
+                if 'filename' not in source:
+                    # Source was probably a stream (not downloaded)
+                    # So we should regather to prevent stream expiration
                     source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
-                except Exception as e:
-                    await self._channel.send(f'There was an error processing your song.\n'
-                                             f'```css\n[{e}]\n```')
-                    continue
+                else:
+                    source = YTDLSource(discord.FFmpegPCMAudio(source['filename']), data=source['data'], requester=source['requester'])
+            except Exception as e:
+                await self._channel.send(f'There was an error processing your song.\n'
+                                         f'```css\n[{e}]\n```')
+                continue
 
             source.volume = self.volume
             self.current = source
