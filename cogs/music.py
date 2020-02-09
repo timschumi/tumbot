@@ -331,7 +331,7 @@ class Music(commands.Cog):
             return
 
         requester = self.get_player(ctx).current.requester
-        if ctx.author != requester:
+        if ctx.author != requester and not ctx.author.guild_permissions.manage_channels:
             await ctx.send(f'Only **`{requester}`** can skip the current song!')
             return
 
