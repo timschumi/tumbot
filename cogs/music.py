@@ -285,6 +285,7 @@ class Music(commands.Cog):
         await player.queue.put(source)
 
     @commands.command(name='pause')
+    @commands.has_permissions(manage_channels=True)
     async def pause_(self, ctx):
         """Pause the currently playing song."""
         vc = ctx.voice_client
@@ -298,6 +299,7 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Paused the song!')
 
     @commands.command(name='resume')
+    @commands.has_permissions(manage_channels=True)
     async def resume_(self, ctx):
         """Resume the currently paused song."""
         vc = ctx.voice_client
@@ -368,6 +370,7 @@ class Music(commands.Cog):
                                    f'requested by `{vc.source.requester}`')
 
     @commands.command(name='volume', aliases=['vol'])
+    @commands.is_owner()
     async def change_volume(self, ctx, *, vol: float):
         """Change the player volume.
         Parameters
@@ -392,6 +395,7 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Set the volume to **{vol}%**')
 
     @commands.command(name='stop')
+    @commands.has_permissions(manage_channels=True)
     async def stop_(self, ctx):
         """Stop the currently playing song and destroy the player.
         !Warning!
