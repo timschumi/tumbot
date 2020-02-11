@@ -17,19 +17,8 @@ class ErrorHandler(commands.Cog):
         error = getattr(error, 'original', error)
 
         # Manche Fehler einfach ignorieren
-        ignored = (commands.UserInputError)
+        ignored = (commands.UserInputError, commands.CommandNotFound)
         if isinstance(error, ignored):
-            return
-
-        if isinstance(error, commands.CommandNotFound):
-            if "ban" in ctx.message.content:
-                await ctx.message.add_reaction('\U0001F528')
-            elif "kick" in ctx.message.content:
-                await ctx.message.add_reaction('\U0001F97E')
-            elif "cuddle" in ctx.message.content:
-                await ctx.message.add_reaction('\U0001F427')
-            else:
-                await ctx.message.add_reaction('\U0001F44F')
             return
 
         if isinstance(error, commands.NoPrivateMessage):
