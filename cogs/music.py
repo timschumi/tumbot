@@ -351,6 +351,12 @@ class Music(commands.Cog):
         elif not vc.is_playing():
             return
 
+        if not ctx.author.voice or not ctx.author.voice.channel:
+            return ctx.send("You're not even in a voice channel!")
+
+        if vc.channel != ctx.author.voice.channel:
+            return ctx.send("You're not even in the same voice channel!")
+
         requester = self.get_player(ctx).current.requester
         if ctx.author != requester and not ctx.author.guild_permissions.manage_channels:
             await ctx.send(f'Only **`{requester}`** can skip the current song!')
