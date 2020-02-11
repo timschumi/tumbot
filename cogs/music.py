@@ -432,6 +432,9 @@ class Music(commands.Cog):
         """
         vc = ctx.voice_client
 
+        if vc and vc.is_playing() and not ctx.author.guild_permissions.administrator:
+            return await ctx.send('Nobody is going to tell me what to do!')
+
         if not vc or not vc.is_connected():
             return await ctx.send('I am not currently playing anything!', delete_after=20)
 
