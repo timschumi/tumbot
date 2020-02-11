@@ -86,7 +86,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         try:
             to_run = partial(ytdl.extract_info, url=search, download=download)
             data = await loop.run_in_executor(None, to_run)
-        except youtube_dl.utils.ExtractorError as e:
+        except youtube_dl.utils.DownloadError as e:
             await ctx.send(f'```ini\n[Error while adding to queue: {e}]\n```', delete_after=15)
             return None
 
