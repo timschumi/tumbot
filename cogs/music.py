@@ -286,7 +286,7 @@ class Music(commands.Cog):
         search: str [Required]
             The song to search and retrieve using YTDL. This could be a simple search, an ID or URL.
         """
-        if ctx.author.voice is None:
+        if ctx.author.voice is None or ctx.author.voice.channel is None:
             await ctx.send("You are not connected to a voice channel!")
             return
 
