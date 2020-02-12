@@ -12,6 +12,8 @@ e.g You might like to implement a vote before skipping the song or only allow ad
 Music bots require lots of work, and tuning. Goodluck.
 If you find any bugs feel free to ping me on discord. @Eviee#0666
 """
+import os
+
 import discord
 from discord.ext import commands
 
@@ -81,8 +83,12 @@ class YTDLSource(discord.PCMVolumeTransformer):
     async def create_source(cls, ctx, search: str, *, loop, download=False):
         loop = loop or asyncio.get_event_loop()
 
-        to_run = partial(ytdl.extract_info, url=search, download=download)
-        data = await loop.run_in_executor(None, to_run)
+        try:
+            to_run = partial(ytdl.extract_info, url=search, download=download)
+            data = await loop.run_in_executor(None, to_run)
+        except youtube_dl.utils.DownloadError as e:
+            await ctx.send(f'```ini\n[Error while adding to queue: {e}]\n```', delete_after=15)
+            return None
 
         if 'entries' in data:
             # take first item from a playlist
@@ -90,12 +96,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         await ctx.send(f'```ini\n[Added {data["title"]} to the Queue.]\n```', delete_after=15)
 
+        entry = {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
         if download:
-            source = ytdl.prepare_filename(data)
-        else:
-            return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
-
-        return cls(discord.FFmpegPCMAudio(source), data=data, requester=ctx.author)
+            entry['filename'] = ytdl.prepare_filename(data)
+            entry['data'] = data
+        return entry
 
     @classmethod
     async def regather_stream(cls, data, *, loop):
@@ -148,15 +153,18 @@ class MusicPlayer:
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
 
-            if not isinstance(source, YTDLSource):
-                # Source was probably a stream (not downloaded)
-                # So we should regather to prevent stream expiration
-                try:
+            try:
+                if 'filename' not in source:
+                    # Source was probably a stream (not downloaded)
+                    # So we should regather to prevent stream expiration
                     source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
-                except Exception as e:
-                    await self._channel.send(f'There was an error processing your song.\n'
-                                             f'```css\n[{e}]\n```')
-                    continue
+                else:
+                    filename = source['filename']
+                    source = YTDLSource(discord.FFmpegPCMAudio(filename), data=source['data'], requester=source['requester'])
+            except Exception as e:
+                await self._channel.send(f'There was an error processing your song.\n'
+                                         f'```css\n[{e}]\n```')
+                continue
 
             source.volume = self.volume
             self.current = source
@@ -169,6 +177,10 @@ class MusicPlayer:
             # Make sure the FFmpeg process is cleaned up.
             source.cleanup()
             self.current = None
+
+            if filename is not None:
+                os.remove(filename)
+                filename = None
 
             try:
                 # We are no longer playing this song...
@@ -247,6 +259,11 @@ class Music(commands.Cog):
         if vc:
             if vc.channel.id == channel.id:
                 return
+
+            if vc.is_playing():
+                await ctx.send("TUMbot is currently active in a different channel!")
+                return
+
             try:
                 await vc.move_to(channel)
             except asyncio.TimeoutError:
@@ -269,6 +286,10 @@ class Music(commands.Cog):
         search: str [Required]
             The song to search and retrieve using YTDL. This could be a simple search, an ID or URL.
         """
+        if ctx.author.voice is None or ctx.author.voice.channel is None:
+            await ctx.send("You are not connected to a voice channel!")
+            return
+
         await ctx.trigger_typing()
 
         vc = ctx.voice_client
@@ -276,16 +297,22 @@ class Music(commands.Cog):
         if not vc:
             await ctx.invoke(self.connect_)
 
+        if ctx.author.voice.channel != vc.channel:
+            await ctx.send("TUMbot is currently playing music in a different channel!")
+            return
+
         player = self.get_player(ctx)
 
         # If download is False, source will be a dict which will be used later to regather the stream.
         # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=True)
 
+        if source is None:
+            return
+
         await player.queue.put(source)
 
     @commands.command(name='pause')
-    @commands.has_permissions(manage_channels=True)
     async def pause_(self, ctx):
         """Pause the currently playing song."""
         vc = ctx.voice_client
@@ -299,7 +326,6 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Paused the song!')
 
     @commands.command(name='resume')
-    @commands.has_permissions(manage_channels=True)
     async def resume_(self, ctx):
         """Resume the currently paused song."""
         vc = ctx.voice_client
@@ -313,7 +339,6 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Resumed the song!')
 
     @commands.command(name='skip')
-    @commands.has_permissions(manage_channels=True)
     async def skip_(self, ctx):
         """Skip the song."""
         vc = ctx.voice_client
@@ -324,6 +349,17 @@ class Music(commands.Cog):
         if vc.is_paused():
             pass
         elif not vc.is_playing():
+            return
+
+        if not ctx.author.voice or not ctx.author.voice.channel:
+            return ctx.send("You're not even in a voice channel!")
+
+        if vc.channel != ctx.author.voice.channel:
+            return ctx.send("You're not even in the same voice channel!")
+
+        requester = self.get_player(ctx).current.requester
+        if ctx.author != requester and not ctx.author.guild_permissions.manage_channels:
+            await ctx.send(f'Only **`{requester}`** can skip the current song!')
             return
 
         vc.stop()
@@ -371,7 +407,6 @@ class Music(commands.Cog):
                                    f'requested by `{vc.source.requester}`')
 
     @commands.command(name='volume', aliases=['vol'])
-    @commands.is_owner()
     async def change_volume(self, ctx, *, vol: float):
         """Change the player volume.
         Parameters
@@ -396,13 +431,15 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Set the volume to **{vol}%**')
 
     @commands.command(name='stop')
-    @commands.has_permissions(manage_channels=True)
     async def stop_(self, ctx):
         """Stop the currently playing song and destroy the player.
         !Warning!
             This will destroy the player assigned to your guild, also deleting any queued songs and settings.
         """
         vc = ctx.voice_client
+
+        if vc and vc.is_playing() and not ctx.author.guild_permissions.administrator:
+            return await ctx.send('Nobody is going to tell me what to do!')
 
         if not vc or not vc.is_connected():
             return await ctx.send('I am not currently playing anything!', delete_after=20)
