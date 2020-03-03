@@ -22,11 +22,11 @@ class Birthdays(commands.Cog):
 
     @mensa.command()
     @commands.has_permissions(manage_messages=True)
-    async def setup(self, ctx, location):
-        text = self.get_content(location, 0)
+    async def setup(self, ctx):
+        text = self.get_content(0)
         if text is False:
             await ctx.send(
-                "Speiseplan für Tag 1 konnte nicht abgerufen werden, vermutlich existiert die Location nicht.")
+                "Geburtstags-Message existiert nicht, oder channel ist invalide")
             return
 
         for day in range(1, 6):
@@ -63,7 +63,7 @@ class Birthdays(commands.Cog):
             with connection:
                 connection.execute("DELETE FROM mensa WHERE messageid = ?", (messageid,))
 
-    def get_content(self, location, day):
+    def get_content(self, day):
         now = datetime.datetime.now().isocalendar()
         year = now[0]
         week = now[1]
@@ -82,16 +82,10 @@ class Birthdays(commands.Cog):
             print(f"mensa: Got HTTPError while trying to access {self.fillURL(location, year, week)}")
             return False
 
-        text = "Speiseplan {}/{} ({}):\n".format(location, data["date"], calendar.day_abbr[day - 1])
+        text = "Geburtstage am {}\n{}:\n".format(data["date"], calendar.day_abbr[day - 1])
 
-        for i in data["dishes"]:
-            text += "    **{}**".format(i["name"])
-
-            if len(i["ingredients"]) != 0:
-                text += " ({})".format(','.join(i["ingredients"]))
-
-            text += "\n"
-
+        for i in data["birthdays"]:
+            text += "**Alles Gute zum Geburtstag**, {}\n".format(i["name"])
         return text
 
 
