@@ -10,10 +10,10 @@ from discord.ext import commands
 class Mensa(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.bot.register_job(60*60*12, self.update_entries)
+        self.bot.register_job(60 * 60 * 12, self.update_entries)
 
     def fillURL(self, location, year, week):
-        return "https://srehwald.github.io/eat-api/{}/{}/{}.json".format(location, year, week)
+        return f"https://srehwald.github.io/eat-api/{location}/{year}/{week:02d}.json"
 
     @commands.group()
     async def mensa(self, ctx):
@@ -25,7 +25,8 @@ class Mensa(commands.Cog):
     async def setup(self, ctx, location):
         text = self.get_content(location, 0)
         if text is False:
-            await ctx.send("Speiseplan für Tag 1 konnte nicht abgerufen werden, vermutlich existiert die Location nicht.")
+            await ctx.send(
+                "Speiseplan für Tag 1 konnte nicht abgerufen werden, vermutlich existiert die Location nicht.")
             return
 
         for day in range(1, 6):
@@ -35,7 +36,8 @@ class Mensa(commands.Cog):
 
             message = await ctx.send(text)
             with self.bot.db.get(ctx.guild.id) as db:
-                db.execute("INSERT INTO mensa (location, day, messageid, channelid) VALUES (?, ?, ?, ?)", (location, day, message.id, ctx.channel.id))
+                db.execute("INSERT INTO mensa (location, day, messageid, channelid) VALUES (?, ?, ?, ?)",
+                           (location, day, message.id, ctx.channel.id))
 
     def update_entries(self):
         for connection in self.bot.db.get_all():
@@ -70,23 +72,28 @@ class Mensa(commands.Cog):
         if weekday > 5:
             week += 1
 
-        with urllib.request.urlopen(self.fillURL(location, year, week)) as url:
-            if url.getcode() == 404:
-                return False
+        try:
+            with urllib.request.urlopen(self.fillURL(location, year, week)) as url:
+                if url.getcode() == 404:
+                    return False
 
-            data = json.loads(url.read().decode())["days"][day - 1]
+                data = json.loads(url.read().decode())["days"][day - 1]
+        except urllib.error.HTTPError:
+            print(f"mensa: Got HTTPError while trying to access {self.fillURL(location, year, week)}")
+            return False
 
-            text = "Speiseplan {}/{} ({}):\n".format(location, data["date"], calendar.day_abbr[day - 1])
+        text = "Speiseplan {}/{} ({}):\n".format(location, data["date"], calendar.day_abbr[day - 1])
 
-            for i in data["dishes"]:
-                text += "    **{}**".format(i["name"])
+        for i in data["dishes"]:
+            text += "    **{}**".format(i["name"])
 
-                if len(i["ingredients"]) != 0:
-                    text += " ({})".format(','.join(i["ingredients"]))
+            if len(i["ingredients"]) != 0:
+                text += " ({})".format(','.join(i["ingredients"]))
 
-                text += "\n"
+            text += "\n"
 
         return text
+
 
 def setup(bot):
     bot.add_cog(Mensa(bot))

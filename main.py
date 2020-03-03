@@ -10,6 +10,7 @@ from discord.ext import commands
 
 db = DbMgr()
 
+
 # Finde den Prefix eines Servers
 def get_prefix(bot, message):
     if message.guild is None:
@@ -17,76 +18,61 @@ def get_prefix(bot, message):
 
     return bot.dbconf_get(message.guild.id, 'prefix', '!')
 
+
 bot = Bot(db, command_prefix=get_prefix)
-
-
-# Botowner für Permissions zu manchen Commands
-def botowner(ctx):
-    if ctx.author.id == 296323983819669514 or ctx.author.id == 137291894953607168:
-        return True
-    else:
-        raise commands.errors.MissingPermissions('You need to be thebot owner to use this.')
 
 
 # Bot herunterfahren
 @bot.command()
-@commands.check(botowner)
+@commands.is_owner()
 async def shutdown(ctx):
-    await ctx.channel.purge(limit=1)
-    await ctx.send("Bot wird heruntergefahren...")
-    await _shutdown(ctx)
-
-async def _shutdown(ctx):
+    await ctx.message.add_reaction('\U00002705')
     await bot.logout()
+
 
 # Bot updaten
 @bot.command()
-@commands.check(botowner)
+@commands.is_owner()
 async def update(ctx):
-    await ctx.channel.purge(limit=1)
-    await ctx.send("Bot wird aktualisiert...")
-    call(["git", "pull", "origin", "master"])
+    if call(["git", "fetch", "origin", "master"]) == 0 and call(["git", "checkout", "FETCH_HEAD"]) == 0:
+        await ctx.message.add_reaction('\U00002705')
+    else:
+        await ctx.message.add_reaction('\U0001F525')
 
-    await _shutdown(ctx)
-    os.execv(__file__, sys.argv)
 
 @bot.command()
 async def ping(ctx):
-    await ctx.channel.purge(limit=1)
     await ctx.send(f'Pong! Meine Latenz sind aktuell {round(bot.latency * 1000)} ms.')
 
 
 # Modul laden
 @bot.command()
-@commands.check(botowner)
+@commands.is_owner()
 async def load(ctx, extension):
-    await ctx.channel.purge(limit=1)
     e = extension.lower()
     bot.load_extension(f'cogs.{e}')
-    await ctx.send(e + "aktiviert")
+    await ctx.message.add_reaction('\U00002705')
     print(e + ' aktiviert')
 
 
 # Modul deaktivieren
 @bot.command()
-@commands.check(botowner)
+@commands.is_owner()
 async def unload(ctx, extension):
-    await ctx.channel.purge(limit=1)
     e = extension.lower()
     bot.unload_extension(f'cogs.{e}')
     print(e + ' deaktiviert')
-    await ctx.send(e + ' deaktiviert')
+    await ctx.message.add_reaction('\U00002705')
 
 
 # Modul neuladen
 @bot.command()
-@commands.check(botowner)
+@commands.is_owner()
 async def reload(ctx, extension):
-    await ctx.channel.purge(limit=1)
     e = extension.lower()
     bot.reload_extension(f'cogs.{e}')
     print(e + ' neugeladen')
-    await ctx.send(e + ' neugeladen')
+    await ctx.message.add_reaction('\U00002705')
 
 
 # Beim start alle module laden die nicht mit test starten

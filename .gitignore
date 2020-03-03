@@ -1,1 +1,3 @@
 *.db
+.ytdl-cache/
+__pycache__/

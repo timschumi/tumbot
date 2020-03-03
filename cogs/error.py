@@ -3,6 +3,7 @@ from discord.ext import commands
 import sys
 import traceback
 
+
 class ErrorHandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -16,12 +17,16 @@ class ErrorHandler(commands.Cog):
         error = getattr(error, 'original', error)
 
         # Manche Fehler einfach ignorieren
-        ignored = (commands.CommandNotFound, commands.UserInputError)
+        ignored = (commands.UserInputError, commands.CommandNotFound)
         if isinstance(error, ignored):
             return
 
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send('Dieser Befehl kann nicht in DMs benutzt werden.')
+            return
+
         # Hat der Aufrufer nicht genug Rechte?
-        if isinstance(error, commands.errors.MissingPermissions):
+        if isinstance(error, (commands.errors.MissingPermissions, commands.errors.NotOwner)):
             await ctx.message.add_reaction('\U0001F6AB')
             return
 
@@ -29,6 +34,7 @@ class ErrorHandler(commands.Cog):
         print('Fehler beim Ausführen des Befehls `{}`:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
         await ctx.message.add_reaction('\U0001F525')
+
 
 def setup(bot):
     bot.add_cog(ErrorHandler(bot))
