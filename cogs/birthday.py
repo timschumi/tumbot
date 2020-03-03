@@ -19,11 +19,24 @@ class Birthdays(commands.Cog):
     @birthdays.command()
     @commands.has_permissions(manage_messages=True)
     async def setup(self, ctx):
+        """
+            accepts a json encoded string as input and adds it into the databasse
+        :param ctx:
+        """
         text = self.get_content(0)
         if text is False:
             await ctx.send(
                 "Geburtstags-Message existiert nicht, oder channel ist invalide")
             return
+        data = {}
+        try:
+            data = json.load(text)
+        except:
+            await ctx.send("Das ist keine JSON Datei")
+            return
+        for day in data.keys():
+            for user in data[day]:
+                self.updateBirthday(ctx, user, day)
 
     def updateBirthday(self, ctx, userId, birthdate):
         with self.bot.db.get(ctx.guild.id) as db:
