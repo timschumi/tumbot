@@ -4,9 +4,25 @@ import json
 import asyncio
 import calendar
 from discord.ext import commands
+import re
 
 
 class Birthdays(commands.Cog):
+    re.compile("(((0[1-9])|(1[0-9])|(2[0-9])|(3[0-1]))"  # 01-31
+               "\."
+               "((01)|(03)|(05)|(07)|(08)|(10)|(12))"  # all morhts with 31 days
+               "\.)"
+               "|"
+               "(((0[1-9])|(1[0-9])|(2[0-9])|(30))"  # 01-30
+               "\."
+               "((04)|(06)|(09)|(11))"  # all morhts with 30 days
+               "\.)"
+               "|"
+               "(((0[1-9])|(1[0-9])|(2[0-9]))"  # 01-29
+               "\."
+               "02"  # febuary
+               "\.)")
+
     def __init__(self, bot):
         self.bot = bot
         self.bot.register_job(60 * 60 * 24, self.congratulate)
