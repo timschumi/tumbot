@@ -78,54 +78,38 @@ class Birthdays(commands.Cog):
         message = await ctx.send(text)
         self.updateBirthday(ctx,, text)
 
-        def getcurrentdayformated(self):
-            return datetime.datetime.now().strftime("%d.%m.")
+    def getcurrentdayformated(self):
+        return datetime.datetime.now().strftime("%d.%m.")
 
-        def congratulate(self):
-            for connection in self.bot.db.get_all():
-                currentday = self.getcurrentdayformated()
-                messages = connection.execute(
-                    "SELECT userId FROM geburtstage WHERE birthday='{}'".format(currentdate)).fetchall()
-                for i in messages:
-                    asyncio.run_coroutine_threadsafe(self.update_entry(i[3], i[2], i[0], i[1]), self.bot.loop).result()
+    def congratulate(self):
+        for connection in self.bot.db.get_all():
+            currentday = self.getcurrentdayformated()
+            messages = connection.execute(
+                "SELECT userId FROM geburtstage WHERE birthday='{}'".format(currentdate)).fetchall()
+            for i in messages:
+                asyncio.run_coroutine_threadsafe(self.update_entry(i[3], i[2], i[0], i[1]), self.bot.loop).result()
 
-        async def update_entry(self, channelid, messageid, location, day):
-            channel = self.bot.get_channel(channelid)
+    async def update_entry(self, channelid, messageid, location, day):
+        channel = self.bot.get_channel(channelid)
 
-            if channel is None:
-                self.discard_entry(messageid)
+        if channel is None:
+            self.discard_entry(messageid)
 
-            message = await channel.fetch_message(messageid)
+        message = await channel.fetch_message(messageid)
 
-            if message is None:
-                self.discard_entry(messageid)
+        if message is None:
+            self.discard_entry(messageid)
 
-            await message.edit(content=self.get_content(location, day))
+        await message.edit(content=self.get_content(location, day))
 
-        def get_content(self, day):
-            now = datetime.datetime.now().isocalendar()
-            year = now[0]
-            week = now[1]
-            weekday = now[2]
+    def get_content(self, day):
+                data = json.loads(url.read().decode())["days"][day - 1]
 
-            if weekday > 5:
-                week += 1
+        text = "Geburtstage am {}:\n".format(day)
 
-            try:
-                with urllib.request.urlopen(self.fillURL(location, year, week)) as url:
-                    if url.getcode() == 404:
-                        return False
-
-                    data = json.loads(url.read().decode())["days"][day - 1]
-            except urllib.error.HTTPError:
-                print(f"mensa: Got HTTPError while trying to access {self.fillURL(location, year, week)}")
-                return False
-
-            text = "Geburtstage am {}\n{}:\n".format(data["date"], calendar.day_abbr[day - 1])
-
-            for i in data["birthdays"]:
-                text += "**Alles Gute zum Geburtstag**, {}\n".format(i["name"])
-            return text
+        for i in data["birthdays"]:
+            text += "**Alles Gute zum Geburtstag**, {}\n".format(i["name"])
+        return text
 
     def setup(bot):
         bot.add_cog(Birthdays(bot))
