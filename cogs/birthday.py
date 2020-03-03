@@ -12,15 +12,12 @@ class Birthdays(commands.Cog):
         self.bot = bot
         self.bot.register_job(60 * 60 * 24, self.congratulate)
 
-    def fillURL(self, location, year, week):
-        return f"https://srehwald.github.io/eat-api/{location}/{year}/{week:02d}.json"
-
     @commands.group()
-    async def mensa(self, ctx):
+    async def birthdays(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send("Ungültiger command!")
 
-    @mensa.command()
+    @birthdays.command()
     @commands.has_permissions(manage_messages=True)
     async def setup(self, ctx):
         text = self.get_content(0)
@@ -36,12 +33,16 @@ class Birthdays(commands.Cog):
 
             message = await ctx.send(text)
             with self.bot.db.get(ctx.guild.id) as db:
-                db.execute("INSERT INTO mensa (location, day, messageid, channelid) VALUES (?, ?, ?, ?)",
-                           (location, day, message.id, ctx.channel.id))
+                db.execute("INSERT INTO birtdays (userId, date) VALUES (?, ?)",
+                           (message., ))
 
+    def getcurrentdayformated(self):
+        return datetime.datetime.now().strftime("%d.%m.")
+                
     def congratulate(self):
         for connection in self.bot.db.get_all():
-            messages = connection.execute("SELECT location, day, messageid, channelid FROM mensa").fetchall()
+            currentday=getcurrentdayformated()
+            messages = connection.execute("SELECT userId FROM geburtstage WHERE date='{}'".format(currentdate)).fetchall()
             for i in messages:
                 asyncio.run_coroutine_threadsafe(self.update_entry(i[3], i[2], i[0], i[1]), self.bot.loop).result()
 
@@ -57,11 +58,6 @@ class Birthdays(commands.Cog):
             self.discard_entry(messageid)
 
         await message.edit(content=self.get_content(location, day))
-
-    def discard_entry(self, messageid):
-        for connection in self.bot.db.get_all():
-            with connection:
-                connection.execute("DELETE FROM mensa WHERE messageid = ?", (messageid,))
 
     def get_content(self, day):
         now = datetime.datetime.now().isocalendar()
