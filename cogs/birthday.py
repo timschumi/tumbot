@@ -35,10 +35,9 @@ class Birthdays(commands.Cog):
     @birthdays.command()
     @commands.has_permissions(manage_messages=True)
     async def setup(self, ctx):
-        """
-            accepts a json encoded string as input and adds it into the databasse
-        :param ctx:
-        """
+        """accepts a json encoded string as input and adds it into the database
+        Encoding: Bithdate -> Discord-ID"""
+
         text = self.get_content(0)
         if text is False:
             await ctx.send(
@@ -65,6 +64,7 @@ class Birthdays(commands.Cog):
 
     @birthdays.command()
     async def add(self, ctx):
+        """adds a new bithday to the database, if possible"""
         text: str = self.get_content(0)
         if len(text) == 0:
             await ctx.send(
