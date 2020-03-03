@@ -1,6 +1,6 @@
 CREATE TABLE birtdays(
   userId INT,
-  date TEXT
+  birthday TEXT
 );
 
 PRAGMA user_version = 7;
