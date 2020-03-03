@@ -1,4 +1,3 @@
-import random
 import datetime
 import urllib
 import json
@@ -26,64 +25,76 @@ class Birthdays(commands.Cog):
                 "Geburtstags-Message existiert nicht, oder channel ist invalide")
             return
 
-        for day in range(1, 6):
-            text = self.get_content(location, day)
-            if text is False:
-                continue
+    def updateBirthday(self, ctx, userId, birthdate):
+        with self.bot.db.get(ctx.guild.id) as db:
+            messages = db.execute(
+                "SELECT userId FROM geburtstage WHERE userId='{}'".format(userId)).fetchall()
+            if (len(messages) > 0):
+                db.execute("UPDATE geburtstage SET birthday = '{}' WHERE userId = '{}'".format(birthdate, userId))
+            else:
+                db.execute("INSERT INTO birtdays (userId, birthday) VALUES ('{}', '{}')".format(userId, birthdate))
 
-            message = await ctx.send(text)
-            with self.bot.db.get(ctx.guild.id) as db:
-                db.execute("INSERT INTO birtdays (userId, date) VALUES (?, ?)",
-                           (message., ))
+    @birthdays.command()
+    async def add(self, ctx):
+        text: str = self.get_content(0)
+        if len(text) == 0:
+            await ctx.send(
+                "Geburtstags-Message existiert nicht, oder channel ist invalide")
+            return
 
-    def getcurrentdayformated(self):
-        return datetime.datetime.now().strftime("%d.%m.")
-                
-    def congratulate(self):
-        for connection in self.bot.db.get_all():
-            currentday=getcurrentdayformated()
-            messages = connection.execute("SELECT userId FROM geburtstage WHERE date='{}'".format(currentdate)).fetchall()
-            for i in messages:
-                asyncio.run_coroutine_threadsafe(self.update_entry(i[3], i[2], i[0], i[1]), self.bot.loop).result()
+        if text
 
-    async def update_entry(self, channelid, messageid, location, day):
-        channel = self.bot.get_channel(channelid)
+        message = await ctx.send(text)
+        self.updateBirthday(ctx,, text)
 
-        if channel is None:
-            self.discard_entry(messageid)
+        def getcurrentdayformated(self):
+            return datetime.datetime.now().strftime("%d.%m.")
 
-        message = await channel.fetch_message(messageid)
+        def congratulate(self):
+            for connection in self.bot.db.get_all():
+                currentday = self.getcurrentdayformated()
+                messages = connection.execute(
+                    "SELECT userId FROM geburtstage WHERE birthday='{}'".format(currentdate)).fetchall()
+                for i in messages:
+                    asyncio.run_coroutine_threadsafe(self.update_entry(i[3], i[2], i[0], i[1]), self.bot.loop).result()
 
-        if message is None:
-            self.discard_entry(messageid)
+        async def update_entry(self, channelid, messageid, location, day):
+            channel = self.bot.get_channel(channelid)
 
-        await message.edit(content=self.get_content(location, day))
+            if channel is None:
+                self.discard_entry(messageid)
 
-    def get_content(self, day):
-        now = datetime.datetime.now().isocalendar()
-        year = now[0]
-        week = now[1]
-        weekday = now[2]
+            message = await channel.fetch_message(messageid)
 
-        if weekday > 5:
-            week += 1
+            if message is None:
+                self.discard_entry(messageid)
 
-        try:
-            with urllib.request.urlopen(self.fillURL(location, year, week)) as url:
-                if url.getcode() == 404:
-                    return False
+            await message.edit(content=self.get_content(location, day))
 
-                data = json.loads(url.read().decode())["days"][day - 1]
-        except urllib.error.HTTPError:
-            print(f"mensa: Got HTTPError while trying to access {self.fillURL(location, year, week)}")
-            return False
+        def get_content(self, day):
+            now = datetime.datetime.now().isocalendar()
+            year = now[0]
+            week = now[1]
+            weekday = now[2]
 
-        text = "Geburtstage am {}\n{}:\n".format(data["date"], calendar.day_abbr[day - 1])
+            if weekday > 5:
+                week += 1
 
-        for i in data["birthdays"]:
-            text += "**Alles Gute zum Geburtstag**, {}\n".format(i["name"])
-        return text
+            try:
+                with urllib.request.urlopen(self.fillURL(location, year, week)) as url:
+                    if url.getcode() == 404:
+                        return False
 
+                    data = json.loads(url.read().decode())["days"][day - 1]
+            except urllib.error.HTTPError:
+                print(f"mensa: Got HTTPError while trying to access {self.fillURL(location, year, week)}")
+                return False
 
-def setup(bot):
-    bot.add_cog(Birthdays(bot))
+            text = "Geburtstage am {}\n{}:\n".format(data["date"], calendar.day_abbr[day - 1])
+
+            for i in data["birthdays"]:
+                text += "**Alles Gute zum Geburtstag**, {}\n".format(i["name"])
+            return text
+
+    def setup(bot):
+        bot.add_cog(Birthdays(bot))
