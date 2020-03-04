@@ -1,5 +1,4 @@
 import datetime
-import json
 import re
 from typing import Pattern
 
@@ -15,35 +14,16 @@ class Birthdays(commands.Cog):
                                            r"|"
                                            r"(((0[1-9])|(1[0-9])|(2[0-9]))\."  # 01.-29.
                                            r"02\.)")  # february
+    BIRTHDAY_CHANNEL_ID = 684857179907555333
 
     def __init__(self, bot):
         self.bot = bot
-        self.birthdaychannel = await self.bot.fetch_channel(666653781366145028)
         self.bot.register_job(60 * 60 * 24, self.congratulate)
 
     @commands.group(aliases=['birth', 'birthday', 'birthdate', 'geburtstag'])
     async def birthdays(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send("Ungültiger command!")
-
-    @birthdays.command()
-    @commands.has_permissions(manage_messages=True)
-    async def setup(self, ctx, json_text):
-        """accepts a json encoded string as input and adds it into the database
-        Encoding: Birthday[DD.MM.] -> Discord-ID"""
-
-        try:
-            data: dict = json.loads(json_text)
-        except:
-            await ctx.send("Das ist kein valider JSON-String")
-            return
-        for date in data.keys():
-            if self.DATEPATTERN.match(date) is None:
-                await ctx.send("Geburtstag muss <DD.MM.> entsprechen")
-                return
-            day, month = date.strip(".").split(".")
-            for user in data[date]:
-                self.update_birthday(ctx, user, day, month)
 
     @birthdays.command()
     async def add(self, ctx, birthdate):
@@ -53,6 +33,7 @@ class Birthdays(commands.Cog):
             return
         day, month = birthdate.strip(".").split(".")
         self.update_birthday(ctx, ctx.message.author.id, day, month)
+        await ctx.message.add_reaction('\U00002705')
 
     def get_current_date(self) -> [int, int]:
         date = datetime.datetime.now()
@@ -72,10 +53,10 @@ class Birthdays(commands.Cog):
         for user in self.get_user_ids(day, month):
             text += ":tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <@!{}>" \
                     " :partying_face: :fireworks: :tada:\n".format(user)
-        await self.birthdaychannel.send(text)
+        await self.bot.fetch_channel(self.BIRTHDAY_CHANNEL_ID).send(text)
 
     def get_user_ids(self, day: int, month: int) -> [int]:
-        with self.bot.db.get(self.birthdaychannel.guild.id) as db:
+        with self.bot.db.get(self.BIRTHDAY_CHANNEL_ID) as db:
             return db.execute(
                 "SELECT userId FROM birthdays WHERE date = {} AND month = {}".format(day, month)).fetchall()
 
