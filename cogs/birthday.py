@@ -18,6 +18,7 @@ class Birthdays(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.birthdaychannel = await self.bot.fetch_channel(666653781366145028)
         self.bot.register_job(60 * 60 * 24, self.congratulate)
 
     @commands.group(aliases=['birth', 'birthday', 'birthdate', 'geburtstag'])
@@ -64,18 +65,18 @@ class Birthdays(commands.Cog):
                 "INSERT OR REPLACE INTO birthdays (userId, date, month) VALUES ({}, {}, {})".format(
                     user_id, day, month))
 
-    async def congratulate(self, ctx):
+    async def congratulate(self):
         day, month = self.get_current_date()
         text = "" \
                "".format(day, month)
-        for user in self.get_user_ids(ctx, day, month):
+        for user in self.get_user_ids(day, month):
             text += ":tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <!@{}>" \
                     " :partying_face: " \
                     ":fireworks: :tada:\n".format(user)
-        await ctx.send(text)
+        await self.birthdaychannel.send(text)
 
-    def get_user_ids(self, ctx, day: int, month: int) -> [int]:
-        with self.bot.db.get(ctx.guild.id) as db:
+    def get_user_ids(self, day: int, month: int) -> [int]:
+        with self.bot.db.get(self.birthdaychannel.guild.id) as db:
             return db.execute(
                 "SELECT userId FROM birthdays WHERE date = {} AND month = {}".format(day, month)).fetchall()
 
