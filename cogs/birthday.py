@@ -1,115 +1,88 @@
 import datetime
-import urllib
 import json
-import asyncio
-import calendar
+import re
 from typing import Pattern
 
 from discord.ext import commands
-import re
 
 
 class Birthdays(commands.Cog):
-    DATEPATTERN: Pattern[str] = re.compile("(((0[1-9])|(1[0-9])|(2[0-9])|(3[0-1]))"  # 01-31
-                                           "\."
-                                           "((01)|(03)|(05)|(07)|(08)|(10)|(12))"  # all months with 31 days
-                                           "\.)"
-                                           "|"
-                                           "(((0[1-9])|(1[0-9])|(2[0-9])|(30))"  # 01-30
-                                           "\."
-                                           "((04)|(06)|(09)|(11))"  # all months with 30 days
-                                           "\.)"
-                                           "|"
-                                           "(((0[1-9])|(1[0-9])|(2[0-9]))"  # 01-29
-                                           "\."
-                                           "02"  # febuary
-                                           "\.)")
+    DATEPATTERN: Pattern[str] = re.compile(r'(((0[1-9])|(1[0-9])|(2[0-9])|(3[0-1]))\.'  # 01.-31.
+                                           r"((01)|(03)|(05)|(07)|(08)|(10)|(12))\.)"  # all months with 31 days
+                                           r"|"
+                                           r"(((0[1-9])|(1[0-9])|(2[0-9])|(30))\."  # 01.-30.
+                                           r"((04)|(06)|(09)|(11))\.)"  # all months with 30 days
+                                           r"|"
+                                           r"(((0[1-9])|(1[0-9])|(2[0-9]))\."  # 01.-29.
+                                           r"02\.)")  # february
 
     def __init__(self, bot):
         self.bot = bot
         self.bot.register_job(60 * 60 * 24, self.congratulate)
 
-    @commands.group(aliases=['bith','birthday','geburtstag'])
+    @commands.group(aliases=['birth', 'birthday', 'birthdate', 'geburtstag'])
     async def birthdays(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send("Ungültiger command!")
 
     @birthdays.command()
     @commands.has_permissions(manage_messages=True)
-    async def setup(self, ctx):
+    async def setup(self, ctx, json_text):
         """accepts a json encoded string as input and adds it into the database
-        Encoding: Bithdate -> Discord-ID"""
+        Encoding: Birthday[DD.MM.] -> Discord-ID"""
 
-        text = self.get_content(0)
-        if text is False:
+        if json_text is False:
             await ctx.send(
-                "Geburtstags-Message existiert nicht, oder channel ist invalide")
+                "Message existiert nicht")
             return
-        data = {}
         try:
-            data = json.load(text)
+            data: dict = json.loads(json_text)
         except:
-            await ctx.send("Das ist keine JSON Datei")
+            await ctx.send("Das ist kein valider JSON-String")
             return
-        for day in data.keys():
-            for user in data[day]:
-                self.updateBirthday(ctx, user, day)
-
-    def updateBirthday(self, ctx, userId, birthdate):
-        with self.bot.db.get(ctx.guild.id) as db:
-            messages = db.execute(
-                "SELECT userId FROM geburtstage WHERE userId='{}'".format(userId)).fetchall()
-            if (len(messages) > 0):
-                db.execute("UPDATE geburtstage SET birthday = '{}' WHERE userId = '{}'".format(birthdate, userId))
-            else:
-                db.execute("INSERT INTO birtdays (userId, birthday) VALUES ('{}', '{}')".format(userId, birthdate))
+        for date in data.keys():
+            if self.DATEPATTERN.match(date) is None:
+                await ctx.send(
+                    "Geburtstag muss DD.MM. entsprechen")
+                return
+            day, month = date.strip(".").split(".")
+            for user in data[date]:
+                self.update_birthday(ctx, user, day, month)
 
     @birthdays.command()
-    async def add(self, ctx):
-        """adds a new bithday to the database, if possible"""
-        text: str = self.get_content(0)
-        if len(text) == 0:
-            await ctx.send(
-                "Geburtstags-Message existiert nicht, oder channel ist invalide")
+    async def add(self, ctx, birthdate):
+        """adds a new bithday <DD.MM.> to the database, if possible"""
+        if self.DATEPATTERN.match(birthdate) is None:
+            await ctx.send("Usage: <!birthday add DD.MM.> (of course with a valid date)")
             return
+        day, month = birthdate.strip(".").split(".")
+        self.update_birthday(ctx, ctx.message.author.id, day, month)
 
-        if text
+    def get_current_date(self) -> [int, int]:
+        date = datetime.datetime.now()
+        return date.day, date.month
 
-        message = await ctx.send(text)
-        self.updateBirthday(ctx,, text)
+    def update_birthday(self, ctx, user_id, day, month):
+        with self.bot.db.get(ctx.guild.id) as db:
+            db.execute(
+                "INSERT OR REPLACE INTO birthdays (userId, date, month) VALUES ({}, {}, {})".format(
+                    user_id, day, month))
 
-    def getcurrentdayformated(self):
-        return datetime.datetime.now().strftime("%d.%m.")
+    async def congratulate(self, ctx):
+        day, month = self.get_current_date()
+        text = "" \
+               "".format(day, month)
+        for user in self.get_user_ids(ctx, day, month):
+            text += ":tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, " \
+                    " :partying_face: " \
+                    ":fireworks: :tada:\n".format(user)
+        await ctx.send(text)
 
-    def congratulate(self):
-        for connection in self.bot.db.get_all():
-            currentday = self.getcurrentdayformated()
-            messages = connection.execute(
-                "SELECT userId FROM geburtstage WHERE birthday='{}'".format(currentdate)).fetchall()
-            for i in messages:
-                asyncio.run_coroutine_threadsafe(self.update_entry(i[3], i[2], i[0], i[1]), self.bot.loop).result()
+    def get_user_ids(self, ctx, day: int, month: int):
+        with self.bot.db.get(ctx.guild.id) as db:
+            return db.execute(
+                "SELECT userId FROM birthdays WHERE date = {} AND month = {}".format(day, month)).fetchall()
 
-    async def update_entry(self, channelid, messageid, location, day):
-        channel = self.bot.get_channel(channelid)
 
-        if channel is None:
-            self.discard_entry(messageid)
-
-        message = await channel.fetch_message(messageid)
-
-        if message is None:
-            self.discard_entry(messageid)
-
-        await message.edit(content=self.get_content(location, day))
-
-    def get_content(self, day):
-                data = json.loads(url.read().decode())["days"][day - 1]
-
-        text = "Geburtstage am {}:\n".format(day)
-
-        for i in data["birthdays"]:
-            text += "**Alles Gute zum Geburtstag**, {}\n".format(i["name"])
-        return text
-
-    def setup(bot):
-        bot.add_cog(Birthdays(bot))
+def setup(bot):
+    bot.add_cog(Birthdays(bot))
