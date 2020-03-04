@@ -39,8 +39,7 @@ class Birthdays(commands.Cog):
             return
         for date in data.keys():
             if self.DATEPATTERN.match(date) is None:
-                await ctx.send(
-                    "Geburtstag muss <DD.MM.> entsprechen")
+                await ctx.send("Geburtstag muss <DD.MM.> entsprechen")
                 return
             day, month = date.strip(".").split(".")
             for user in data[date]:
@@ -66,12 +65,13 @@ class Birthdays(commands.Cog):
 
     async def congratulate(self):
         day, month = self.get_current_date()
-        text = "" \
-               "".format(day, month)
+        text = "Geburtstage am {}.{}.:".format(day, month)
+        users = self.get_user_ids(day, month)
+        if len(users) == 0:
+            return
         for user in self.get_user_ids(day, month):
             text += ":tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <@!{}>" \
-                    " :partying_face: " \
-                    ":fireworks: :tada:\n".format(user)
+                    " :partying_face: :fireworks: :tada:\n".format(user)
         await self.birthdaychannel.send(text)
 
     def get_user_ids(self, day: int, month: int) -> [int]:
