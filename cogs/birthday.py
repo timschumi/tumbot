@@ -64,16 +64,16 @@ class Birthdays(commands.Cog):
             await ctx.send("Usage: <!birthday add DD.MM.> (of course with a valid date)")
             return
         day, month = birthdate.strip(".").split(".")
-        self.update_birthday(ctx, ctx.message.author.id, day, month)
+        self.update_birthday(ctx.message.author.id, day, month)
         await ctx.message.add_reaction('\U00002705')
 
     def get_current_date(self) -> [int, int]:
         date = datetime.datetime.now()
         return date.day, date.month
 
-    def update_birthday(self, ctx, user_id, day, month):
-        with self.bot.db.get(ctx.guild.id) as db:
-            db.execute("INSERT OR REPLACE INTO birthdays (userId, date, month) VALUES ({}, {}, {})".format(
+    def update_birthday(self, user_id, day, month):
+        with self.bot.db.get(self.BIRTHDAY_CHANNEL_ID) as db:
+            db.execute("INSERT OR REPLACE INTO birthdays (userId, date, month) VALUES ('{}', {}, {})".format(
                 user_id, day, month))
 
     async def congratulate(self):
