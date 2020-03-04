@@ -61,16 +61,15 @@ class Birthdays(commands.Cog):
 
     def update_birthday(self, ctx, user_id, day, month):
         with self.bot.db.get(ctx.guild.id) as db:
-            db.execute(
-                "INSERT OR REPLACE INTO birthdays (userId, date, month) VALUES ({}, {}, {})".format(
-                    user_id, day, month))
+            db.execute("INSERT OR REPLACE INTO birthdays (userId, date, month) VALUES ({}, {}, {})".format(
+                user_id, day, month))
 
     async def congratulate(self):
         day, month = self.get_current_date()
         text = "" \
                "".format(day, month)
         for user in self.get_user_ids(day, month):
-            text += ":tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <!@{}>" \
+            text += ":tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <@!{}>" \
                     " :partying_face: " \
                     ":fireworks: :tada:\n".format(user)
         await self.birthdaychannel.send(text)
