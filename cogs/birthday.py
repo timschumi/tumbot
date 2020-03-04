@@ -31,10 +31,6 @@ class Birthdays(commands.Cog):
         """accepts a json encoded string as input and adds it into the database
         Encoding: Birthday[DD.MM.] -> Discord-ID"""
 
-        if json_text is False:
-            await ctx.send(
-                "Message existiert nicht")
-            return
         try:
             data: dict = json.loads(json_text)
         except:
@@ -43,7 +39,7 @@ class Birthdays(commands.Cog):
         for date in data.keys():
             if self.DATEPATTERN.match(date) is None:
                 await ctx.send(
-                    "Geburtstag muss DD.MM. entsprechen")
+                    "Geburtstag muss <DD.MM.> entsprechen")
                 return
             day, month = date.strip(".").split(".")
             for user in data[date]:
@@ -78,7 +74,7 @@ class Birthdays(commands.Cog):
                     ":fireworks: :tada:\n".format(user)
         await ctx.send(text)
 
-    def get_user_ids(self, ctx, day: int, month: int):
+    def get_user_ids(self, ctx, day: int, month: int) -> [int]:
         with self.bot.db.get(ctx.guild.id) as db:
             return db.execute(
                 "SELECT userId FROM birthdays WHERE date = {} AND month = {}".format(day, month)).fetchall()
