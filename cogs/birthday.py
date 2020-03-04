@@ -14,7 +14,7 @@ class Birthdays(commands.Cog):
                                            r"|"
                                            r"(((0[1-9])|(1[0-9])|(2[0-9]))\."  # 01.-29.
                                            r"02\.)")  # february
-    BIRTHDAY_CHANNEL_ID = 684857179907555333
+    BIRTHDAY_CHANNEL_ID = 666653781366145028
 
     def __init__(self, bot):
         self.bot = bot
