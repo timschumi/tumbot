@@ -69,7 +69,7 @@ class Birthdays(commands.Cog):
         text = "" \
                "".format(day, month)
         for user in self.get_user_ids(ctx, day, month):
-            text += ":tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, " \
+            text += ":tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <!@{}>" \
                     " :partying_face: " \
                     ":fireworks: :tada:\n".format(user)
         await ctx.send(text)
