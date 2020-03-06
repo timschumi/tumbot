@@ -1,7 +1,7 @@
 CREATE TABLE birthdays
 (
     userId TEXT NOT NULL UNIQUE,
-    date   INT  NOT NULL,
+    day    INT  NOT NULL,
     month  INT  NOT NULL
 );
 
