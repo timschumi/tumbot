@@ -25,6 +25,11 @@ class Birthdays(commands.Cog):
 
     @birthdays.command()
     @commands.has_permissions(manage_messages=True)
+    async def setup(self, ctx):
+        self.BIRTHDAY_CHANNEL_ID = ctx.guild.id
+
+    @birthdays.command()
+    @commands.has_permissions(manage_messages=True)
     async def list(self, ctx, querry=""):
         """lists all birthdays (birthdays or userid are possible, jet optional querries)"""
         with self.bot.db.get(self.BIRTHDAY_CHANNEL_ID) as db:
