@@ -18,10 +18,10 @@ class Birthdays(commands.Cog):
         self.bot = bot
         self.bot.register_job(60 * 60 * 24, self.congratulate)
 
-    @commands.group(aliases=['birth', 'birthday', 'birthdate', 'geburtstag'])
+    @commands.group(aliases=['birth', 'birthday', 'birthdate', 'geburtstag'], invoke_without_command=True)
     async def birthdays(self, ctx):
-        if ctx.invoked_subcommand is None:
-            await ctx.send("Ungültiger command!")
+        """manage birthdays"""
+        pass
 
     @birthdays.command()
     @commands.has_permissions(manage_messages=True)
