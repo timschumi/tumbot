@@ -37,7 +37,7 @@ class Birthdays(commands.Cog):
             elif self.DATEPATTERN.match(querry) is not None:  # Birthday as Querry
                 day, month = querry.strip(".").split(".")
                 results = db.execute(
-                    "SELECT userId, day, month FROM birthdays WHERE day = %d AND month = %d", (day, month)).fetchall()
+                    "SELECT userId, day, month FROM birthdays WHERE day = ? AND month = ?", (day, month)).fetchall()
                 if len(results) is 0:
                     await ctx.send("No Birthday at {}.{}.".format(day, month))
                     return
@@ -47,7 +47,7 @@ class Birthdays(commands.Cog):
                 await ctx.send(text)
             else:  # Username as Querry
                 results = db.execute(
-                    "SELECT userId, day, month FROM birthdays WHERE userId LIKE '%s'", querry).fetchall()
+                    "SELECT userId, day, month FROM birthdays WHERE userId LIKE '?'", querry).fetchall()
                 print(results)
                 if len(results) is 0:
                     await ctx.send("No UserID matches this request")
@@ -70,7 +70,7 @@ class Birthdays(commands.Cog):
 
     def update_birthday(self, user_id, day, month):
         with self.bot.db.get(self.BIRTHDAY_CHANNEL_ID) as db:
-            db.execute("INSERT OR REPLACE INTO birthdays (userId, day, month) VALUES ('%s', %d, %d)", (
+            db.execute("INSERT OR REPLACE INTO birthdays (userId, day, month) VALUES ('?', ?, ?)", (
                 user_id, day, month))
 
     async def congratulate(self):
@@ -87,7 +87,7 @@ class Birthdays(commands.Cog):
     def get_user_ids(self, day: int, month: int) -> [int]:
         with self.bot.db.get(self.BIRTHDAY_CHANNEL_ID) as db:
             return db.execute(
-                "SELECT userId FROM birthdays WHERE day = %d AND month = %d", (day, month)).fetchall()
+                "SELECT userId FROM birthdays WHERE day = ? AND month = ?", (day, month)).fetchall()
 
 
 def setup(bot):
