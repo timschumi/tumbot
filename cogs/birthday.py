@@ -6,14 +6,12 @@ from discord.ext import commands
 
 
 class Birthdays(commands.Cog):
-    DATEPATTERN: Pattern[str] = re.compile(r'(((0[1-9])|(1[0-9])|(2[0-9])|(3[0-1]))\.'  # 01.-31.
-                                           r"((01)|(03)|(05)|(07)|(08)|(10)|(12))\.)"  # all months with 31 days
+    DATEPATTERN: Pattern[str] = re.compile(r"(((0?[1-9])|([12][0-9]))\."  # 01.-29.
+                                           r"((0?[1-9])|(1[0-2]))\.)"  # all months have 1..29 days
                                            r"|"
-                                           r"(((0[1-9])|(1[0-9])|(2[0-9])|(30))\."  # 01.-30.
-                                           r"((04)|(06)|(09)|(11))\.)"  # all months with 30 days
+                                           r"(30\.((0?[13-9])|(1[0-2]))\.)"  # all months with 30 days
                                            r"|"
-                                           r"(((0[1-9])|(1[0-9])|(2[0-9]))\."  # 01.-29.
-                                           r"02\.)")  # february
+                                           r"(31\.((0?[13578])|(10)|(12))\.)")  # all months with 31 days
     BIRTHDAY_CHANNEL_ID = 666653781366145028
 
     def __init__(self, bot):
