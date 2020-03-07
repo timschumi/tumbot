@@ -26,7 +26,6 @@ class DbMgr:
         return self.db_handles[guild]
 
     def get_all(self):
-        dbs = {}
         for file in glob.glob("db/*.db"):
             search = re.search('/([0-9]+?)\.db', file)
             if search is None or search.group(1) is None:
