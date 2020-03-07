@@ -10,7 +10,7 @@ from discord.ext import commands
 class Mensa(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.bot.register_job(60 * 60 * 12, self.update_entries)
+        self.bot.register_job(60 * 60 * 24, self.update_entries)
 
     def fillURL(self, location, year, week):
         return f"https://srehwald.github.io/eat-api/{location}/{year}/{week:02d}.json"
