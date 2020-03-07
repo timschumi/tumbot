@@ -8,11 +8,11 @@ from discord.ext import commands
 
 class Birthdays(commands.Cog):
     DATEPATTERN: Pattern[str] = re.compile(r"(((0?[1-9])|([12][0-9]))\."  # 01.-29.
-                                           r"((0?[1-9])|(1[0-2]))\.)"  # all months have 1..29 days
+                                           r"((0?[1-9])|(1[0-2])))"  # all months have 1..29 days
                                            r"|"
-                                           r"(30\.((0?[13-9])|(1[0-2]))\.)"  # all months with 30 days
+                                           r"(30\.((0?[13-9])|(1[0-2])))"  # all months with 30 days
                                            r"|"
-                                           r"(31\.((0?[13578])|(10)|(12))\.)")  # all months with 31 days
+                                           r"(31\.((0?[13578])|(10)|(12)))")  # all months with 31 days
     def __init__(self, bot):
         self.bot = bot
         self.bot.register_job(60 * 60 * 24, self.congratulate_all)
