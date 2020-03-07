@@ -25,17 +25,6 @@ class Birthdays(commands.Cog):
 
     @birthdays.command()
     @commands.has_permissions(manage_messages=True)
-    async def setup(self, ctx):
-        with self.bot.db.get(self.BIRTHDAY_CHANNEL_ID) as db:
-            data = db.execute("SELECT userId, day, month FROM birthdays").fetchall()
-        self.BIRTHDAY_CHANNEL_ID = ctx.guild.id
-        with self.bot.db.get(self.BIRTHDAY_CHANNEL_ID) as db:
-            for birthday in data:
-                db.execute("INSERT OR REPLACE INTO birthdays (userId, day, month) VALUES ('?', ?, ?)", (
-                    birthday[0], birthday[1], birthday[2]))
-
-    @birthdays.command()
-    @commands.has_permissions(manage_messages=True)
     async def list(self, ctx, querry=""):
         """lists all birthdays (birthdays or userid are possible, jet optional querries)"""
         with self.bot.db.get(self.BIRTHDAY_CHANNEL_ID) as db:
