@@ -45,7 +45,7 @@ class Birthdays(commands.Cog):
 
         text = ""
         for result in results:
-            user = await self.bot.fetch_user(result[0])
+            user = await ctx.guild.fetch_member(result[0])
             text += "User: {}\t->\t{}.{}.\n".format(user.display_name, result[1], result[2])
         await ctx.send(text)
 
