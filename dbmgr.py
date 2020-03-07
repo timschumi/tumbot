@@ -12,6 +12,7 @@ class DbMgr:
         self.db_handles = {}
 
     def open(self, guild):
+        guild = str(guild)
         if guild in self.db_handles:
             return
 
@@ -19,6 +20,7 @@ class DbMgr:
         self.upgrade_db(self.db_handles[guild])
 
     def get(self, guild):
+        guild = str(guild)
         self.open(guild)
 
         return self.db_handles[guild]
@@ -48,6 +50,7 @@ class DbMgr:
             user_version += 1
 
     def close(self, guild, commit=True):
+        guild = str(guild)
         if guild in self.db_handles:
             if commit:
                 self.db_handles[guild].commit()
