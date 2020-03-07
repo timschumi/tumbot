@@ -30,14 +30,14 @@ class Birthdays(commands.Cog):
         """
         with self.bot.db.get(ctx.guild.id) as db:
             if len(query) == 0:  # No Query
-                results = db.execute("SELECT userId, day, month FROM birthdays").fetchall()
+                results = db.execute("SELECT userId, day, month FROM birthdays ORDER BY month, day").fetchall()
             elif self.DATEPATTERN.match(query) is not None:  # Birthday as Query
                 day, month = query.strip(".").split(".")
                 results = db.execute(
-                    "SELECT userId, day, month FROM birthdays WHERE day = ? AND month = ?", (day, month)).fetchall()
+                    "SELECT userId, day, month FROM birthdays WHERE day = ? AND month = ? ORDER BY month, day", (day, month)).fetchall()
             else:  # Username as Query
                 results = db.execute(
-                    "SELECT userId, day, month FROM birthdays WHERE userId LIKE ?", (query,)).fetchall()
+                    "SELECT userId, day, month FROM birthdays WHERE userId LIKE ? ORDER BY month, day", (query,)).fetchall()
 
         if len(results) == 0:
             await ctx.send("No entries found.")
