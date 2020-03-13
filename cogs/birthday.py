@@ -8,11 +8,11 @@ from discord.ext import commands
 
 class Birthdays(commands.Cog):
     DATEPATTERN: Pattern[str] = re.compile(r"(((0?[1-9])|([12][0-9]))\."  # 01.-29.
-                                           r"((0?[1-9])|(1[0-2])))"  # all months have 1..29 days
+                                           r"((0?[1-9])|(1[0-2]))\.?)"  # all months have 1..29 days
                                            r"|"
-                                           r"(30\.((0?[13-9])|(1[0-2])))"  # all months with 30 days
+                                           r"(30\.((0?[13-9])|(1[0-2]))\.?)"  # all months with 30 days
                                            r"|"
-                                           r"(31\.((0?[13578])|(10)|(12)))")  # all months with 31 days
+                                           r"(31\.((0?[13578])|(10)|(12))\.?)")  # all months with 31 days
     def __init__(self, bot):
         self.bot = bot
         self.bot.register_job(60 * 60 * 24, self.congratulate_all)
@@ -31,7 +31,7 @@ class Birthdays(commands.Cog):
         with self.bot.db.get(ctx.guild.id) as db:
             if len(query) == 0:  # No Query
                 results = db.execute("SELECT userId, day, month FROM birthdays ORDER BY month, day").fetchall()
-            elif self.DATEPATTERN.match(query) is not None:  # Birthday as Query
+            elif self.DATEPATTERN.fullmatch(query) is not None:  # Birthday as Query
                 day, month = query.strip(".").split(".")
                 results = db.execute(
                     "SELECT userId, day, month FROM birthdays WHERE day = ? AND month = ? ORDER BY month, day", (day, month)).fetchall()
@@ -52,7 +52,7 @@ class Birthdays(commands.Cog):
     @birthdays.command()
     async def add(self, ctx, birthdate):
         """Adds a birthday (DD.MM.) for the calling user"""
-        if self.DATEPATTERN.match(birthdate) is None:
+        if self.DATEPATTERN.fullmatch(birthdate) is None:
             await ctx.send("Usage: <!birthday add DD.MM.> (of course with a valid date)")
             return
         day, month = birthdate.strip(".").split(".")
