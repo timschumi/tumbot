@@ -56,8 +56,8 @@ class Admin(commands.Cog):
         if amount > 100:
             await ctx.send("Zu großer Betrag!")
             return
-        await ctx.channel.purge(limit=amount)
-        await ctx.send(f"Es wurden **{amount}** Nachrichten gelöscht.", delete_after=15)
+        await ctx.channel.purge(limit=amount+1)
+        await ctx.send(f"**{amount}** Nachrichten wurden von **{ctx.author}** gelöscht.")
 
 
 def setup(bot):
