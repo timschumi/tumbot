@@ -46,7 +46,7 @@ class Birthdays(commands.Cog):
         text = "Geburtstage:\n"
         for result in results:
             user = await ctx.guild.fetch_member(result[0])
-            text += "{}.{}.\t->\t{}\n".format(user.display_name, result[1], result[2])
+            text += "{}.{}.\t->\t{}\n".format(result[1], result[2], user.display_name)
         await ctx.send(text)
 
     @birthdays.command()
