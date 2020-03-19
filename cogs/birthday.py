@@ -30,23 +30,23 @@ class Birthdays(commands.Cog):
         """
         with self.bot.db.get(ctx.guild.id) as db:
             if len(query) == 0:  # No Query
-                results = db.execute("SELECT userId, day, month FROM birthdays ORDER BY month, day").fetchall()
+                results = db.execute("SELECT day, month, userId FROM birthdays ORDER BY month, day").fetchall()
             elif self.DATEPATTERN.fullmatch(query) is not None:  # Birthday as Query
                 day, month = query.strip(".").split(".")
                 results = db.execute(
-                    "SELECT userId, day, month FROM birthdays WHERE day = ? AND month = ? ORDER BY month, day", (day, month)).fetchall()
+                    "SELECT day, month, userId FROM birthdays WHERE day = ? AND month = ? ORDER BY month, day", (day, month)).fetchall()
             else:  # Username as Query
                 results = db.execute(
-                    "SELECT userId, day, month FROM birthdays WHERE userId LIKE ? ORDER BY month, day", (query,)).fetchall()
+                    "SELECT day, month, userId FROM birthdays WHERE userId LIKE ? ORDER BY month, day", (query,)).fetchall()
 
         if len(results) == 0:
             await ctx.send("No entries found.")
             return
 
-        text = ""
+        text = "Geburtstage:\n"
         for result in results:
             user = await ctx.guild.fetch_member(result[0])
-            text += "User: {}\t->\t{}.{}.\n".format(user.display_name, result[1], result[2])
+            text += "{}.{}.\t->\t{}\n".format(user.display_name, result[1], result[2])
         await ctx.send(text)
 
     @birthdays.command()
