@@ -12,7 +12,7 @@ class Corona(commands.Cog):
         self.bot = bot
 
     async def printnews(self, ctx):
-        url = "https://covidapi.org/api/news_feed.php"
+        url = "https://covidapi.org/api/news_feed_html.php"
         response = urllib.request.urlopen(url)
         response = response.read()
         response = re.search("</html>.*<br>", str(response))
