@@ -24,7 +24,7 @@ class Autokick(commands.Cog):
         except Exception:
             pass
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if member.id in self.blocks:
             await member.move_to(None)
