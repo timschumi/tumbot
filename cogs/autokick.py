@@ -11,22 +11,16 @@ class Autokick(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def add(self, user):
-        try:
-            self.blocks.append(int(user))
-        except Exception:
-            pass
+        self.blocks.append(int(user))
 
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def remove(self, user):
-        try:
-            self.blocks.remove(int(user))
-        except Exception:
-            pass
+        self.blocks.remove(int(user))
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        if member.id in self.blocks:
+        if int(member.id) in self.blocks:
             await member.move_to(None)
 
 
