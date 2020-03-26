@@ -8,7 +8,7 @@ class Autokick(commands.Cog):
         self.bot = bot
         self.blocks = []
 
-    @commands.command
+    @commands.command()
     @commands.has_permissions(administrator=True)
     async def add(self, user):
         try:
@@ -16,7 +16,7 @@ class Autokick(commands.Cog):
         except Exception:
             pass
 
-    @commands.command
+    @commands.command()
     @commands.has_permissions(administrator=True)
     async def remove(self, user):
         try:
