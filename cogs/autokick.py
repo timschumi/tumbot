@@ -4,8 +4,8 @@ from discord.ext import commands
 
 class Autokick(commands.Cog):
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.blocks = []
 
     @commands.command
@@ -30,5 +30,5 @@ class Autokick(commands.Cog):
             await member.move_to(None)
 
 
-def setup(client):
-    client.add_cog(Autokick(client))
+def setup(bot):
+    bot.add_cog(Autokick(bot))
