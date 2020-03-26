@@ -9,12 +9,12 @@ class Autokick(commands.Cog):
         self.blocks = []
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def add(self, user):
         self.blocks.append(int(user))
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def remove(self, user):
         self.blocks.remove(int(user))
 
