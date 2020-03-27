@@ -59,6 +59,22 @@ class Admin(commands.Cog):
         await ctx.channel.purge(limit=amount+1)
         await ctx.send(f"**{amount}** Nachrichten wurden von **{ctx.author}** gelöscht.")
 
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def flatten(self, ctx):
+        async with ctx.channel.typing():
+            text = ""
+
+            async for message in ctx.channel.history(limit=None, oldest_first=True):
+                if len(text) + len(message.clean_content) + 1 > 2000:
+                    await ctx.send(text)
+                    text = ""
+
+                text += message.clean_content + " "
+
+            if len(text) > 0:
+                await ctx.send(text)
+
 
 def setup(bot):
     bot.add_cog(Admin(bot))
