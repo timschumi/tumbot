@@ -66,6 +66,14 @@ class Admin(commands.Cog):
             text = ""
 
             async for message in ctx.channel.history(limit=None, oldest_first=True):
+                # Skip command
+                if ctx.message.id == message.id:
+                    continue
+
+                # Skip own messages
+                if self.bot.user.id == message.author.id:
+                    continue
+
                 if len(text) + len(message.clean_content) + 1 > 2000:
                     await ctx.send(text)
                     text = ""
