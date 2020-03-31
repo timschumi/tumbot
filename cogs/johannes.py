@@ -17,6 +17,8 @@ class Johannes(commands.Cog):
                                                     "sheet" in message.content.lower()):
             await message.channel.send("Ja wir dürfen in der Eidi-Klausur ein Cheat-Sheet verwenden. "
                                        "Dieses ist ein doppelseitig handbeschriebenes Din-A4-Blatt!")
+        elif "lmu" in message.content.lower():
+            await message.add_reaction(":lmuo:668091545878003712")
 
 
 def setup(bot):
