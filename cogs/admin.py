@@ -1,5 +1,6 @@
 from discord.ext import commands
 import re
+import sqlite3
 
 class Admin(commands.Cog):
     def __init__(self, bot):
@@ -14,8 +15,12 @@ class Admin(commands.Cog):
             return
 
         query = matches.group(1)
-        with self.bot.db.get(ctx.guild.id) as db:
-            result = [dict(row) for row in db.execute(query).fetchall()]
+        try:
+            with self.bot.db.get(ctx.guild.id) as db:
+                result = [dict(row) for row in db.execute(query).fetchall()]
+        except sqlite3.OperationalError as e:
+            await ctx.send(f"```{e}```")
+            return
 
         if len(result) < 1:
             return
