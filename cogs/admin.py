@@ -42,7 +42,8 @@ class Admin(commands.Cog):
             for key in keys:
                 newtext += " {} |".format(str(row[key]).ljust(key_length[key]))
 
-            if len(text) + len(newtext) >= 2000:
+            # -6: Account for code block
+            if len(text) + len(newtext) >= 2000 - 6:
                 await ctx.send("```{}```".format(text))
                 text = ""
 
