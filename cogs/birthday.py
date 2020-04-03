@@ -45,7 +45,7 @@ class Birthdays(commands.Cog):
 
         text = ""
         for result in results:
-            user = ctx.guild.get_member(int(result[0]))
+            user = ctx.guild.get_member(result[0])
 
             if user is not None:
                 text += "User: {}\t->\t{}.{}.\n".format(user.display_name, result[1], result[2])
