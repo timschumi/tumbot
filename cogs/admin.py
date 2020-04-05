@@ -59,8 +59,8 @@ class Admin(commands.Cog):
     @commands.command(aliases=['purge'])
     @commands.has_permissions(administrator=True)
     async def clear(self, ctx, amount=10):
-        if amount < 1:
-            await ctx.send("Kann keine negative Nachrichtenzahl löschen!")
+        if amount <= 0:
+            await ctx.send('"Was bist du für ein Idiot" ~Johannes Stöhr (Negativer ist Betrag unmöglich)')
             return
         if amount > 100:
             await ctx.send("Zu großer Betrag!")
