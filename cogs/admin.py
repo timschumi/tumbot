@@ -2,6 +2,7 @@ from discord.ext import commands
 import re
 import sqlite3
 
+
 class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -60,7 +61,7 @@ class Admin(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def clear(self, ctx, amount=10):
         if amount <= 0:
-            await ctx.send('"Was bist du für ein Idiot" ~Johannes Stöhr (Negativer ist Betrag unmöglich)')
+            await ctx.send('"Was bist du für ein Idiot" ~ Johannes Stöhr (Betrag <= 0 ist unmöglich!)')
             return
         if amount > 100:
             await ctx.send("Zu großer Betrag!")
