@@ -26,6 +26,10 @@ class ReactionRoles(commands.Cog):
             await ctx.send("Could not resolve role.", delete_after=60)
             return
 
+        if ctx.author.top_role >= role:
+            await ctx.send("Target role is higher than current highest role.", delete_after=60)
+            return
+
         self.active[ctx.author.id] = role.id
         await ctx.send("React to a message with an emoji to finish the setup.", delete_after=60)
 
