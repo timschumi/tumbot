@@ -26,7 +26,7 @@ class ReactionRoles(commands.Cog):
             await ctx.send("Could not resolve role.", delete_after=60)
             return
 
-        if ctx.author.top_role >= role:
+        if ctx.author.top_role <= role:
             await ctx.send("Target role is higher than current highest role.", delete_after=60)
             return
 
