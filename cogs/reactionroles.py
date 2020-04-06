@@ -22,6 +22,10 @@ class ReactionRoles(commands.Cog):
         if not isinstance(role, discord.Role):
             role = discord.utils.get(ctx.guild.roles, name=role)
 
+        if role is None:
+            await ctx.send("Could not resolve role.", delete_after=60)
+            return
+
         self.active[ctx.author.id] = role.id
         await ctx.send("React to a message with an emoji to finish the setup.", delete_after=60)
 
