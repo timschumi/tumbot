@@ -18,14 +18,6 @@ class ReactionRoles(commands.Cog):
     async def add(self, ctx, role: discord.Role):
         """Creates a new reactionrole"""
 
-        # Fallback if role can't be mentioned: Search by name
-        if not isinstance(role, discord.Role):
-            role = discord.utils.get(ctx.guild.roles, name=role)
-
-        if role is None:
-            await ctx.send("Could not resolve role.", delete_after=60)
-            return
-
         if ctx.author.top_role <= role:
             await ctx.send("Target role is higher than current highest role.", delete_after=60)
             return
