@@ -2,7 +2,7 @@
 
 import os
 import discord
-import logging
+import glob
 from subprocess import call
 from bot import Bot
 from dbmgr import DbMgr
@@ -42,7 +42,7 @@ async def update(ctx):
 
 @bot.command()
 async def ping(ctx):
-    await ctx.send(f'Pong! Meine Latenz sind aktuell {round(bot.latency * 1000)} ms.')
+    await ctx.send(f'Pong! Meine Latenz ist aktuell {round(bot.latency * 1000)}ms.')
 
 
 # Modul laden
@@ -52,7 +52,6 @@ async def load(ctx, extension):
     e = extension.lower()
     bot.load_extension(f'cogs.{e}')
     await ctx.message.add_reaction('\U00002705')
-    print(e + ' aktiviert')
 
 
 # Modul deaktivieren
@@ -61,7 +60,6 @@ async def load(ctx, extension):
 async def unload(ctx, extension):
     e = extension.lower()
     bot.unload_extension(f'cogs.{e}')
-    print(e + ' deaktiviert')
     await ctx.message.add_reaction('\U00002705')
 
 
@@ -71,27 +69,15 @@ async def unload(ctx, extension):
 async def reload(ctx, extension):
     e = extension.lower()
     bot.reload_extension(f'cogs.{e}')
-    print(e + ' neugeladen')
     await ctx.message.add_reaction('\U00002705')
 
 
-# Beim start alle module laden die nicht mit test starten
-for filename in os.listdir('./cogs'):
-    if filename.endswith(".py"):
-        if filename.startswith('test'):
-            try:
-                bot.load_extension(f'cogs.{filename[:-3]}')
-            except Exception:
-                print(F'{filename}' + ' ist fehlerhaft')
-        else:
-            if filename.endswith('.py'):
-                bot.load_extension(f'cogs.{filename[:-3]}')
-                print(filename[:-3] + ' aktiviert')
-            elif filename.endswith('__pycache__'):
-                print('Py-Cache gefunden')
-            else:
-                print(F'{filename}' + ' ist fehlerhaft')
-    else:
-        pass
+# Beim start alle module laden
+for filename in [re.search('/(.+?)\.py', a).group(1) for a in glob.glob("plugins/*.py")]:
+    try:
+        bot.load_extension(f'cogs.{filename}')
+    except Exception as e:
+        print(f"Exception while loading `{filename}`:")
+        print(f"{type(e).__name__}: {e}")
 
 bot.run(os.environ['TUMBOT_TOKEN'])
