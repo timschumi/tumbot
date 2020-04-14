@@ -10,7 +10,7 @@ class Bot(DBot):
     def __init__(self, db, **options):
         super().__init__(**options)
         self.db = db
-        self.jobs = {}
+        self.jobs = []
         self.run_jobs = True
 
     async def close(self):
@@ -19,26 +19,33 @@ class Bot(DBot):
         await super().close()
         self.db.close_all()
 
-    def run(self, token):
-        self.job_runner = Thread(target=self.job_runner_func)
-        self.job_runner.start()
+    async def on_ready(self):
+        print(f"Bot is ready! Logged in as {self.user}.")
+        Thread(target=self.job_runner).start()
 
-        super().run(token)
-
-    def job_runner_func(self):
+    def job_runner(self):
+        print("Starting background timer runner.")
         while self.run_jobs:
-            for timer in self.jobs.keys():
-                if math.floor(time.time()) % timer == 0:
-                    for job in self.jobs[timer]:
-                        try:
-                            job()
-                        except Exception as e:
-                            print("Error: {}".format(e))
-            time.sleep(1)
+            for job in self.jobs:
+                t = math.floor(time.time())
+                if t - job["last"] <= job["timer"]:
+                    continue
+
+                job["last"] = t
+                try:
+                    job["function"]()
+                except Exception as e:
+                    print(f"Exception while running job {job['function'].__name__}:")
+                    print(f"{type(e).__name__}: {e}")
+            time.sleep(10)
 
     def register_job(self, timer, f):
         print("Registering job {} to run every {} seconds".format(f.__name__, timer))
-        self.jobs.setdefault(timer, []).append(f)
+        self.jobs.append({
+            "last": 0,
+            "timer": timer,
+            "function": f
+        })
 
     def dbconf_get(self, guild_id, name, default=None):
         result = self.db.get(guild_id).execute("SELECT value FROM config WHERE name = ?", (name,)).fetchall()
