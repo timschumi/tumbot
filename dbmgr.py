@@ -46,7 +46,7 @@ class DbMgr:
         while(os.path.isfile(self.SCHEMA_PATTERN.format(user_version + 1))):
             with open(self.SCHEMA_PATTERN.format(user_version + 1)) as file:
                 connection.executescript(file.read())
-            user_version += 1
+            user_version = connection.execute("PRAGMA user_version").fetchone()[0]
 
     def close(self, guild, commit=True):
         guild = str(guild)
