@@ -3,6 +3,7 @@
 import os
 import discord
 import glob
+import re
 from subprocess import call
 from bot import Bot
 from dbmgr import DbMgr
