@@ -73,7 +73,7 @@ async def reload(ctx, extension):
 
 
 # Beim start alle module laden
-for filename in [re.search('/(.+?)\.py', a).group(1) for a in glob.glob("plugins/*.py")]:
+for filename in [re.search('/(.+?)\.py', a).group(1) for a in glob.glob("cogs/*.py")]:
     try:
         bot.load_extension(f'cogs.{filename}')
     except Exception as e:
