@@ -10,16 +10,16 @@ class Autokick(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def add(self, _, user: discord.Member):
+    async def add(self, ctx, user: discord.Member):
         self.blocks.append(user.id)
 
     @commands.command()
     @commands.is_owner()
-    async def remove(self, _, user: discord.Member):
+    async def remove(self, ctx, user: discord.Member):
         self.blocks.remove(user.id)
 
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member):
+    async def on_voice_state_update(self, member, before, after):
         if member.id in self.blocks:
             await member.move_to(None)
 
