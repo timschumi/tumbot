@@ -58,7 +58,10 @@ class Birthdays(commands.Cog):
                     await ctx.send("```{}```".format(text))
                     text = ""
                 text += line
-        await ctx.send("```{}```".format(text))
+        # text should not be empty, but if somehow the ctx.guild.get_member(r) would return None i.e. if the
+        # Database somehow has a fault, this could happen
+        if len(text) > 0:
+            await ctx.send("```{}```".format(text))
 
     @birthdays.command()
     async def add(self, ctx, birthdate):
