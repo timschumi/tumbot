@@ -51,18 +51,14 @@ class Birthdays(commands.Cog):
             user = ctx.guild.get_member(result[0])
 
             if user is not None:
-                text += "User: {}\t->\t{}.{}.\n".format(user.display_name, result[1], result[2])
-        output = ""
-        for line in text.split("\n"):
-            line += "\n"
-            # -6: Account for code block
-            # -2:Account for possible additional \n
-            if len(output) + len(line) >= 2000 - 6 - 2:
-                await ctx.send("```{}```".format(output))
-                output = ""
-
-            output += line
-        await ctx.send("```{}```".format(output))
+                line = "User: {}\t->\t{}.{}.\n".format(user.display_name, result[1], result[2])
+                # -6: Account for code block
+                # -2:Account for possible additional \n
+                if len(text) + len(line) >= 2000 - 6 - 2:
+                    await ctx.send("```{}```".format(text))
+                    text = ""
+                text += line
+        await ctx.send("```{}```".format(text))
 
     @birthdays.command()
     async def add(self, ctx, birthdate):
