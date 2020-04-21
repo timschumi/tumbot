@@ -13,6 +13,7 @@ class Birthdays(commands.Cog):
                                            r"(30\.((0?[13-9])|(1[0-2]))\.?)"  # all months with 30 days
                                            r"|"
                                            r"(31\.((0?[13578])|(10)|(12))\.?)")  # all months with 31 days
+
     def __init__(self, bot):
         self.bot = bot
         self.bot.register_job(60 * 60 * 24, self.congratulate_all)
@@ -34,10 +35,12 @@ class Birthdays(commands.Cog):
             elif self.DATEPATTERN.fullmatch(query) is not None:  # Birthday as Query
                 day, month = query.strip(".").split(".")
                 results = db.execute(
-                    "SELECT userId, day, month FROM birthdays WHERE day = ? AND month = ? ORDER BY month, day", (day, month)).fetchall()
+                    "SELECT userId, day, month FROM birthdays WHERE day = ? AND month = ? ORDER BY month, day",
+                    (day, month)).fetchall()
             else:  # Username as Query
                 results = db.execute(
-                    "SELECT userId, day, month FROM birthdays WHERE userId LIKE ? ORDER BY month, day", (query,)).fetchall()
+                    "SELECT userId, day, month FROM birthdays WHERE userId LIKE ? ORDER BY month, day",
+                    (query,)).fetchall()
 
         if len(results) == 0:
             await ctx.send("No entries found.")
@@ -48,8 +51,19 @@ class Birthdays(commands.Cog):
             user = ctx.guild.get_member(result[0])
 
             if user is not None:
-                text += "User: {}\t->\t{}.{}.\n".format(user.display_name, result[1], result[2])
-        await ctx.send(text)
+                line = "User: {}\t->\t{}.{}.\n".format(user.display_name, result[1], result[2])
+                # -6: Account for code block
+                # -2:Account for possible additional \n
+                if len(text) + len(line) >= 2000 - 6 - 2:
+                    await ctx.send("```{}```".format(text))
+                    text = ""
+                text += line
+            else:
+                await ctx.send("**UserId {} produced an error!**".format(result[0]))
+        # text should not be empty, but if somehow the ctx.guild.get_member(r) would return None i.e. if the
+        # Database somehow has a fault, this could happen
+        if len(text) > 0:
+            await ctx.send("```{}```".format(text))
 
     @birthdays.command()
     async def add(self, ctx, birthdate):
@@ -65,7 +79,7 @@ class Birthdays(commands.Cog):
 
         with self.bot.db.get(ctx.guild.id) as db:
             db.execute("INSERT OR REPLACE INTO birthdays (userId, day, month) VALUES (?, ?, ?)",
-                (ctx.author.id, day, month))
+                       (ctx.author.id, day, month))
 
         await ctx.message.add_reaction('\U00002705')
 
@@ -105,7 +119,7 @@ class Birthdays(commands.Cog):
     async def congratulate(self, conn, day, month):
         text = "Geburtstage am {}.{}.:".format(day, month)
         users = conn.execute(
-                "SELECT userId FROM birthdays WHERE day = ? AND month = ?", (day, month)).fetchall()
+            "SELECT userId FROM birthdays WHERE day = ? AND month = ?", (day, month)).fetchall()
         if len(users) == 0:
             return
         for user in users:
