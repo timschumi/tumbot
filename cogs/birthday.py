@@ -58,6 +58,8 @@ class Birthdays(commands.Cog):
                     await ctx.send("```{}```".format(text))
                     text = ""
                 text += line
+            else:
+                await ctx.send("**UserId {} produced an error!**".format(result[0]))
         # text should not be empty, but if somehow the ctx.guild.get_member(r) would return None i.e. if the
         # Database somehow has a fault, this could happen
         if len(text) > 0:
