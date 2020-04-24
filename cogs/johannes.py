@@ -1,24 +1,39 @@
 from discord.ext import commands
-import discord
 
 
 class Johannes(commands.Cog):
+
     def __init__(self, bot):
         self.bot = bot
+
+    def cheatsheet(self, subject):
+        return f"Ja wir dürfen in der {subject}-Klausur ein Cheat-Sheet verwenden. Dieses ist ein doppelseitig " \
+               f"handbeschriebenes Din-A4-Blatt!"
 
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
             return
+        lower = message.content.lower()
 
-        if "johannes" in message.content.lower() or "stöhr" in message.content.lower():
+        # Reactions
+        if "johannes" in lower or "stöhr" in lower:
             await message.add_reaction('\U0001F427')
-        elif "eidi" in message.content.lower() and ("cheat" in message.content.lower() or
-                                                    "sheet" in message.content.lower()):
-            await message.channel.send("Ja wir dürfen in der Eidi-Klausur ein Cheat-Sheet verwenden. "
-                                       "Dieses ist ein doppelseitig handbeschriebenes Din-A4-Blatt!")
-        elif "lmu" in message.content.lower():
+        if "lmu" in lower:
             await message.add_reaction(":lmuo:668091545878003712")
+        # Messages
+        if "gad" in lower and ("cheat" in lower or "sheet" in lower):
+            await message.channel.send(self.cheatsheet("GAD"))
+        elif "eist" in lower and ("cheat" in lower or "sheet" in lower):
+            await message.channel.send(self.cheatsheet("EIST"))
+        elif "linalg" in lower and ("cheat" in lower or "sheet" in lower):
+            await message.channel.send(self.cheatsheet("LINALG"))
+        elif ("dwt" in lower or "wahrscheinlichkeitstheorie" in lower) and ("cheat" in lower or "sheet" in lower):
+            await message.channel.send(self.cheatsheet("DWT"))
+        elif "theo" in lower and ("cheat" in lower or "sheet" in lower):
+            await message.channel.send(self.cheatsheet("THEO"))
+        elif ("grnvs" in lower or "rechnernetz" in lower) and ("cheat" in lower or "sheet" in lower):
+            await message.channel.send(self.cheatsheet("GRNVS"))
 
 
 def setup(bot):
