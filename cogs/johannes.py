@@ -10,6 +10,10 @@ class Johannes(commands.Cog):
         return f"Ja wir dürfen in der {subject}-Klausur ein Cheat-Sheet verwenden. Dieses ist ein doppelseitig " \
                f"handbeschriebenes Din-A4-Blatt!"
 
+    @commands.command()
+    async def johannes(self, ctx):
+        await ctx.send("\U0001F427")
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
