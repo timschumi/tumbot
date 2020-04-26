@@ -65,12 +65,10 @@ class ShutTheBox(commands.Cog):
             elif playerpkt[0] == playerpkt[1]:
                 await ctx.send(f'Unentschieden beide Spieler haben {playerpkt[0]}')
             else:
-                await ctx.send("Error #SB01 Unerwarteter Fehler bei der Ausgabe kontaktiere bitte den Botbesitzer")
+                await ctx.send("Unerwarteter Fehler bei der Ausgabe kontaktiere bitte den Botbesitzer")
 
         if player1.id is player2.id:
-            errorsb02embed = discord.Embed(title="Error #SB02",
-                                           description="Du kannst dich nicht selbst herausfordern", color=0xff0000)
-            await channel.send(embed=errorsb02embed)
+            await channel.send("Hast du keine Freunde mit denen du spielen kannst? :(")
             return
 
         if player2.bot:
@@ -147,9 +145,7 @@ class ShutTheBox(commands.Cog):
         error = getattr(error, 'original', error)
 
         if isinstance(error, commands.MissingRequiredArgument):
-            errorsb01embed = discord.Embed(title="Error #SB01",
-                                           description="Fehlende NutzerID! Syntax: challenge <userid>", color=0xff0000)
-            await ctx.send(embed=errorsb01embed)
+            await ctx.send("Ohne Gegner kannst du nicht spielen :(")
             return
 
         if isinstance(error, asyncio.TimeoutError):

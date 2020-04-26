@@ -4,3 +4,7 @@ EidI
 DS
 ERA
 Winfo
+Linalg
+Eist
+GAD
+DWT
