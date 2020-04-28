@@ -58,12 +58,13 @@ class Admin(commands.Cog):
         await ctx.send("```{}```".format(text))
 
     @commands.command(aliases=['purge'])
+    @commands.cooldown(2, 600, type=commands.BucketType.default)
     @commands.has_permissions(administrator=True)
     async def clear(self, ctx, amount=10):
         if amount <= 0:
             await ctx.send('"Was bist du für ein Idiot" ~ Johannes Stöhr (Betrag <= 0 ist unmöglich!)')
             return
-        if amount > 100:
+        if amount > 20:
             await ctx.send("Zu großer Betrag!")
             return
         await ctx.channel.purge(limit=amount+1)
