@@ -1,1 +1,31 @@
-This is a readme file.
+TUMBot Readme Datei:
+
+Alle Commands:
+
+
+Birthdays:
+  birthdays   Manages birthdays
+Johannes:
+  johannes    
+Mensa:
+  mensa       
+MessageStore:
+  metafrage   Gibt den Meta-Fragen-Text wider
+  msg         Allows for saving larger chunks of text using a shorthand
+Quotes:
+  quote       
+Randomstuff:
+  exzellenz   
+  pinguinfakt 
+ShutTheBox:
+  challenge   
+Status:
+  status      
+Userinfo:
+  userinfo    
+​No Category:
+  help        Shows help message
+  ping        
+
+
+
