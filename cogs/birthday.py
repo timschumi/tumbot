@@ -64,6 +64,8 @@ class Birthdays(commands.Cog):
         # Database somehow has a fault, this could happen
         if len(text) > 0:
             await ctx.send("```{}```".format(text))
+        else:
+            await ctx.send("No valid users with birthdays could be found")
 
     @birthdays.command()
     async def add(self, ctx, birthdate):
