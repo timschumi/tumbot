@@ -29,5 +29,41 @@ class Quotes(commands.Cog):
 
         await ctx.message.add_reaction('\U00002705')
 
+    @quote.command()
+    @commands.has_permissions(manage_channels=True)
+    async def list(self, ctx, search=""):
+        """Lists all quotes that use an optional query"""
+
+        # if else for performance reasons, as SQLite does not perform query optimisation
+        if len(search) > 0:
+            search = "%" + search + "%"
+
+            with self.bot.db.get(ctx.guild.id) as db:
+                quotes = db.execute("SELECT content FROM quotes WHERE LOWER(content) LIKE ? ORDER BY content",
+                                    (search,)).fetchall()
+        else:
+            with self.bot.db.get(ctx.guild.id) as db:
+                quotes = db.execute("SELECT content FROM quotes ORDER BY content",
+                                    (search,)).fetchall()
+
+        if len(quotes) == 0:
+            await ctx.send("No quotes found.")
+            return
+
+        text = ""
+        for quote in quotes:
+            line = "{}\n".format(quote[0])
+            # lines can never be >= 2000-6, due to being inputted by the user in discord as well using the same
+            # message length mechanism
+
+            # -6: Account for code block
+            if len(text) + len(line) >= 2000 - 6:
+                await ctx.send("```{}```".format(text))
+                text = ""
+            text += line
+        if len(text) > 0:
+            await ctx.send("```{}```".format(text))
+
+
 def setup(bot):
     bot.add_cog(Quotes(bot))
