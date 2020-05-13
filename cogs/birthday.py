@@ -53,8 +53,7 @@ class Birthdays(commands.Cog):
             if user is not None:
                 line = "User: {}\t->\t{}.{}.\n".format(user.display_name, result[1], result[2])
                 # -6: Account for code block
-                # -2:Account for possible additional \n
-                if len(text) + len(line) >= 2000 - 6 - 2:
+                if len(text) + len(line) >= 2000 - 6:
                     await ctx.send("```{}```".format(text))
                     text = ""
                 text += line
