@@ -1,5 +1,6 @@
 from discord.ext import commands
 
+
 class Quotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -11,7 +12,8 @@ class Quotes(commands.Cog):
         search = "%" + search + "%"
 
         with self.bot.db.get(ctx.guild.id) as db:
-            quote = db.execute("SELECT content FROM quotes WHERE LOWER(content) LIKE ? ORDER BY RANDOM() LIMIT 1", (search,)).fetchall()
+            quote = db.execute("SELECT content FROM quotes WHERE LOWER(content) LIKE ? ORDER BY RANDOM() LIMIT 1",
+                               (search,)).fetchall()
 
         if len(quote) == 0:
             await ctx.send("No quotes found!")
@@ -27,7 +29,7 @@ class Quotes(commands.Cog):
         content = await commands.clean_content(fix_channel_mentions=True).convert(ctx, content)
 
         with self.bot.db.get(ctx.guild.id) as db:
-            db.execute("INSERT INTO quotes (content) VALUES (?)", (content, ))
+            db.execute("INSERT INTO quotes (content) VALUES (?)", (content,))
 
         await ctx.message.add_reaction('\U00002705')
 
