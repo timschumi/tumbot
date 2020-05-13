@@ -8,6 +8,8 @@ class Quotes(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     async def quote(self, ctx, search=""):
+        """Lists one quote that use an optional query"""
+
         search = "%" + search + "%"
 
         with self.bot.db.get(ctx.guild.id) as db:
@@ -22,6 +24,8 @@ class Quotes(commands.Cog):
     @quote.command()
     @commands.has_permissions(administrator=True)
     async def add(self, ctx, *, content):
+        """adds a quote"""
+
         content = await commands.clean_content(fix_channel_mentions=True).convert(ctx, content)
 
         with self.bot.db.get(ctx.guild.id) as db:
