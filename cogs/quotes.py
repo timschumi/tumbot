@@ -1,5 +1,3 @@
-import random
-
 from discord.ext import commands
 
 class Quotes(commands.Cog):
