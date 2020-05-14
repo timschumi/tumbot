@@ -7,7 +7,7 @@ class Quotes(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     async def quote(self, ctx, search=""):
-        """Lists one quote that use an optional query"""
+        """Displays one random quote"""
 
         search = "%" + search + "%"
 
@@ -24,7 +24,7 @@ class Quotes(commands.Cog):
     @quote.command()
     @commands.has_permissions(administrator=True)
     async def add(self, ctx, *, content):
-        """adds a quote"""
+        """Adds a quote"""
 
         content = await commands.clean_content(fix_channel_mentions=True).convert(ctx, content)
 
@@ -36,7 +36,7 @@ class Quotes(commands.Cog):
     @quote.command()
     @commands.has_permissions(manage_channels=True)
     async def list(self, ctx, search=""):
-        """Lists all quotes that use an optional query"""
+        """Lists all the quotes"""
 
         # if else for performance reasons, as SQLite does not perform query optimisation
         if len(search) > 0:
