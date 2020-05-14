@@ -50,16 +50,16 @@ class Quotes(commands.Cog):
 
         text = ""
         for quote in quotes:
-            line = "{}\n".format(quote[0])
+            line = "{}\n\n".format(quote[0])
             # [single lines can not ever be > 1994 chars]
 
             # -6: Account for code block
             if len(text) + len(line) >= 2000 - 6:
-                await ctx.send("```{}```".format(text))
+                await ctx.send("{}".format(text))
                 text = ""
             text += line
         if len(text) > 0:
-            await ctx.send("```{}```".format(text))
+            await ctx.send("{}".format(text))
 
     @quote.command()
     @commands.has_permissions(administrator=True)
