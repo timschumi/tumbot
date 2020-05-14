@@ -51,8 +51,7 @@ class Quotes(commands.Cog):
         text = ""
         for quote in quotes:
             line = "{}\n".format(quote[0])
-            # lines can never be >= 2000-6, due to being inputted by the user in discord as well using the same
-            # message length mechanism
+            # [single lines can not ever be > 1994 chars]
 
             # -6: Account for code block
             if len(text) + len(line) >= 2000 - 6:
