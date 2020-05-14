@@ -61,6 +61,29 @@ class Quotes(commands.Cog):
         if len(text) > 0:
             await ctx.send("```{}```".format(text))
 
+    @quote.command()
+    @commands.has_permissions(administrator=True)
+    async def delete(self, ctx, search):
+        """Removes a quote"""
+
+        search = "%" + search + "%"
+
+        with self.bot.db.get(ctx.guild.id) as db:
+            results = db.execute("SELECT content FROM quotes WHERE LOWER(content) LIKE ? ORDER BY content",
+                                 (search,)).fetchall()
+
+        if len(results) > 1:
+            await ctx.send("Only one quote at a time can be removed, to prevent admin-abuse.")
+            return
+        if len(results) == 0:
+            await ctx.send("No quotes could be found. What does not exist cant be deleted. :pengsad:")
+            return
+
+        with self.bot.db.get(ctx.guild.id) as db:
+            db.execute("DELETE FROM quotes WHERE content = ?", (results[0][0],))
+
+        await ctx.message.add_reaction('\U00002705')
+
 
 def setup(bot):
     bot.add_cog(Quotes(bot))
