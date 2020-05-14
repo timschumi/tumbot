@@ -38,17 +38,11 @@ class Quotes(commands.Cog):
     async def list(self, ctx, search=""):
         """Lists all the quotes"""
 
-        # if else for performance reasons, as SQLite does not perform query optimisation
-        if len(search) > 0:
-            search = "%" + search + "%"
+        search = "%" + search + "%"
 
-            with self.bot.db.get(ctx.guild.id) as db:
-                quotes = db.execute("SELECT content FROM quotes WHERE LOWER(content) LIKE ? ORDER BY content",
-                                    (search,)).fetchall()
-        else:
-            with self.bot.db.get(ctx.guild.id) as db:
-                quotes = db.execute("SELECT content FROM quotes ORDER BY content",
-                                    (search,)).fetchall()
+        with self.bot.db.get(ctx.guild.id) as db:
+            quotes = db.execute("SELECT content FROM quotes WHERE LOWER(content) LIKE ? ORDER BY content",
+                                (search,)).fetchall()
 
         if len(quotes) == 0:
             await ctx.send("No quotes found.")
