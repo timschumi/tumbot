@@ -76,7 +76,7 @@ class Quotes(commands.Cog):
             await ctx.send("Only one quote at a time can be removed, to prevent admin-abuse.")
             return
         if len(results) == 0:
-            await ctx.send("No quotes could be found. What does not exist cant be deleted. :pengsad:")
+            await ctx.send("No quotes could be found. What does not exist cant be deleted. \U0001F427")
             return
 
         with self.bot.db.get(ctx.guild.id) as db:
