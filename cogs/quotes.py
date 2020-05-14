@@ -69,18 +69,18 @@ class Quotes(commands.Cog):
         search = "%" + search + "%"
 
         with self.bot.db.get(ctx.guild.id) as db:
-            results = db.execute("SELECT content FROM quotes WHERE LOWER(content) LIKE ? ORDER BY content",
+            resulting_ids = db.execute("SELECT rowid FROM quotes WHERE LOWER(content) LIKE ? ORDER BY content",
                                  (search,)).fetchall()
 
-        if len(results) > 1:
+        if len(resulting_ids) > 1:
             await ctx.send("Only one quote at a time can be removed, to prevent admin-abuse.")
             return
-        if len(results) == 0:
+        if len(resulting_ids) == 0:
             await ctx.send("No quotes could be found. What does not exist cant be deleted. \U0001F427")
             return
 
         with self.bot.db.get(ctx.guild.id) as db:
-            db.execute("DELETE FROM quotes WHERE content = ?", (results[0][0],))
+            db.execute("DELETE FROM quotes WHERE rowid = (?)", (resulting_ids[0][0],))
 
         await ctx.message.add_reaction('\U00002705')
 
