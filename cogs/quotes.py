@@ -55,11 +55,11 @@ class Quotes(commands.Cog):
 
             # -6: Account for code block
             if len(text) + len(line) >= 2000 - 6:
-                await ctx.send("{}".format(text))
+                await ctx.send(text)
                 text = ""
             text += line
         if len(text) > 0:
-            await ctx.send("{}".format(text))
+            await ctx.send(text)
 
     @quote.command()
     @commands.has_permissions(administrator=True)
