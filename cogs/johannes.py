@@ -23,7 +23,7 @@ class Johannes(commands.Cog):
 
         if message.guild is None and not message.author.bot:
             channel = self.bot.get_channel(self.sendchannel)
-            content = f'**{message.author} ({message.author.id})** sagt: "{message.content}"'
+            content = f'**{message.author}** sagt: "{message.content}"'
             if len(message.content) < 1800:
                 await channel.send(content)
             else:
