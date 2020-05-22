@@ -73,14 +73,8 @@ async def reload(ctx, extension):
     await ctx.message.add_reaction('\U00002705')
 
 
-# fuck windows..
-if os.name == 'nt':
-    pyregex = r'\\\(.+?)\.py'
-else:
-    pyregex = r'/(.+?)\.py'
-
 # Beim start alle module laden
-for filename in [re.search(pyregex, a).group(1) for a in glob.glob("cogs/*.py")]:
+for filename in [re.search('/(.+?)\.py', a).group(1) for a in glob.glob("cogs/*.py")]:
     try:
         bot.load_extension(f'cogs.{filename}')
     except Exception as e:
