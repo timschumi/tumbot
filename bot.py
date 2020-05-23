@@ -33,7 +33,7 @@ class Bot(DBot):
                 print(f"{type(e).__name__}: {e}")
             time.sleep(10)
 
-    def register_job_dayly(self, daytime, f):
+    def register_job_daily(self, daytime, f):
         print("Registering job {} to run every day at {}".format(f.__name__, daytime))
         schedule.every().day.at(daytime).do(f)
 
