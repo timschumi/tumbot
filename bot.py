@@ -5,7 +5,8 @@ from threading import Thread
 import math
 import time
 import os
-import schedule
+from schedule import Scheduler
+
 
 class Bot(DBot):
     def __init__(self, db, **options):
@@ -13,6 +14,7 @@ class Bot(DBot):
         self.db = db
         self.jobs = []
         self.run_jobs = True
+        self.schedule = Scheduler()
 
     async def close(self):
         print("Shutting down!")
@@ -28,18 +30,18 @@ class Bot(DBot):
         print("Starting background timer runner.")
         while self.run_jobs:
             try:
-                schedule.run_pending()
+                self.schedule.run_pending()
             except Exception as e:
                 print(f"{type(e).__name__}: {e}")
             time.sleep(10)
 
     def register_job_daily(self, daytime, f):
         print("Registering job {} to run every day at {}".format(f.__name__, daytime))
-        schedule.every().day.at(daytime).do(f)
+        self.schedule.every().day.at(daytime).do(f)
 
     def register_job(self, timer, f):
         print("Registering job {} to run every {} seconds".format(f.__name__, timer))
-        schedule.every(timer).seconds.do(f)
+        self.schedule.every(timer).seconds.do(f)
 
     def dbconf_get(self, guild_id, name, default=None):
         result = self.db.get(guild_id).execute("SELECT value FROM config WHERE name = ?", (name,)).fetchall()
