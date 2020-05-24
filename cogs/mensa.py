@@ -84,13 +84,13 @@ class Mensa(commands.Cog):
             print(f"mensa: Got HTTPError while trying to access {self.fillURL(location, year, week)}")
             return False
 
-        text = "Speiseplan {}/{} ({}):\n".format(location, data["date"], calendar.day_abbr[day - 1])
+        text = f"Speiseplan {location}/{data['date']} ({calendar.day_abbr[day - 1]}):\n"
 
         for i in data["dishes"]:
-            text += "    **{}**".format(i["name"])
+            text += f"    **{i['name']}**"
 
             if len(i["ingredients"]) != 0:
-                text += " ({})".format(','.join(i["ingredients"]))
+                text += f" ({','.join(i['ingredients'])})"
 
             text += "\n"
 

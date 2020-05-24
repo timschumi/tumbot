@@ -42,9 +42,9 @@ class MessageStore(commands.Cog):
         text = ""
 
         for row in result:
-            text += "`{}`\n".format(row[0])
+            text += f"`{row[0]}`\n"
 
-        await ctx.send("Available shorthands:\n{}".format(text))
+        await ctx.send(f"Available shorthands:\n{text}")
 
     @msg.command()
     @commands.has_permissions(manage_channels=True)

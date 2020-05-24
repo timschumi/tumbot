@@ -33,11 +33,11 @@ class Bot(DBot):
             time.sleep(10)
 
     def register_job_daily(self, daytime, f):
-        print("Registering job {} to run every day at {}".format(f.__name__, daytime))
+        print(f"Registering job {f.__name__} to run every day at {daytime}")
         self.schedule.every().day.at(daytime).do(f)
 
     def register_job(self, timer, f):
-        print("Registering job {} to run every {} seconds".format(f.__name__, timer))
+        print(f"Registering job {f.__name__} to run every {timer} seconds")
         self.schedule.every(timer).seconds.do(f)
 
     def dbconf_get(self, guild_id, name, default=None):

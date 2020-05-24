@@ -41,23 +41,23 @@ class Admin(commands.Cog):
         text = "|"
 
         for i in keys:
-            text += " {} |".format(str(i).ljust(key_length[i]))
+            text += f" {str(i).ljust(key_length[i])} |"
 
         text += "\n" + '-' * len(text)
 
         for row in result:
             newtext = "\n|"
             for key in keys:
-                newtext += " {} |".format(str(row[key]).ljust(key_length[key]))
+                newtext += f" {str(row[key]).ljust(key_length[key])} |"
 
             # -6: Account for code block
             if len(text) + len(newtext) >= 2000 - 6:
-                await ctx.send("```{}```".format(text))
+                await ctx.send(f"```{text}```")
                 text = ""
 
             text += newtext
 
-        await ctx.send("```{}```".format(text))
+        await ctx.send(f"```{text}```")
 
     @commands.command(aliases=['purge'])
     @commands.cooldown(2, 600, type=commands.BucketType.default)

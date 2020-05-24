@@ -53,18 +53,18 @@ class Birthdays(commands.Cog):
             user = ctx.guild.get_member(result[0])
 
             if user is not None:
-                line = "User: {}\t->\t{}.{}.\n".format(user.display_name, result[1], result[2])
+                line = f"User: {user.display_name}\t->\t{result[1]}.{result[2]}.\n"
                 # -6: Account for code block
                 if len(text) + len(line) >= 2000 - 6:
-                    await ctx.send("```{}```".format(text))
+                    await ctx.send(f"```{text}```")
                     text = ""
                 text += line
             else:
-                await ctx.send("**UserId {} produced an error!**".format(result[0]))
+                await ctx.send(f"**UserId {result[0]} produced an error!**")
         # text should not be empty, but if somehow the ctx.guild.get_member(r) would return None i.e. if the
         # Database somehow has a fault, this could happen
         if len(text) > 0:
-            await ctx.send("```{}```".format(text))
+            await ctx.send(f"```{text}```")
 
     @birthdays.command()
     async def add(self, ctx, birthdate):
@@ -120,14 +120,14 @@ class Birthdays(commands.Cog):
             asyncio.run_coroutine_threadsafe(self.congratulate(conn, day, month), self.bot.loop).result()
 
     async def congratulate(self, conn, day, month):
-        text = "Geburtstage am {}.{}.:".format(day, month)
+        text = f"Geburtstage am {day}.{month}.:"
         users = conn.execute(
             "SELECT userId FROM birthdays WHERE day = ? AND month = ?", (day, month)).fetchall()
         if len(users) == 0:
             return
         for user in users:
-            text += "\n    :tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <@{}>" \
-                    " :partying_face: :fireworks: :tada:".format(user[0])
+            text += f"\n    :tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <@{user[0]}> " \
+                    f":partying_face: :fireworks: :tada: "
 
         # This is essentially what dbconf_get does, but we don't have the guild ID :/
         channel = conn.execute("SELECT value FROM config WHERE name = 'birthday_channel'").fetchall()

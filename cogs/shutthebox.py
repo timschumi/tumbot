@@ -84,7 +84,7 @@ class ShutTheBox(commands.Cog):
 
         self.running_games.append(player1.id)
 
-        await ctx.send("Hey " + opponent.mention + ' du wurdest herausgefordert zu ShuttheBox! Schreibe "accept" '
+        await ctx.send(f'Hey {opponent.mention} du wurdest herausgefordert zu ShuttheBox! Schreibe "accept" '
                                                    'um die Challegenge zu akzeptieren')
         await self.client.wait_for('message',
                                    check=lambda message: message.author == player2 and message.content == "accept",
@@ -110,7 +110,7 @@ class ShutTheBox(commands.Cog):
                     if checker1 is True:
                         break
                 else:
-                    await ctx.send(f'Ungültige Eingabe!')
+                    await ctx.send('Ungültige Eingabe!')
             if checkboxes() == 0:
                 await ctx.send(f'{player1} hat gewonnen!')
                 self.running_games.remove(ctx.author.id)
@@ -134,7 +134,7 @@ class ShutTheBox(commands.Cog):
                     if checker2 is True:
                         break
                 else:
-                    await ctx.send(f'Ungültige Eingabe!')
+                    await ctx.send('Ungültige Eingabe!')
             if checkboxes() == 0:
                 await ctx.send(f'{player2} hat gewonnen!')
                 self.running_games.remove(ctx.author.id)

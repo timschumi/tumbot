@@ -48,7 +48,7 @@ class Status(commands.Cog):
                 channel = self.bot.get_channel(i[2])
 
                 asyncio.run_coroutine_threadsafe(
-                    channel.send("{} (<{}>) just changed status: `{} -> {}`".format(i[0], i[1], i[3], current_code)),
+                    channel.send(f"{i[0]} (<{i[1]}>) just changed status: `{i[3]} -> {current_code}`"),
                     self.bot.loop).result()
 
 
