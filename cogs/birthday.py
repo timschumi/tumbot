@@ -21,14 +21,16 @@ class Birthdays(commands.Cog):
     @commands.group(aliases=['birth', 'birthday', 'birthdate', 'geburtstag'], invoke_without_command=True)
     async def birthdays(self, ctx):
         """Manages birthdays"""
+
         pass
 
     @birthdays.command()
     async def list(self, ctx, query=""):
         """Lists all birthdays
 
-        `query` is either a date or a User-ID.
+        `query` is either a date or a user-id.
         """
+
         with self.bot.db.get(ctx.guild.id) as db:
             if len(query) == 0:  # No Query
                 results = db.execute("SELECT userId, day, month FROM birthdays ORDER BY month, day").fetchall()
@@ -67,6 +69,7 @@ class Birthdays(commands.Cog):
     @birthdays.command()
     async def add(self, ctx, birthdate):
         """Adds a birthday (DD.MM.) for the calling user"""
+
         if self.DATEPATTERN.fullmatch(birthdate) is None:
             await ctx.send("Usage: <!birthday add DD.MM.> (of course with a valid date)")
             return
@@ -86,6 +89,7 @@ class Birthdays(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def channel(self, ctx, target: discord.TextChannel = None):
         """Sets a new output channel for birthday messages"""
+
         if target is not None:
             self.bot.dbconf_set(ctx.guild.id, "birthday_channel", target.id)
             await ctx.message.add_reaction('\U00002705')

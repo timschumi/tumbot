@@ -9,7 +9,8 @@ class MessageStore(commands.Cog):
 
     @commands.command()
     async def metafrage(self, ctx):
-        """Gibt den Meta-Fragen-Text wider"""
+        """Displays the meta-question-text"""
+
         metafrageembed = discord.Embed(
             title="Metafrage",
             description='Eine Metafrage ist eine Frage über eine Frage, wie beispielsweise "Darf ich etwas fragen?" '

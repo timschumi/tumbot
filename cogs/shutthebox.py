@@ -11,6 +11,8 @@ class ShutTheBox(commands.Cog):
 
     @commands.command()
     async def challenge(self, ctx, opponent: discord.Member):
+        """Challange another player to a game of 'shut the box'"""
+
         channel = ctx.channel
         player1 = ctx.author
         player2 = opponent

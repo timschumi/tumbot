@@ -10,6 +10,8 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def sql(self, ctx, *, query):
+        """Executes a sql-querry"""
+
         matches = re.match(r'`(.*)`', query)
         if not matches:
             await ctx.send("Couldn't filter out the query that should be executed.")
@@ -61,6 +63,8 @@ class Admin(commands.Cog):
     @commands.cooldown(2, 600, type=commands.BucketType.default)
     @commands.has_permissions(administrator=True)
     async def clear(self, ctx, amount=10):
+        """Removes up to 20 messages"""
+
         if amount <= 0:
             await ctx.send('"Was bist du für ein Idiot" ~ Johannes Stöhr (Betrag <= 0 ist unmöglich!)')
             return
@@ -73,6 +77,8 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def flatten(self, ctx):
+        """Flattens all the previous texts in this channel into a wall of text"""
+
         async with ctx.channel.typing():
             text = ""
 

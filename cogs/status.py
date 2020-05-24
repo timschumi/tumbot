@@ -11,12 +11,16 @@ class Status(commands.Cog):
 
     @commands.group()
     async def status(self, ctx):
+        """Manages website status pings"""
+
         if ctx.invoked_subcommand is None:
             await ctx.send("Ungültiger command!")
 
     @status.command()
     @commands.has_permissions(manage_channels=True)
     async def setup(self, ctx, name, url):
+        """Adds a new website to be pinged every 60 seconds"""
+
         with self.bot.db.get(ctx.guild.id) as db:
             db.execute("INSERT INTO status (name, url, channelid, status) VALUES (?, ?, ?, ?)",
                        (name, url, ctx.channel.id, self.get_code(url)))
