@@ -70,7 +70,7 @@ class Quotes(commands.Cog):
 
         with self.bot.db.get(ctx.guild.id) as db:
             resulting_ids = db.execute("SELECT rowid FROM quotes WHERE LOWER(content) LIKE ? ORDER BY content",
-                                 (search,)).fetchall()
+                                       (search,)).fetchall()
 
         if len(resulting_ids) > 1:
             await ctx.send("Only one quote at a time can be removed, to prevent admin-abuse.")

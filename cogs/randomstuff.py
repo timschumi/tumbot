@@ -21,5 +21,6 @@ class Randomstuff(commands.Cog):
     async def pinguinfakt(self, ctx):
         await ctx.send(self.randomstring("pinguinfakten"))
 
+
 def setup(bot):
     bot.add_cog(Randomstuff(bot))

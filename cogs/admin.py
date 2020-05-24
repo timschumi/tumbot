@@ -67,7 +67,7 @@ class Admin(commands.Cog):
         if amount > 20:
             await ctx.send("Zu großer Betrag!")
             return
-        await ctx.channel.purge(limit=amount+1)
+        await ctx.channel.purge(limit=amount + 1)
         await ctx.send(f"**{amount}** Nachrichten wurden von **{ctx.author}** gelöscht.")
 
     @commands.command()

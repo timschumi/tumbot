@@ -4,6 +4,7 @@ import pathlib
 import glob
 import re
 
+
 class DbMgr:
     DB_PATTERN = 'db/{}.db'
     SCHEMA_PATTERN = 'db/schema_{}.sql'
@@ -43,7 +44,7 @@ class DbMgr:
     def upgrade_db(self, connection):
         user_version = connection.execute("PRAGMA user_version").fetchone()[0]
 
-        while(os.path.isfile(self.SCHEMA_PATTERN.format(user_version + 1))):
+        while os.path.isfile(self.SCHEMA_PATTERN.format(user_version + 1)):
             with open(self.SCHEMA_PATTERN.format(user_version + 1)) as file:
                 connection.executescript(file.read())
             user_version = connection.execute("PRAGMA user_version").fetchone()[0]

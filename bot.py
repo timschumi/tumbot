@@ -54,7 +54,7 @@ class Bot(DBot):
     def dbconf_set(self, guild_id, name, value):
         saved = self.dbconf_get(guild_id, name)
 
-        if saved == None:
+        if saved is None:
             with self.db.get(guild_id) as db:
                 db.execute("INSERT INTO config(name, value) VALUES(?, ?)", (name, value))
             return

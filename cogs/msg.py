@@ -45,7 +45,6 @@ class MessageStore(commands.Cog):
 
         await ctx.send("Available shorthands:\n{}".format(text))
 
-
     @msg.command()
     @commands.has_permissions(manage_channels=True)
     async def set(self, ctx, name, *, content):
@@ -81,7 +80,8 @@ class MessageStore(commands.Cog):
         key = search.group(1)
 
         with self.bot.db.get(message.guild.id) as db:
-            result = db.execute("SELECT name, content FROM msg WHERE name = ? OR name = ?", (key.lower(), "-" + key.lower())).fetchall()
+            result = db.execute("SELECT name, content FROM msg WHERE name = ? OR name = ?",
+                                (key.lower(), "-" + key.lower())).fetchall()
 
         if len(result) == 0:
             return
