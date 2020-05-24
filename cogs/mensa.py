@@ -23,7 +23,7 @@ class Mensa(commands.Cog):
     @mensa.command()
     @commands.has_permissions(manage_messages=True)
     async def setup(self, ctx, location):
-        """Setup a new TUM mensa location"""
+        """Setup a new eat-api printout"""
 
         text = self.get_content(location, 0)
         if text is False:
