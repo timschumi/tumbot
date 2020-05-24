@@ -18,7 +18,7 @@ class Autokick(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def remove(self, ctx, user: discord.Member):
-        """Allows a user from joining a new voice chat"""
+        """Allows a user to join a new voice chat"""
 
         self.blocks.remove(user.id)
 
