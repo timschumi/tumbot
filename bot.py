@@ -1,10 +1,7 @@
-from discord.ext import commands
-from discord.ext.commands import Bot as DBot
-import sqlite3
-from threading import Thread
-import math
 import time
-import os
+from threading import Thread
+
+from discord.ext.commands import Bot as DBot
 from schedule import Scheduler
 
 

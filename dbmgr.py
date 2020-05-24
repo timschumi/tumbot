@@ -1,8 +1,7 @@
-import os
-import sqlite3
-import pathlib
 import glob
+import os
 import re
+import sqlite3
 
 
 class DbMgr:

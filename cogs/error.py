@@ -1,7 +1,7 @@
-import random
-from discord.ext import commands
 import sys
 import traceback
+
+from discord.ext import commands
 
 
 class ErrorHandler(commands.Cog):

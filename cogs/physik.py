@@ -1,8 +1,4 @@
 from discord.ext import commands
-import re
-import discord
-import asyncio
-import os
 
 
 class Physik(commands.Cog):

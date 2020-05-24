@@ -1,13 +1,14 @@
 #!/usr/bin/env python3.7
 
-import os
-import discord
 import glob
+import os
 import re
 from subprocess import call
+
+from discord.ext import commands
+
 from bot import Bot
 from dbmgr import DbMgr
-from discord.ext import commands
 
 db = DbMgr()
 

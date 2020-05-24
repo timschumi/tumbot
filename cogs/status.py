@@ -1,9 +1,7 @@
-import random
-import urllib
 import asyncio
-import calendar
+import urllib
+
 from discord.ext import commands
-import discord
 
 
 class Status(commands.Cog):
