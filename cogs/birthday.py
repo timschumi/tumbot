@@ -16,7 +16,7 @@ class Birthdays(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.bot.register_job(60 * 60 * 24, self.congratulate_all)
+        self.bot.register_job_daily("00:01", self.congratulate_all)
 
     @commands.group(aliases=['birth', 'birthday', 'birthdate', 'geburtstag'], invoke_without_command=True)
     async def birthdays(self, ctx):
