@@ -63,7 +63,7 @@ class Admin(commands.Cog):
     @commands.cooldown(2, 600, type=commands.BucketType.default)
     @commands.has_permissions(administrator=True)
     async def clear(self, ctx, amount=10):
-        """Removes up to 20 messages"""
+        """Removes a given amount of messages"""
 
         if amount <= 0:
             await ctx.send('"Was bist du für ein Idiot" ~ Johannes Stöhr (Betrag <= 0 ist unmöglich!)')
