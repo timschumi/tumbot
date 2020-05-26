@@ -10,7 +10,7 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def sql(self, ctx, *, query):
-        """Executes a SQL-querry"""
+        """Executes a SQL-query"""
 
         matches = re.match(r'`(.*)`', query)
         if not matches:
