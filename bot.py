@@ -1,10 +1,7 @@
-from discord.ext import commands
-from discord.ext.commands import Bot as DBot
-import sqlite3
-from threading import Thread
-import math
 import time
-import os
+from threading import Thread
+
+from discord.ext.commands import Bot as DBot
 from schedule import Scheduler
 
 
@@ -36,11 +33,11 @@ class Bot(DBot):
             time.sleep(10)
 
     def register_job_daily(self, daytime, f):
-        print("Registering job {} to run every day at {}".format(f.__name__, daytime))
+        print(f"Registering job {f.__name__} to run every day at {daytime}")
         self.schedule.every().day.at(daytime).do(f)
 
     def register_job(self, timer, f):
-        print("Registering job {} to run every {} seconds".format(f.__name__, timer))
+        print(f"Registering job {f.__name__} to run every {timer} seconds")
         self.schedule.every(timer).seconds.do(f)
 
     def dbconf_get(self, guild_id, name, default=None):
@@ -54,7 +51,7 @@ class Bot(DBot):
     def dbconf_set(self, guild_id, name, value):
         saved = self.dbconf_get(guild_id, name)
 
-        if saved == None:
+        if saved is None:
             with self.db.get(guild_id) as db:
                 db.execute("INSERT INTO config(name, value) VALUES(?, ?)", (name, value))
             return

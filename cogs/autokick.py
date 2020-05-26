@@ -11,11 +11,15 @@ class Autokick(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def add(self, ctx, user: discord.Member):
+        """Blocks a user from joining a new voice-chat"""
+
         self.blocks.append(user.id)
 
     @commands.command()
     @commands.is_owner()
     async def remove(self, ctx, user: discord.Member):
+        """Removes a previously set voice-chat block"""
+
         self.blocks.remove(user.id)
 
     @commands.Cog.listener()

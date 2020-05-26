@@ -1,9 +1,7 @@
-import random
-import urllib
 import asyncio
-import calendar
+import urllib
+
 from discord.ext import commands
-import discord
 
 
 class Status(commands.Cog):
@@ -13,12 +11,16 @@ class Status(commands.Cog):
 
     @commands.group()
     async def status(self, ctx):
+        """Manages website status checks"""
+
         if ctx.invoked_subcommand is None:
             await ctx.send("Ungültiger command!")
 
     @status.command()
     @commands.has_permissions(manage_channels=True)
     async def setup(self, ctx, name, url):
+        """Adds a new website to the list of status checks"""
+
         with self.bot.db.get(ctx.guild.id) as db:
             db.execute("INSERT INTO status (name, url, channelid, status) VALUES (?, ?, ?, ?)",
                        (name, url, ctx.channel.id, self.get_code(url)))
@@ -46,7 +48,7 @@ class Status(commands.Cog):
                 channel = self.bot.get_channel(i[2])
 
                 asyncio.run_coroutine_threadsafe(
-                    channel.send("{} (<{}>) just changed status: `{} -> {}`".format(i[0], i[1], i[3], current_code)),
+                    channel.send(f"{i[0]} (<{i[1]}>) just changed status: `{i[3]} -> {current_code}`"),
                     self.bot.loop).result()
 
 

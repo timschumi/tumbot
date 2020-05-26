@@ -10,6 +10,8 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def sql(self, ctx, *, query):
+        """Executes a SQL-query"""
+
         matches = re.match(r'`(.*)`', query)
         if not matches:
             await ctx.send("Couldn't filter out the query that should be executed.")
@@ -39,40 +41,44 @@ class Admin(commands.Cog):
         text = "|"
 
         for i in keys:
-            text += " {} |".format(str(i).ljust(key_length[i]))
+            text += f" {str(i).ljust(key_length[i])} |"
 
         text += "\n" + '-' * len(text)
 
         for row in result:
             newtext = "\n|"
             for key in keys:
-                newtext += " {} |".format(str(row[key]).ljust(key_length[key]))
+                newtext += f" {str(row[key]).ljust(key_length[key])} |"
 
             # -6: Account for code block
             if len(text) + len(newtext) >= 2000 - 6:
-                await ctx.send("```{}```".format(text))
+                await ctx.send(f"```{text}```")
                 text = ""
 
             text += newtext
 
-        await ctx.send("```{}```".format(text))
+        await ctx.send(f"```{text}```")
 
     @commands.command(aliases=['purge'])
     @commands.cooldown(2, 600, type=commands.BucketType.default)
     @commands.has_permissions(administrator=True)
     async def clear(self, ctx, amount=10):
+        """Removes a given amount of messages"""
+
         if amount <= 0:
             await ctx.send('"Was bist du für ein Idiot" ~ Johannes Stöhr (Betrag <= 0 ist unmöglich!)')
             return
         if amount > 20:
             await ctx.send("Zu großer Betrag!")
             return
-        await ctx.channel.purge(limit=amount+1)
+        await ctx.channel.purge(limit=amount + 1)
         await ctx.send(f"**{amount}** Nachrichten wurden von **{ctx.author}** gelöscht.")
 
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def flatten(self, ctx):
+        """Flattens all the previous texts in this channel into a wall of text"""
+
         async with ctx.channel.typing():
             text = ""
 

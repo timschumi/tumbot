@@ -38,7 +38,7 @@ class Quotes(commands.Cog):
     async def list(self, ctx, search=""):
         """Lists all the quotes"""
 
-        search = "%" + search + "%"
+        search = f"%{search}%"
 
         with self.bot.db.get(ctx.guild.id) as db:
             quotes = db.execute("SELECT content FROM quotes WHERE LOWER(content) LIKE ? ORDER BY content",
@@ -50,7 +50,7 @@ class Quotes(commands.Cog):
 
         text = ""
         for quote in quotes:
-            line = "{}\n\n".format(quote[0])
+            line = f"{quote[0]}\n\n"
             # [single lines can not ever be > 1994 chars]
 
             # -6: Account for code block
@@ -70,7 +70,7 @@ class Quotes(commands.Cog):
 
         with self.bot.db.get(ctx.guild.id) as db:
             resulting_ids = db.execute("SELECT rowid FROM quotes WHERE LOWER(content) LIKE ? ORDER BY content",
-                                 (search,)).fetchall()
+                                       (search,)).fetchall()
 
         if len(resulting_ids) > 1:
             await ctx.send("Only one quote at a time can be removed, to prevent admin-abuse.")

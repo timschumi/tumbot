@@ -15,11 +15,12 @@ class Randomstuff(commands.Cog):
         await ctx.send(random.choice((self.randomstring("exzellenz_extra"), self.excellentstring())))
 
     def excellentstring(self):
-        return "{} ist {}.".format(self.randomstring("exzellenz_trivial"), random.choice(("trivial", "sehr exzellent")))
+        return f"{self.randomstring('exzellenz_trivial')} ist {random.choice(('trivial', 'sehr exzellent'))}."
 
     @commands.command()
     async def pinguinfakt(self, ctx):
         await ctx.send(self.randomstring("pinguinfakten"))
+
 
 def setup(bot):
     bot.add_cog(Randomstuff(bot))

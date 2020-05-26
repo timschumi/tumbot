@@ -7,8 +7,10 @@ class Userinfo(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=['userinfos', 'whois'])
     async def userinfo(self, ctx, member: discord.Member):
+        """Displays the most relevent stats of a user"""
+
         roles = [role for role in member.roles]
 
         userinfoembed = discord.Embed(colour=member.color, timestamp=ctx.message.created_at)

@@ -11,6 +11,7 @@ class ReactionRoles(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     async def rr(self, ctx):
         """Manages reactionroles"""
+
         pass
 
     @rr.command()

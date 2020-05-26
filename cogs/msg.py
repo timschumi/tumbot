@@ -9,7 +9,8 @@ class MessageStore(commands.Cog):
 
     @commands.command()
     async def metafrage(self, ctx):
-        """Gibt den Meta-Fragen-Text wider"""
+        """Displays the meta-question-text"""
+
         metafrageembed = discord.Embed(
             title="Metafrage",
             description='Eine Metafrage ist eine Frage über eine Frage, wie beispielsweise "Darf ich etwas fragen?" '
@@ -41,10 +42,9 @@ class MessageStore(commands.Cog):
         text = ""
 
         for row in result:
-            text += "`{}`\n".format(row[0])
+            text += f"`{row[0]}`\n"
 
-        await ctx.send("Available shorthands:\n{}".format(text))
-
+        await ctx.send(f"Available shorthands:\n{text}")
 
     @msg.command()
     @commands.has_permissions(manage_channels=True)
@@ -81,7 +81,8 @@ class MessageStore(commands.Cog):
         key = search.group(1)
 
         with self.bot.db.get(message.guild.id) as db:
-            result = db.execute("SELECT name, content FROM msg WHERE name = ? OR name = ?", (key.lower(), "-" + key.lower())).fetchall()
+            result = db.execute("SELECT name, content FROM msg WHERE name = ? OR name = ?",
+                                (key.lower(), "-" + key.lower())).fetchall()
 
         if len(result) == 0:
             return

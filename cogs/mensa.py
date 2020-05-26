@@ -1,9 +1,9 @@
-import random
-import datetime
-import urllib
-import json
 import asyncio
 import calendar
+import datetime
+import json
+import urllib
+
 from discord.ext import commands
 
 
@@ -23,6 +23,8 @@ class Mensa(commands.Cog):
     @mensa.command()
     @commands.has_permissions(manage_messages=True)
     async def setup(self, ctx, location):
+        """Setup a new eat-api printout"""
+
         text = self.get_content(location, 0)
         if text is False:
             await ctx.send(
@@ -82,13 +84,13 @@ class Mensa(commands.Cog):
             print(f"mensa: Got HTTPError while trying to access {self.fillURL(location, year, week)}")
             return False
 
-        text = "Speiseplan {}/{} ({}):\n".format(location, data["date"], calendar.day_abbr[day - 1])
+        text = f"Speiseplan {location}/{data['date']} ({calendar.day_abbr[day - 1]}):\n"
 
         for i in data["dishes"]:
-            text += "    **{}**".format(i["name"])
+            text += f"    **{i['name']}**"
 
             if len(i["ingredients"]) != 0:
-                text += " ({})".format(','.join(i["ingredients"]))
+                text += f" ({','.join(i['ingredients'])})"
 
             text += "\n"
 
