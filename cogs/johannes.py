@@ -30,7 +30,7 @@ class Johannes(commands.Cog):
         if "lmu" in lower:
             await message.add_reaction(":lmuo:668091545878003712")
         # Messages
-        if "gad" in lower and (("cheat" in lower or "sheet" in lower) or "open" and "book"):
+        if "gad" in lower and (("cheat" in lower or "sheet" in lower) or "open" in lower and "book" in lower):
             await message.channel.send(self.openbook("GAD"))
         elif "eist" in lower and ("cheat" in lower or "sheet" in lower):
             await message.channel.send(self.cheatsheet("EIST"))
