@@ -10,6 +10,10 @@ class Johannes(commands.Cog):
         return f"Ja wir dürfen in der {subject}-Klausur ein Cheat-Sheet verwenden. Dieses ist ein doppelseitig " \
                f"handbeschriebenes Din-A4-Blatt!"
 
+    def openbook(self, subject):
+        return f"Die {subject}-elektronische Übungsleistung ist eine Openbook-Klausur, dementsprechend ist jedes " \
+               f"Hilfsmittel erlaubt"
+
     @commands.command()
     async def johannes(self, ctx):
         await ctx.send("\U0001F427")
@@ -26,8 +30,8 @@ class Johannes(commands.Cog):
         if "lmu" in lower:
             await message.add_reaction(":lmuo:668091545878003712")
         # Messages
-        if "gad" in lower and ("cheat" in lower or "sheet" in lower):
-            await message.channel.send(self.cheatsheet("GAD"))
+        if "gad" in lower and (("cheat" in lower or "sheet" in lower) or "open" and "book"):
+            await message.channel.send(self.openbook("GAD"))
         elif "eist" in lower and ("cheat" in lower or "sheet" in lower):
             await message.channel.send(self.cheatsheet("EIST"))
         elif "linalg" in lower and ("cheat" in lower or "sheet" in lower):
