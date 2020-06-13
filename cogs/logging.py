@@ -70,17 +70,26 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
         try:
-            if payload.guild_id is not None:
-                ch = payload.channel_id
-                guild = payload.guild_id
-                msg = payload.message_id
-                content = payload.cached_message.clean_content
-                member = payload.cached_message.author
-                logchannelid = self.get_logchannel(member.guild.id)
-                if logchannelid is None:
-                    return
-                logch = self.bot.get_channel(int(logchannelid))
-                await logch.send(':recycle: **Nachricht:** "' + str(content) + '" von User: ' + str(member) + ' (' +
+            if payload.guild_id is None:
+                return
+
+            ch = payload.channel_id
+            guild = payload.guild_id
+            msg = payload.message_id
+            content = payload.cached_message.clean_content
+            member = payload.cached_message.author
+            channel = payload.cached_message.channel
+
+            logchannelid = self.get_logchannel(member.guild.id)
+            if logchannelid is None:
+                return
+
+            # Don't log if a bot's message has been deleted (unless it's from the log channel)
+            if member.bot and str(logchannelid) != str(channel.id):
+                return
+
+            logch = self.bot.get_channel(int(logchannelid))
+            await logch.send(':recycle: **Nachricht:** "' + str(content) + '" von User: ' + str(member) + ' (' +
                                  str(member.id) + ") gelöscht.")
         except Exception:
             pass
