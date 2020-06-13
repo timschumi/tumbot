@@ -19,22 +19,6 @@ class Logging(commands.Cog):
         await ctx.channel.purge(limit=1)
         await ctx.send("Channel <#" + lchannelid + "> ist jetzt der Channel für den Log.")
 
-    # Memberjoin
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-        try:
-            if member.bot:
-                logchannelid = self.get_logchannel(member.guild.id)
-                if logchannelid is None:
-                    return
-                logch = self.bot.get_channel(int(logchannelid))
-                await logch.send(
-                    ":inbox_tray: **" + str(member) + "(" + str(member.id) + ")** ist dem Sever beigetreten.")
-            else:
-                pass
-        except Exception:
-            pass
-
     # Memberleave
     @commands.Cog.listener()
     async def on_member_remove(self, member):
@@ -98,32 +82,6 @@ class Logging(commands.Cog):
                 logch = self.bot.get_channel(int(logchannelid))
                 await logch.send(':recycle: **Nachricht:** "' + str(content) + '" von User: ' + str(member) + ' (' +
                                  str(member.id) + ") gelöscht.")
-        except Exception:
-            pass
-
-    @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
-        try:
-            guild = member.guild
-            if not member.bot:
-                logchannelid = self.get_logchannel(member.guild.id)
-                if logchannelid is None:
-                    return
-                logch = self.bot.get_channel(int(logchannelid))
-                if before.channel is None:
-                    await logch.send(
-                        ":mega: **" + str(member) + " (" + str(member.id) + ")** hat den Voice Channel **" +
-                        str(after.channel) + "** betreten.")
-                elif before.channel is not None and after.channel is None:
-                    await logch.send(
-                        ":mega: **" + str(member) + " (" + str(member.id) + ")** hat den Voice Channel **" +
-                        str(before.channel) + "** verlassen.")
-                elif before.channel is not None and after.channel is not None:
-                    await logch.send(
-                        ":mega: **" + str(member) + " (" + str(member.id) + ")** hat den Voice Channel von **" +
-                        str(before.channel) + "** zu **" + str(after.channel) + "** gewechselt.")
-            else:
-                pass
         except Exception:
             pass
 
