@@ -89,7 +89,12 @@ class Logging(commands.Cog):
                 return
 
             logch = self.bot.get_channel(int(logchannelid))
-            await logch.send(':recycle: **Nachricht:** "' + str(content) + '" von User: ' + str(member) + ' (' +
+
+            # Skip pretty presentation if we are deleting a log message from the log channel
+            if member.bot and str(logchannelid) == str(channel.id):
+                await logch.send(str(content))
+            else:
+                await logch.send(':recycle: **Nachricht:** "' + str(content) + '" von User: ' + str(member) + ' (' +
                                  str(member.id) + ") gelöscht.")
         except Exception:
             pass
