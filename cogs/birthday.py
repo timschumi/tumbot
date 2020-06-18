@@ -53,7 +53,7 @@ class Birthdays(commands.Cog):
             user = ctx.guild.get_member(result[0])
 
             if user is not None:
-                line = f"User: {user.display_name}\t->\t{result[1]}.{result[2]}.\n"
+                line = f"{result[1]:02}.{result[2]:02}. -> {user.display_name}\n"
                 # -6: Account for code block
                 if len(text) + len(line) >= 2000 - 6:
                     await ctx.send(f"```{text}```")
