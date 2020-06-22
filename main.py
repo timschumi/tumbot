@@ -10,8 +10,12 @@ from discord.ext import commands
 from bot import Bot
 from dbmgr import DbMgr
 
-db = DbMgr()
+try:
+    dbpath = os.environ['TUMBOT_DBPATH']
+except KeyError:
+    dbpath = "db"
 
+db = DbMgr(dbpath)
 
 # Finde den Prefix eines Servers
 def get_prefix(bot, message):

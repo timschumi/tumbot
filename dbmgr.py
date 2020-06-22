@@ -5,8 +5,9 @@ import sqlite3
 
 
 class DbMgr:
-    def __init__(self):
+    def __init__(self, dbpath="db"):
         self.db_handles = {}
+        self.dbpath = dbpath
 
     def open(self, guild):
         guild = str(guild)
@@ -23,7 +24,7 @@ class DbMgr:
         return self.db_handles[guild]
 
     def get_all(self):
-        for file in glob.glob("db/*.db"):
+        for file in glob.glob(f"{self.dbpath}/*.db"):
             search = re.search('/([0-9]+?)\.db', file)
             if search is None or search.group(1) is None:
                 continue
@@ -33,7 +34,7 @@ class DbMgr:
         return list(self.db_handles.values())
 
     def create_new_conn(self, guild):
-        connection = sqlite3.connect(f"db/{guild}.db", check_same_thread=False)
+        connection = sqlite3.connect(f"{self.dbpath}/{guild}.db", check_same_thread=False)
         connection.row_factory = sqlite3.Row
         return connection
 
