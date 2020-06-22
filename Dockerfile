@@ -12,4 +12,4 @@ VOLUME /tumbot-db
 ENV TUMBOT_TOKEN ""
 ENV TUMBOT_DBPATH "/tumbot-db"
 
-CMD ["python", "./main.py"]
+CMD ["python", "-u", "./main.py"]
