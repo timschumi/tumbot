@@ -20,6 +20,10 @@ class Randomstuff(commands.Cog):
     @commands.command()
     async def pinguinfakt(self, ctx):
         await ctx.send(self.randomstring("pinguinfakten"))
+    
+    @commands.command(aliases=['source', 'sauce'])    
+    async def repo(self, ctx):
+        await ctx.send("<https://github.com/timschumi/TUMbot>")
 
 
 def setup(bot):
