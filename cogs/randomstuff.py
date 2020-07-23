@@ -21,9 +21,9 @@ class Randomstuff(commands.Cog):
     async def pinguinfakt(self, ctx):
         await ctx.send(self.randomstring("pinguinfakten"))
     
-    @commands.command()    
+    @commands.command(aliases=['source', 'sauce'])    
     async def repo(self, ctx):
-        await ctx.send("https://github.com/timschumi/TUMbot")
+        await ctx.send("<https://github.com/timschumi/TUMbot>")
 
 
 def setup(bot):
