@@ -43,6 +43,11 @@ class Johannes(commands.Cog):
         elif ("grnvs" in lower or "rechnernetz" in lower) and ("cheat" in lower or "sheet" in lower):
             await message.channel.send(self.cheatsheet("GRNVS"))
 
+        # Username
+        if message.author.id == 542841669792301056:
+            await ctx.send("\U0001F1E9")
+            await ctx.send("\U0001F1FC")
+            await ctx.send("\U0001F1F9")
 
 def setup(bot):
     bot.add_cog(Johannes(bot))
