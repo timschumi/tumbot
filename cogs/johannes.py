@@ -29,6 +29,10 @@ class Johannes(commands.Cog):
             await message.add_reaction('\U0001F427')
         if "lmu" in lower:
             await message.add_reaction(":lmuo:668091545878003712")
+        if message.author.id == 542841669792301056:
+            await message.add_reaction('\:regional_indicator_d:')
+            await message.add_reaction('\:regional_indicator_w:')
+            await message.add_reaction('\:regional_indicator_t:')
         # Messages
         if "gad" in lower and (("cheat" in lower or "sheet" in lower) or "open" in lower and "book" in lower):
             await message.channel.send(self.openbook("GAD"))
