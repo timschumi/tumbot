@@ -48,6 +48,8 @@ class MessageStore(commands.Cog):
     async def set(self, ctx, name, *, content):
         """Assigns content to a shorthand"""
 
+        content = await commands.clean_content().convert(ctx, content)
+
         with self.bot.db.get(ctx.guild.id) as db:
             if len(db.execute("SELECT name, content FROM msg WHERE name = ?", (name.lower(),)).fetchall()) > 0:
                 db.execute("UPDATE msg SET content = ? WHERE name = ?", (content, name.lower()))
