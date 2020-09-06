@@ -31,7 +31,6 @@ class Invite(commands.Cog):
     async def channel(self, ctx, lchannelid):
         """Sets the notification channel for invites."""
         self.set_invitelog(ctx.guild.id, lchannelid)
-        await ctx.channel.purge(limit=1)
         await ctx.send("Channel <#" + lchannelid + "> ist jetzt der Channel für den Invite-Log.")
 
     @commands.Cog.listener()
