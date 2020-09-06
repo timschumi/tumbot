@@ -18,13 +18,18 @@ class Invite(commands.Cog):
     async def update_invites(self, guild):
         self.invites[guild.id] = await guild.invites()
 
-    def set_invitelog(self, guild, logchannel):
-        return self.bot.dbconf_set(guild, 'invitelog', logchannel)
+    def set_invitelog(self, guild, channelid):
+        return self.bot.dbconf_set(guild, 'invitelog', channelid)
 
-    # LogChannel setzen
-    @commands.command()
+    @commands.group(invoke_without_command=True)
+    async def invite(self, ctx):
+        """Manages invites."""
+        pass
+
+    @invite.command()
     @commands.has_permissions(administrator=True)
-    async def setinvitelogchannel(self, ctx, lchannelid):
+    async def channel(self, ctx, lchannelid):
+        """Sets the notification channel for invites."""
         self.set_invitelog(ctx.guild.id, lchannelid)
         await ctx.channel.purge(limit=1)
         await ctx.send("Channel <#" + lchannelid + "> ist jetzt der Channel für den Invite-Log.")
