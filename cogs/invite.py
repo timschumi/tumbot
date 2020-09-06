@@ -1,5 +1,6 @@
 import asyncio
 
+import discord
 from discord.ext import commands
 
 
@@ -28,10 +29,10 @@ class Invite(commands.Cog):
 
     @invite.command()
     @commands.has_permissions(administrator=True)
-    async def channel(self, ctx, lchannelid):
+    async def channel(self, ctx, channel: discord.TextChannel):
         """Sets the notification channel for invites."""
-        self.set_invitelog(ctx.guild.id, lchannelid)
-        await ctx.send("Channel <#" + lchannelid + "> ist jetzt der Channel für den Invite-Log.")
+        self.set_invitelog(ctx.guild.id, channel.id)
+        await ctx.send(f"Channel {channel.mention} ist jetzt der Channel für den Invite-Log.")
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
