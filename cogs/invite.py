@@ -29,10 +29,21 @@ class Invite(commands.Cog):
 
     @invite.command()
     @commands.has_permissions(administrator=True)
-    async def channel(self, ctx, channel: discord.TextChannel):
-        """Sets the notification channel for invites."""
-        self.set_invitelog(ctx.guild.id, channel.id)
-        await ctx.send(f"Channel {channel.mention} ist jetzt der Channel für den Invite-Log.")
+    async def channel(self, ctx, channel: discord.TextChannel = None):
+        """Gets/Sets the notification channel for invites."""
+        if channel is not None:
+            self.set_invitelog(ctx.guild.id, channel.id)
+            await ctx.send(f"Channel {channel.mention} ist jetzt der Channel für den Invite-Log.")
+            return
+
+        channel = self.get_invitelog(ctx.guild.id)
+
+        if channel is None:
+            await ctx.send(f"Es ist momentan kein Channel für den Invite-Log gesetzt.")
+            return
+
+        await ctx.send(f"Channel <#{channel}> ist der Channel für den Invite-Log.")
+        return
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
