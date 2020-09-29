@@ -75,15 +75,25 @@ class DatabaseManager:
             # Insert a default starting version if it doesn't exist
             self._init_schema_version(conn, schema)
 
-            while True:
-                version = self._get_schema_version(conn, schema)
-                path = f"{directory}/{schema}_{version + 1}.sql"
+            # Backup old user_version and overwrite with schema version.
+            # (I'm aware that this is a terribly bad idea. But it works.)
+            user_ver = self._get_user_version(conn)
+            self._set_user_version(conn, self._get_schema_version(conn, schema))
 
-                if not os.path.isfile(path):
-                    break
+            try:
+                while True:
+                    version = self._get_user_version(conn)
+                    path = f"{directory}/{schema}_{version + 1}.sql"
 
-                with open(path) as file:
-                    conn.executescript(file.read())
+                    if not os.path.isfile(path):
+                        break
+
+                    with open(path) as file:
+                        conn.executescript(file.read())
+            finally:
+                # Write back the current schema version and restore the old one
+                self._set_schema_version(conn, schema, self._get_user_version(conn))
+                self._set_user_version(conn, user_ver)
 
     def _find_schemas(self):
         schemas = {}
