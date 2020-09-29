@@ -40,7 +40,7 @@ class DatabaseManager:
     @classmethod
     def _set_user_version(cls, conn, version):
         with conn as c:
-            return c.execute("PRAGMA user_version = ?", (version,))
+            return c.execute(f"PRAGMA user_version = {int(version)}")
 
     @classmethod
     def _init_schema_version(cls, conn, schema):
