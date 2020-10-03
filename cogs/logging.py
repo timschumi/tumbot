@@ -44,7 +44,13 @@ class Logging(commands.Cog):
 
         guild = self.bot.get_guild(payload.guild_id)
         channel = guild.get_channel(payload.channel_id)
-        message = channel.get_message(payload.message_id)
+
+        if not payload.cached_message:
+            await self.log_stuff(guild, f":recycle: Nachricht ({payload.message_id}) in Channel **{channel}** "
+                                        f"({channel.id}) gelöscht, aber nicht mehr im Cache gespeichert.")
+            return
+
+        message = payload.cached_message
 
         logchannelid = self.get_logchannel(guild.id)
         if logchannelid is None:
