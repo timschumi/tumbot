@@ -10,10 +10,11 @@ def get_prefix(bot, message):
     if message.guild is None:
         return '!'
 
-    return bot.conf.get(message.guild.id, 'prefix', '!')
+    return bot.conf.get(message.guild.id, 'prefix')
 
 
 bot = DBot(command_prefix=get_prefix)
+bot.conf.register('prefix', default='!')
 
 # Load all modules
 for cog in bot.find_all_cogs():
