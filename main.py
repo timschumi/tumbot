@@ -2,6 +2,7 @@
 
 import os
 
+from discord import Intents
 from basedbot import DBot
 
 
@@ -13,7 +14,7 @@ def get_prefix(bot, message):
     return bot.conf.get(message.guild.id, 'prefix', '!')
 
 
-bot = DBot(command_prefix=get_prefix)
+bot = DBot(command_prefix=get_prefix, intents=Intents.all())
 
 bot.add_cog_path('cogs')
 bot.add_cog_path('cogs/legacy')
