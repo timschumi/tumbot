@@ -28,6 +28,10 @@ class ConfigVar:
         with self._db.get(dbid) as db:
             db.execute("REPLACE INTO config (name, value) VALUES (?, ?)", (self.name, value))
 
+    def unset(self, dbid):
+        with self._db.get(dbid) as db:
+            db.execute("DELETE FROM config WHERE name = ?", (self.name,))
+
 
 class ConfigManager:
     def __init__(self, db):
