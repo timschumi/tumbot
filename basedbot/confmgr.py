@@ -17,12 +17,6 @@ class ConfigVar:
         if default is None:
             default = self.default
 
-        return self._get(dbid, default=default)
-
-    def set(self, dbid, value):
-        self._set(dbid, value)
-
-    def _get(self, dbid, default=None):
         result = self._db.get(dbid).execute("SELECT value FROM config WHERE name = ?", (self.name,)).fetchall()
 
         if len(result) < 1:
@@ -30,7 +24,7 @@ class ConfigVar:
 
         return str(result[0][0])
 
-    def _set(self, dbid, value):
+    def set(self, dbid, value):
         with self._db.get(dbid) as db:
             db.execute("REPLACE INTO config (name, value) VALUES (?, ?)", (self.name, value))
 
