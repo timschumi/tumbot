@@ -60,12 +60,16 @@ class DBotConf(commands.Cog):
     @commands.group(invoke_without_command=True)
     @commands.has_permissions(administrator=True)
     async def conf(self, ctx):
+        """Manages the bot configuration"""
+
         await ctx.send_help(ctx.command)
         return
 
     @conf.command(name="list")
     @commands.has_permissions(administrator=True)
     async def conf_list(self, ctx):
+        """Lists all available configuration variables"""
+
         text = ""
 
         for varname in self.bot.conf.registered_variables:
@@ -92,6 +96,8 @@ class DBotConf(commands.Cog):
     @commands.has_permissions(administrator=True)
     @check_var_exists
     async def conf_get(self, ctx, name):
+        """Retrieves a single configuration variable"""
+
         var = self.bot.conf.var(name)
         await ctx.send(f"```{_var_to_string(ctx, var)}```")
 
@@ -99,6 +105,8 @@ class DBotConf(commands.Cog):
     @commands.has_permissions(administrator=True)
     @check_var_access
     async def conf_set(self, ctx, name, value):
+        """Sets the value of a specific configuration variable"""
+
         var = self.bot.conf.var(name)
         var.set(ctx.guild.id, value)
 
@@ -108,6 +116,8 @@ class DBotConf(commands.Cog):
     @commands.has_permissions(administrator=True)
     @check_var_access
     async def conf_unset(self, ctx, name):
+        """Resets a configuration variable to its default"""
+
         var = self.bot.conf.var(name)
         var.unset(ctx.guild.id)
 
