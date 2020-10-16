@@ -6,8 +6,6 @@ import asyncio
 import discord
 from discord.ext import commands, tasks
 
-from basedbot import ConfigAccessLevel
-
 
 class Birthdays(commands.Cog):
     DATEPATTERN: Pattern[str] = re.compile(r"(((0?[1-9])|([12][0-9]))\."  # 01.-29.
@@ -19,7 +17,8 @@ class Birthdays(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self._var_channel = self.bot.conf.register('birthday.channel', access=ConfigAccessLevel.ADMIN)
+        self._var_channel = self.bot.conf.register('birthday.channel',
+                                                   description="The channel where birthday messages are sent to.")
         self.congratulate.start()
 
     def cog_unload(self):

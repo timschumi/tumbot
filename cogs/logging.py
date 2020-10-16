@@ -1,12 +1,11 @@
 from discord.ext import commands
 
-from basedbot import ConfigAccessLevel
-
 
 class Logging(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._var_channel = self.bot.conf.register('logging.channel', access=ConfigAccessLevel.ADMIN)
+        self._var_channel = self.bot.conf.register('logging.channel',
+                                                   description="The channel where various activities are logged.")
 
     async def log_stuff(self, guild, message):
         logchannelid = self._var_channel.get(guild.id)

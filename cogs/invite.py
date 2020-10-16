@@ -1,15 +1,14 @@
 import discord
 from discord.ext import commands
 
-from basedbot import ConfigAccessLevel
-
 
 class InviteManager(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
         self.invites = dict()
-        self._var_channel = self.bot.conf.register('invite.channel', access=ConfigAccessLevel.ADMIN)
+        self._var_channel = self.bot.conf.register('invite.channel',
+                                                   description="The channel where invite tracking is logged.")
 
         self.bot.loop.create_task(self.init_invites())
 
