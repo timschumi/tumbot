@@ -1,30 +1,19 @@
 from discord.ext import commands
 
+from basedbot import ConfigAccessLevel
+
 
 class Logging(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    def get_logchannel(self, guild):
-        return self.bot.conf.get(guild, 'logchannel')
-
-    def set_logchannel(self, guild, logchannel):
-        return self.bot.conf.set(guild, 'logchannel', logchannel)
+        self._var_channel = self.bot.conf.register('logging.channel', access=ConfigAccessLevel.ADMIN)
 
     async def log_stuff(self, guild, message):
-        logchannelid = self.get_logchannel(guild.id)
+        logchannelid = self._var_channel.get(guild.id)
         if logchannelid is None:
             return
         logch = self.bot.get_channel(int(logchannelid))
         await logch.send(message)
-
-    # LogChannel setzen
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def setlogchannel(self, ctx, lchannelid):
-        self.set_logchannel(ctx.guild.id, lchannelid)
-        await ctx.channel.purge(limit=1)
-        await ctx.send("Channel <#" + lchannelid + "> ist jetzt der Channel für den Log.")
 
     # Memberleave
     @commands.Cog.listener()
@@ -52,7 +41,7 @@ class Logging(commands.Cog):
 
         message = payload.cached_message
 
-        logchannelid = self.get_logchannel(guild.id)
+        logchannelid = self._var_channel.get(guild.id)
         if logchannelid is None:
             return
 

@@ -6,6 +6,8 @@ import asyncio
 import discord
 from discord.ext import commands, tasks
 
+from basedbot import ConfigAccessLevel
+
 
 class Birthdays(commands.Cog):
     DATEPATTERN: Pattern[str] = re.compile(r"(((0?[1-9])|([12][0-9]))\."  # 01.-29.
@@ -17,6 +19,7 @@ class Birthdays(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self._var_channel = self.bot.conf.register('birthday.channel', access=ConfigAccessLevel.ADMIN)
         self.congratulate.start()
 
     def cog_unload(self):
@@ -85,31 +88,6 @@ class Birthdays(commands.Cog):
 
         await ctx.message.add_reaction('\U00002705')
 
-    @birthdays.command()
-    @commands.has_permissions(manage_messages=True)
-    async def channel(self, ctx, target: discord.TextChannel = None):
-        """Sets a new output channel for birthday messages"""
-
-        if target is not None:
-            self.bot.conf.set(ctx.guild.id, "birthday_channel", target.id)
-            await ctx.message.add_reaction('\U00002705')
-            return
-
-        channel_id = self.bot.conf.get(ctx.guild.id, "birthday_channel")
-
-        if channel_id is None:
-            await ctx.send("No channel set!")
-            return
-
-        channel = await self.bot.fetch_channel(channel_id)
-
-        if channel is None:
-            await ctx.send(f"Could not resolve saved channel ({channel_id}).")
-            return
-
-        await ctx.send(f"Current birthday channel: {channel.mention}")
-        return
-
     def get_current_date(self) -> [int, int]:
         date = datetime.datetime.now()
         return date.day, date.month
@@ -127,7 +105,7 @@ class Birthdays(commands.Cog):
                 text += f"\n    :tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <@{user[0]}> " \
                         f":partying_face: :fireworks: :tada: "
 
-            channel = self.bot.conf.get(guild.id, 'birthday_channel')
+            channel = self._var_channel.get(guild.id)
 
             if channel is None:
                 return

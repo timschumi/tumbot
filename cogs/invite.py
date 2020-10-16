@@ -1,12 +1,15 @@
 import discord
 from discord.ext import commands
 
+from basedbot import ConfigAccessLevel
+
 
 class InviteManager(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
         self.invites = dict()
+        self._var_channel = self.bot.conf.register('invite.channel', access=ConfigAccessLevel.ADMIN)
 
         self.bot.loop.create_task(self.init_invites())
 
@@ -16,38 +19,14 @@ class InviteManager(commands.Cog):
         for g in self.bot.guilds:
             await self.update_invites(g)
 
-    def get_invitelog(self, guild):
-        return self.bot.conf.get(guild, 'invitelog')
-
     async def update_invites(self, guild):
         self.invites[guild.id] = await guild.invites()
-
-    def set_invitelog(self, guild, channelid):
-        return self.bot.conf.set(guild, 'invitelog', channelid)
 
     @commands.group(invoke_without_command=True)
     async def invite(self, ctx):
         """Manages invites."""
 
         await ctx.send_help(ctx.command)
-
-    @invite.command()
-    @commands.has_permissions(administrator=True)
-    async def channel(self, ctx, channel: discord.TextChannel = None):
-        """Gets/Sets the notification channel for invites."""
-        if channel is not None:
-            self.set_invitelog(ctx.guild.id, channel.id)
-            await ctx.send(f"Channel {channel.mention} ist jetzt der Channel für den Invite-Log.")
-            return
-
-        channel = self.get_invitelog(ctx.guild.id)
-
-        if channel is None:
-            await ctx.send(f"Es ist momentan kein Channel für den Invite-Log gesetzt.")
-            return
-
-        await ctx.send(f"Channel <#{channel}> ist der Channel für den Invite-Log.")
-        return
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -60,7 +39,12 @@ class InviteManager(commands.Cog):
         old = self.invites[guild.id]
         self.invites[guild.id] = await guild.invites()
 
-        channel = self.bot.get_channel(int(self.get_invitelog(guild.id)))
+        channel = self._var_channel.get(guild.id)
+
+        if channel is None:
+            return
+
+        channel = self.bot.get_channel(int(channel))
         if channel is None:
             return
 
