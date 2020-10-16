@@ -24,12 +24,13 @@ def _has_access_to_var(member, var):
     return False
 
 
-def _var_to_valstring(ctx, var):
-    return f"\"{var.get(ctx.guild.id)}\" (def. \"{var.default}\")"
-
-
 def _var_to_string(ctx, var):
-    return f"{var.name} = {_var_to_valstring(ctx, var)}"
+    string = f"{var.name} = \"{var.get(ctx.guild.id)}\" (def. \"{var.default}\")"
+
+    if var.description is not None:
+        string += f"\n - {var.description}"
+
+    return string
 
 
 def check_var_exists(func):
@@ -83,7 +84,7 @@ class DBotConf(commands.Cog):
             if not _has_access_to_var(ctx.author, var):
                 continue
 
-            entries.append({'name': var.name, 'value': _var_to_valstring(ctx, var)})
+            entries.append({'name': var.name, 'value': var.get(ctx.guild.id)})
 
         if len(entries) == 0:
             await ctx.send("You don't have access to any variables.")
