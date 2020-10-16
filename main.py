@@ -3,7 +3,7 @@
 import os
 
 from discord import Intents
-from basedbot import DBot
+from basedbot import DBot, ConfigAccessLevel
 
 
 # Find server prefix
@@ -11,10 +11,11 @@ def get_prefix(bot, message):
     if message.guild is None:
         return '!'
 
-    return bot.conf.get(message.guild.id, 'prefix', '!')
+    return bot.conf.get(message.guild.id, 'prefix')
 
 
 bot = DBot(command_prefix=get_prefix, intents=Intents.all())
+bot.conf.register('prefix', default='!', access=ConfigAccessLevel.ADMIN)
 
 bot.add_cog_path('cogs')
 bot.add_cog_path('cogs/legacy')
