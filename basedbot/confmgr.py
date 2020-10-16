@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 class UnregisteredVariableException(Exception):
     pass
 
@@ -6,12 +9,19 @@ class ConflictingVariableException(Exception):
     pass
 
 
+class ConfigAccessLevel(Enum):
+    ADMIN = 1
+    OWNER = 2
+    INTERNAL = 3
+
+
 class ConfigVar:
-    def __init__(self, db, name, default=None):
+    def __init__(self, db, name, default=None, access=ConfigAccessLevel.INTERNAL):
         self._db = db
 
         self.name = name
         self.default = default
+        self.access = access
 
     def get(self, dbid, default=None):
         if default is None:
@@ -53,6 +63,10 @@ class ConfigManager:
                 raise ConflictingVariableException(f"Attribute `{key}` conflicts with existing variable definition.")
 
         return self._vars[name]
+
+    @property
+    def registered_variables(self):
+        return self._vars.keys()
 
     def var(self, name):
         if name not in self._vars:
