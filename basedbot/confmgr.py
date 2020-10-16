@@ -16,7 +16,7 @@ class ConfigAccessLevel(Enum):
 
 
 class ConfigVar:
-    def __init__(self, db, name, default=None, access=ConfigAccessLevel.INTERNAL):
+    def __init__(self, db, name, default=None, access=ConfigAccessLevel.ADMIN):
         self._db = db
 
         self.name = name

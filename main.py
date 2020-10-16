@@ -2,7 +2,7 @@
 
 import os
 
-from basedbot import DBot, ConfigAccessLevel
+from basedbot import DBot
 
 
 # Find server prefix
@@ -14,7 +14,7 @@ def get_prefix(bot, message):
 
 
 bot = DBot(command_prefix=get_prefix)
-bot.conf.register('prefix', default='!', access=ConfigAccessLevel.ADMIN)
+bot.conf.register('prefix', default='!')
 
 # Load all modules
 for cog in bot.find_all_cogs():
