@@ -25,7 +25,12 @@ def _has_access_to_var(member, var):
 
 
 def _var_to_string(ctx, var):
-    return f"{var.name} = \"{var.get(ctx.guild.id)}\" (def. \"{var.default}\")"
+    string = f"{var.name} = \"{var.get(ctx.guild.id)}\" (def. \"{var.default}\")"
+
+    if var.description is not None:
+        string += f"\n - {var.description}"
+
+    return string
 
 
 def check_var_exists(func):
@@ -70,27 +75,22 @@ class DBotConf(commands.Cog):
     async def conf_list(self, ctx):
         """Lists all available configuration variables"""
 
-        text = ""
+        entries = []
 
-        for varname in self.bot.conf.registered_variables:
+        for varname in sorted(self.bot.conf.registered_variables):
             var = self.bot.conf.var(varname)
 
             # Skip if we don't have access
             if not _has_access_to_var(ctx.author, var):
                 continue
 
-            line = _var_to_string(ctx, var) + "\n"
+            entries.append({'name': var.name, 'value': var.get(ctx.guild.id)})
 
-            if len(text) + len(line) >= 2000 - 6:
-                await ctx.send(f"```{text}```")
-                text = ""
-
-            text += line
-
-        if len(text) > 0:
-            await ctx.send(f"```{text}```")
-        else:
+        if len(entries) == 0:
             await ctx.send("You don't have access to any variables.")
+            return
+
+        await self.bot.send_table(ctx, ["name", "value"], entries)
 
     @conf.command(name="get")
     @commands.has_permissions(administrator=True)

@@ -16,12 +16,13 @@ class ConfigAccessLevel(Enum):
 
 
 class ConfigVar:
-    def __init__(self, db, name, default=None, access=ConfigAccessLevel.INTERNAL):
+    def __init__(self, db, name, default=None, access=ConfigAccessLevel.ADMIN, description=None):
         self._db = db
 
         self.name = name
         self.default = default
         self.access = access
+        self.description = description
 
     def get(self, dbid, default=None):
         if default is None:
