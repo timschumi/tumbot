@@ -76,7 +76,7 @@ class DBotConf(commands.Cog):
 
         entries = []
 
-        for varname in self.bot.conf.registered_variables:
+        for varname in sorted(self.bot.conf.registered_variables):
             var = self.bot.conf.var(varname)
 
             # Skip if we don't have access
