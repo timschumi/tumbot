@@ -2,6 +2,13 @@ import discord
 from discord.ext import commands
 
 
+def _reason_to_text(reason):
+    if reason is None:
+        return "No reason given."
+
+    return reason
+
+
 class InviteManager(commands.Cog):
 
     def __init__(self, bot):
@@ -9,6 +16,14 @@ class InviteManager(commands.Cog):
         self.invites = dict()
         self._var_channel = self.bot.conf.register('invite.channel',
                                                    description="The channel where invite tracking is logged.")
+        self._var_inv_channel = self.bot.conf.register('invite.inv_channel',
+                                                       description="The channel where invites will point to (None = current).")
+        self._var_inv_count = self.bot.conf.register('invite.inv_count',
+                                                     default="1",
+                                                     description="The amount of people that can be invited (0 = infinite).")
+        self._var_inv_age = self.bot.conf.register('invite.inv_age',
+                                                   default="0",
+                                                   description="The lifetime of an invite in seconds (0 = infinite).")
 
         self.bot.loop.create_task(self.init_invites())
 
@@ -26,6 +41,42 @@ class InviteManager(commands.Cog):
         """Manages invites."""
 
         await ctx.send_help(ctx.command)
+
+    def _get_inv_channel(self, ctx):
+        # Get stored channel
+        channel = int(self._var_inv_channel.get(ctx.guild.id))
+        if channel is not None:
+            # Try to resolve
+            channel = ctx.guild.get_channel(channel)
+
+        # Can't resolve or not set
+        if channel is None:
+            channel = ctx.channel
+
+        return channel
+
+    @invite.command(name="create")
+    @commands.bot_has_permissions(create_instant_invite=True)
+    @commands.has_permissions(create_instant_invite=True)
+    async def invite_create(self, ctx, *, reason=None):
+        channel = self._get_inv_channel(ctx)
+
+        invite = await channel.create_invite(reason=f"{ctx.author} ({ctx.author.id}): {_reason_to_text(reason)}",
+                                             max_age=self._var_inv_age.get(ctx.guild.id),
+                                             max_uses=self._var_inv_count.get(ctx.guild.id))
+
+        try:
+            await ctx.author.send(f"Invite: <{invite.url}>, reason: {_reason_to_text(reason)}")
+        except discord.errors.Forbidden:
+            await ctx.send("Could not message you the invite link. Do you have messages from server members enabled?")
+            await invite.delete(reason="Could not message the invite link.")
+            return
+
+        # Store invite in database
+        with self.bot.db.get(ctx.guild.id) as db:
+            db.execute("INSERT INTO invite_active (code, user, reason) VALUES (?, ?, ?)", (invite.code, ctx.author.id, reason))
+
+        await ctx.message.add_reaction('\U00002705')
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -59,7 +110,19 @@ class InviteManager(commands.Cog):
             await channel.send("Konnte Invite nicht tracken!")
             return
 
-        text = f"**{member}** ({member.id}) wurde von **{invite.inviter}** ({invite.inviter.id}) eingeladen."
+        inviter = invite.inviter
+
+        # Do we have that invite in the database?
+        result = self.bot.db.get(guild.id).execute("SELECT * FROM invite_active WHERE code = ?", (invite.code,)).fetchall()
+        invite_data = result[0] if len(result) > 0 else None
+
+        if invite_data:
+            inviter = guild.get_member(invite_data["user"])
+
+        text = f"**{member}** ({member.id}) wurde von **{inviter}** ({inviter.id}) eingeladen."
+
+        if invite_data and invite_data["reason"]:
+            text += f" (Reason: {invite_data['reason']})"
 
         text += f" (Invite: {invite.code})"
 
@@ -78,6 +141,10 @@ class InviteManager(commands.Cog):
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
         await self.update_invites(invite.guild)
+
+        # TODO: Clean up expired invites
+        with self.bot.db.get(invite.guild.id) as db:
+            db.execute("DELETE FROM invite_active WHERE code = ?", (invite.code,))
 
 
 def setup(bot):
