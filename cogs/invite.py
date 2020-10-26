@@ -16,6 +16,11 @@ class InviteManager(commands.Cog):
         self.invites = dict()
         self._var_channel = self.bot.conf.register('invite.channel',
                                                    description="The channel where invite tracking is logged.")
+        self._var_perm_backend = self.bot.conf.register('invite.perm_backend',
+                                                        default="permission",
+                                                        description="The control mechanism for who gets to create invites [permission/role].")
+        self._var_perm_role = self.bot.conf.register('invite.perm_role',
+                                                     description="The role that is allowed to create invites.")
         self._var_inv_channel = self.bot.conf.register('invite.inv_channel',
                                                        description="The channel where invites will point to (None = current).")
         self._var_inv_count = self.bot.conf.register('invite.inv_count',
@@ -55,10 +60,29 @@ class InviteManager(commands.Cog):
 
         return channel
 
+    def _can_user_invite(self, ctx):
+        backend = self._var_perm_backend.get(ctx.guild.id)
+
+        if backend == "role":
+            role = self._var_perm_role.get(ctx.guild.id)
+
+            if role is None:
+                return False
+
+            role = ctx.guild.get_role(int(role))
+
+            return role in ctx.author.roles
+
+        # Fallback for "permission" and everything else
+        return ctx.author.guild_permissions.create_instant_invite
+
     @invite.command(name="create")
     @commands.bot_has_permissions(create_instant_invite=True)
-    @commands.has_permissions(create_instant_invite=True)
     async def invite_create(self, ctx, *, reason=None):
+        if not self._can_user_invite(ctx):
+            await ctx.message.add_reaction('\U0001F6AB')
+            return
+
         channel = self._get_inv_channel(ctx)
 
         invite = await channel.create_invite(reason=f"{ctx.author} ({ctx.author.id}): {_reason_to_text(reason)}",
