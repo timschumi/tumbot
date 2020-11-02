@@ -219,6 +219,10 @@ class InviteManager(commands.Cog):
         if invite_data and invite_data["reason"]:
             text += f" (Reason: {invite_data['reason']})"
 
+        if invite_data and invite_data["allowed_by"] != invite_data["user"]:
+            allowed_by = guild.get_member(invite_data["allowed_by"])
+            text += f" (Approver: **{allowed_by}** [{allowed_by.id}])"
+
         text += f" (Invite: {invite.code})"
 
         # Invite has been used, so add one to the counter
