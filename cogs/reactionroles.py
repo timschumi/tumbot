@@ -85,7 +85,7 @@ class ReactionRoles(commands.Cog):
             return
 
         with self.bot.db.get(guild.id) as db:
-            result = db.execute("SELECT role FROM reactionroles WHERE message = ? AND emoji = ?",
+            result = db.execute("SELECT DISTINCT role FROM reactionroles WHERE message = ? AND emoji = ?",
                                 (message.id, str(payload.emoji))).fetchall()
 
         if len(result) == 0:
