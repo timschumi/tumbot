@@ -39,6 +39,10 @@ class InviteManager(commands.Cog):
             await self.update_invites(g)
 
     async def update_invites(self, guild):
+        # Don't do anything if we don't have necessary permissions
+        if not guild.me.guild_permissions.manage_guild:
+            return
+
         self.invites[guild.id] = await guild.invites()
 
     @commands.group(invoke_without_command=True)
@@ -109,6 +113,10 @@ class InviteManager(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         guild = member.guild
+
+        # Don't do anything if we don't have necessary permissions
+        if not guild.me.guild_permissions.manage_guild:
+            return
 
         old = self.invites[guild.id]
         self.invites[guild.id] = await guild.invites()
