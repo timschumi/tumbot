@@ -1,7 +1,35 @@
 import asyncio
+import functools
 
 from discord.ext import commands
 import discord
+
+
+async def _decode_raw_reaction(bot, payload: discord.RawReactionActionEvent):
+    # Fetch all the information
+    guild = bot.get_guild(payload.guild_id)
+    channel = bot.get_channel(payload.channel_id)
+    message = await channel.fetch_message(payload.message_id)
+    member = guild.get_member(payload.user_id)
+
+    # Construct reaction
+    reaction = discord.Reaction(message=message, data={'me': member == guild.me}, emoji=payload.emoji)
+
+    return reaction, member
+
+
+def decode_reaction(func):
+    @functools.wraps(func)
+    async def wrapper(self, payload: discord.RawReactionActionEvent):
+        reaction, member = await _decode_raw_reaction(self.bot, payload)
+        return await func(self, reaction, member)
+
+    return wrapper
+
+
+async def _wait_for_user_reaction(bot, user, timeout=60):
+    payload = await bot.wait_for('raw_reaction_add', check=lambda p: p.user_id == user.id, timeout=timeout)
+    return _decode_raw_reaction(bot, payload)
 
 
 class ReactionRoles(commands.Cog):
@@ -27,23 +55,19 @@ class ReactionRoles(commands.Cog):
         info_message = await ctx.send("React to a message with an emoji to finish the setup.")
 
         try:
-            payload = await self.bot.wait_for('raw_reaction_add', check=lambda p: p.user_id == ctx.author.id, timeout=60)
-        except asyncio.TimeoutError:
+            reaction, member = _wait_for_user_reaction(self.bot, ctx.author, timeout=60)
+        finally:
             await info_message.delete()
-            await ctx.send("Operation timed out. Try clicking a bit faster next time!")
-            return
 
-        guild = self.bot.get_guild(payload.guild_id)
-        channel = self.bot.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        member = guild.get_member(payload.user_id)
+        message = reaction.message
+        guild = message.guild
 
         with self.bot.db.get(guild.id) as db:
             db.execute("INSERT INTO reactionroles(message, emoji, role) VALUES(?, ?, ?)",
-                       (message.id, str(payload.emoji), role.id))
+                       (message.id, str(reaction.emoji), role.id))
 
-        await message.add_reaction(payload.emoji)
-        await message.remove_reaction(payload.emoji, member)
+        await message.add_reaction(reaction.emoji)
+        await reaction.remove(member)
 
         await info_message.delete()
 
@@ -52,41 +76,34 @@ class ReactionRoles(commands.Cog):
     async def delete(self, ctx):
         """Deletes a reactionrole"""
 
-        info_message = await ctx.send("React to a message with an emoji to delete a reactionrole.", delete_after=60)
+        info_message = await ctx.send("React to a message with an emoji to delete a reactionrole.")
 
         try:
-            payload = await self.bot.wait_for('raw_reaction_add', check=lambda p: p.user_id == ctx.author.id, timeout=60)
-        except asyncio.TimeoutError:
+            reaction, member = _wait_for_user_reaction(self.bot, ctx.author, timeout=60)
+        finally:
             await info_message.delete()
-            await ctx.send("Operation timed out. Try clicking a bit faster next time!")
-            return
 
-        guild = self.bot.get_guild(payload.guild_id)
-        channel = self.bot.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        member = guild.get_member(payload.user_id)
+        message = reaction.message
+        guild = message.guild
 
         with self.bot.db.get(guild.id) as db:
-            db.execute("DELETE FROM reactionroles WHERE message = ? AND emoji = ?",
-                       (message.id, str(payload.emoji)))
+            db.execute("DELETE FROM reactionroles WHERE message = ? AND emoji = ?", (message.id, str(reaction.emoji)))
 
-        await message.remove_reaction(payload.emoji, guild.me)
-        await message.remove_reaction(payload.emoji, member)
-        await info_message.delete()
+        await reaction.remove(guild.me)
+        await reaction.remove(member)
 
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        guild = self.bot.get_guild(payload.guild_id)
-        channel = self.bot.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        member = guild.get_member(payload.user_id)
-
-        if member == guild.me:
+    @commands.Cog.listener(name="on_raw_reaction_add")
+    @decode_reaction
+    async def on_reaction_add(self, reaction, member):
+        if reaction.me:
             return
+
+        message = reaction.message
+        guild = message.guild
 
         with self.bot.db.get(guild.id) as db:
             result = db.execute("SELECT DISTINCT role FROM reactionroles WHERE message = ? AND emoji = ?",
-                                (message.id, str(payload.emoji))).fetchall()
+                                (message.id, str(reaction.emoji))).fetchall()
 
         if len(result) == 0:
             return
@@ -98,7 +115,21 @@ class ReactionRoles(commands.Cog):
             else:
                 await member.add_roles(role)
 
-        await message.remove_reaction(payload.emoji, member)
+        await reaction.remove(member)
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        original = getattr(error, 'original', error)
+
+        if isinstance(original, asyncio.TimeoutError):
+            await ctx.send("Operation timed out. Try clicking a bit faster next time!")
+            return
+
+        # Defer to common error handler
+        errhandler = self.bot.get_cog('ErrorHandler')
+
+        if errhandler is not None:
+            await errhandler.on_command_error(ctx, error, force=True)
 
 
 def setup(bot):
