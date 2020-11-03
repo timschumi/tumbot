@@ -18,7 +18,25 @@ class DBot(discord.ext.commands.Bot):
         await super().close()
         self.db.close()
 
-    async def send_table(self, messageable: discord.abc.Messageable, keys, table, maxlen=2000):
+    async def send_paginated(self, msg: discord.abc.Messageable, lines, linefmt="{}\n", textfmt="{}", maxlen=2000):
+        linefmt_len = len(linefmt.format(""))
+        textfmt_len = len(textfmt.format(""))
+
+        text = ""
+
+        for line in lines:
+            if len(text) + textfmt_len + len(line) + linefmt_len >= maxlen:
+                await msg.send(textfmt.format(text))
+                text = ""
+
+            text += linefmt.format(line)
+
+        if len(text) > 0:
+            await msg.send(textfmt.format(text))
+
+        return
+
+    async def send_table(self, messageable: discord.abc.Messageable, keys, table):
         key_length = {}
 
         for row in table:
@@ -35,21 +53,16 @@ class DBot(discord.ext.commands.Bot):
             header += f" {str(i).ljust(key_length[i])} |"
             delimiter += '-' * (key_length[i] + 2) + '|'
 
-        text = header + "\n" + delimiter
+        lines = [header, delimiter]
 
         for row in table:
-            line = "\n|"
+            line = "|"
             for key in keys:
                 line += f" {str(row[key]).ljust(key_length[key])} |"
 
-            # -6: Account for code block
-            if len(text) + len(line) >= maxlen - 6:
-                await messageable.send(f"```{text}```")
-                text = ""
+            lines.append(line)
 
-            text += line
-
-        await messageable.send(f"```{text}```")
+        await self.send_paginated(messageable, lines, textfmt="```{}```")
 
     def add_cog_path(self, path):
         self._cogpaths.append(path)
