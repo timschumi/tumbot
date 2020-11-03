@@ -50,18 +50,7 @@ class Quotes(commands.Cog):
             await ctx.send("No quotes found.")
             return
 
-        text = ""
-        for quote in quotes:
-            line = f"{quote[0]}\n\n"
-            # [single lines can not ever be > 1994 chars]
-
-            # -6: Account for code block
-            if len(text) + len(line) >= 2000 - 6:
-                await ctx.send(text)
-                text = ""
-            text += line
-        if len(text) > 0:
-            await ctx.send(text)
+        await self.bot.send_paginated(ctx, [quote[0] for quote in quotes], linefmt="{}\n\n")
 
     @quote.command()
     @commands.has_permissions(administrator=True)

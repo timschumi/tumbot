@@ -26,25 +26,8 @@ class Admin(commands.Cog):
         """Flattens all the previous texts in this channel into a wall of text"""
 
         async with ctx.channel.typing():
-            text = ""
-
-            async for message in ctx.channel.history(limit=None, oldest_first=True):
-                # Skip command
-                if ctx.message.id == message.id:
-                    continue
-
-                # Skip own messages
-                if self.bot.user.id == message.author.id:
-                    continue
-
-                if len(text) + len(message.clean_content) + 1 > 2000:
-                    await ctx.send(text)
-                    text = ""
-
-                text += message.clean_content + " "
-
-            if len(text) > 0:
-                await ctx.send(text)
+            lines = [m.clean_content for m in await ctx.channel.history(limit=None, oldest_first=True) if m.id != ctx.message.id]
+            await self.bot.send_paginated(ctx, lines, linefmt="{} ")
 
 
 def setup(bot):

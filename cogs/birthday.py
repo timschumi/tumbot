@@ -54,23 +54,13 @@ class Birthdays(commands.Cog):
             await ctx.send("No entries found.")
             return
 
-        text = ""
+        lines = []
+
         for result in results:
             user = ctx.guild.get_member(result[0])
+            lines.append(f"{result[1]:02}.{result[2]:02}. -> {user.display_name if user else result[0]}")
 
-            if user is not None:
-                line = f"{result[1]:02}.{result[2]:02}. -> {user.display_name}\n"
-                # -6: Account for code block
-                if len(text) + len(line) >= 2000 - 6:
-                    await ctx.send(f"```{text}```")
-                    text = ""
-                text += line
-            else:
-                await ctx.send(f"**UserId {result[0]} produced an error!**")
-        # text should not be empty, but if somehow the ctx.guild.get_member(r) would return None i.e. if the
-        # Database somehow has a fault, this could happen
-        if len(text) > 0:
-            await ctx.send(f"```{text}```")
+        await self.bot.send_paginated(ctx, lines, textfmt="```{}```")
 
     @birthdays.command()
     async def add(self, ctx, birthdate):
