@@ -11,26 +11,30 @@ class Randomstuff(commands.Cog):
     def randomstring(self, file):
         return random.choice(open(f"strings/{file}.txt").read().splitlines())
 
-    @commands.command(aliases=['exzellent'])
+    @commands.command(aliases=['exzellent', 'excellence'])
     async def exzellenz(self, ctx):
+        """Shows you some excellent fact"""
         await ctx.send(random.choice((self.randomstring("exzellenz_extra"), self.excellentstring())))
 
     def excellentstring(self):
         return f"{self.randomstring('exzellenz_trivial')} ist {random.choice(('trivial', 'sehr exzellent'))}."
 
-    @commands.command()
+    @commands.command(aliases=["penguinfact"])
     async def pinguinfakt(self, ctx):
+        """Displays cool penguinfacts"""
         await ctx.send(self.randomstring("pinguinfakten"))
 
     @commands.command(aliases=['source', 'sauce'])
     async def repo(self, ctx):
+        """Displays the repo link"""
         await ctx.send("<https://github.com/timschumi/TUMbot>")
 
     @commands.command(aliases=['gettumbot'])
     async def botinvite(self, ctx):
+        """Displays the Invitelink for the bot"""
         await ctx.send(f"https://discord.com/oauth2/authorize?&client_id={self.bot.user.id}&scope=bot&permissions=8")
 
-    @commands.command()
+    @commands.command(aliases=["mf"])
     async def metafrage(self, ctx):
         """Displays the meta-question-text"""
 

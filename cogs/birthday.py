@@ -3,7 +3,6 @@ import time
 import re
 from typing import Pattern
 import asyncio
-import discord
 from discord.ext import commands, tasks
 
 

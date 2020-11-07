@@ -16,6 +16,7 @@ class Johannes(commands.Cog):
 
     @commands.command()
     async def johannes(self, ctx):
+        """Sends a cute Animal"""
         await ctx.send("\U0001F427")
 
     @commands.Cog.listener()
