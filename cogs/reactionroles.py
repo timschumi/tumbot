@@ -29,21 +29,21 @@ def decode_reaction(func):
 
 async def _wait_for_user_reaction(bot, user, timeout=60):
     payload = await bot.wait_for('raw_reaction_add', check=lambda p: p.user_id == user.id, timeout=timeout)
-    return _decode_raw_reaction(bot, payload)
+    return await _decode_raw_reaction(bot, payload)
 
 
 class ReactionRoles(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(aliases=["rr"], invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
     async def reactionroles(self, ctx):
         """Manages reactionroles"""
         await ctx.send_help(ctx.command)
         return
 
-    @reactionroles.command()
+    @reactionroles.command(aliases=["append"])
     @commands.has_permissions(manage_roles=True)
     async def add(self, ctx, role: discord.Role):
         """Creates a new reactionrole"""
@@ -52,10 +52,13 @@ class ReactionRoles(commands.Cog):
             await ctx.send("Target role is higher than current highest role.", delete_after=60)
             return
 
+        if ctx.guild.me.top_role <= role:
+            await ctx.send("Target role is higher than the bots current highest role.", delete_after=60)
+            return
         info_message = await ctx.send("React to a message with an emoji to finish the setup.")
 
         try:
-            reaction, member = _wait_for_user_reaction(self.bot, ctx.author, timeout=60)
+            reaction, member = await _wait_for_user_reaction(self.bot, ctx.author, timeout=60)
         finally:
             await info_message.delete()
 
@@ -63,15 +66,18 @@ class ReactionRoles(commands.Cog):
         guild = message.guild
 
         with self.bot.db.get(guild.id) as db:
+            result = db.execute("SELECT * FROM reactionroles WHERE message == ? AND emoji == ? AND role = ?",
+                             (message.id, str(reaction.emoji), role.id)).fetchall()
+            if len(result) > 0:
+                await ctx.send("Hey you already added that emoji to that message and that Role!")
+                return
             db.execute("INSERT INTO reactionroles(message, emoji, role) VALUES(?, ?, ?)",
                        (message.id, str(reaction.emoji), role.id))
 
         await message.add_reaction(reaction.emoji)
         await reaction.remove(member)
 
-        await info_message.delete()
-
-    @reactionroles.command()
+    @reactionroles.command(aliases=["remove"])
     @commands.has_permissions(manage_roles=True)
     async def delete(self, ctx):
         """Deletes a reactionrole"""
@@ -79,7 +85,7 @@ class ReactionRoles(commands.Cog):
         info_message = await ctx.send("React to a message with an emoji to delete a reactionrole.")
 
         try:
-            reaction, member = _wait_for_user_reaction(self.bot, ctx.author, timeout=60)
+            reaction, member = await _wait_for_user_reaction(self.bot, ctx.author, timeout=60)
         finally:
             await info_message.delete()
 
@@ -123,6 +129,8 @@ class ReactionRoles(commands.Cog):
 
         if isinstance(original, asyncio.TimeoutError):
             await ctx.send("Operation timed out. Try clicking a bit faster next time!")
+            return
+        if isinstance(original, discord.Forbidden):
             return
 
         # Defer to common error handler
