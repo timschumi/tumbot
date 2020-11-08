@@ -1,12 +1,21 @@
 from discord.ext import commands
 
 
+def _is_cs_server(guild_id):
+    return guild_id in [628452781199589377, 752114765148455012]
+
+
+async def _check_cs_server(ctx):
+    return _is_cs_server(ctx.guild.id)
+
+
 class Johannes(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
+    @commands.check(_check_cs_server)
     async def johannes(self, ctx):
         """Sends a cute Animal"""
         await ctx.send("\U0001F427")
@@ -15,6 +24,10 @@ class Johannes(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
+
+        if not _is_cs_server(message.guild.id):
+            return
+
         lower = message.content.lower()
 
         # Reactions
