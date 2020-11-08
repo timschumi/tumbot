@@ -123,8 +123,9 @@ class ReactionRoles(commands.Cog):
 
         await reaction.remove(member)
 
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    @add.error
+    @delete.error
+    async def handle_error(self, ctx, error):
         original = getattr(error, 'original', error)
 
         if isinstance(original, asyncio.TimeoutError):

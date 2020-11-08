@@ -31,7 +31,7 @@ class ErrorHandler(commands.Cog):
             return
 
         # Standard handler: Einfach den Traceback ausgeben
-        print(f'Fehler beim Ausführen des Befehls `{ctx.command}`:', file=sys.stderr)
+        print(f'ERRORHANDLER! Fehler beim Ausführen des Befehls `{ctx.command}`:', file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
         await ctx.message.add_reaction('\U0001F525')
 
