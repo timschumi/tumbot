@@ -28,7 +28,7 @@ class Johannes(commands.Cog):
         if not _is_cs_server(message.guild.id):
             return
 
-        lower = message.content.lower()
+        lower = message.clean_content.lower()
 
         # Reactions
         if "johannes" in lower or "stöhr" in lower:
