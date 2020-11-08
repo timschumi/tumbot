@@ -131,8 +131,6 @@ class ReactionRoles(commands.Cog):
         if isinstance(original, asyncio.TimeoutError):
             await ctx.send("Operation timed out. Try clicking a bit faster next time!")
             return
-        if isinstance(original, discord.Forbidden):
-            return
 
         # Defer to common error handler
         errhandler = self.bot.get_cog('ErrorHandler')
