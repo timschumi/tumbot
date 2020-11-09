@@ -36,12 +36,12 @@ class Quotes(commands.Cog):
         quoteparts = quote.rsplit(' - ', 1)
 
         embedargs = {
-            'description': f"*{quoteparts[0]}*",
+            'title': f"*{quoteparts[0]}*",
             'color': 0x36393F
         }
 
         if len(quoteparts) > 1 and quoteparts[1].strip() != "":
-            embedargs['title'] = quoteparts[1]
+            embedargs['description'] = quoteparts[1]
 
         embed = discord.Embed(**embedargs)
 
