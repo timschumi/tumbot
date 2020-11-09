@@ -1,11 +1,16 @@
 import re
 
+import discord
 from discord.ext import commands
 
 
 class Quotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+        self._var_pretty = self.bot.conf.register('quotes.pretty',
+                                                  default="0",
+                                                  description="Whether to make quotes prettier.")
 
     @commands.group(invoke_without_command=True)
     async def quote(self, ctx, search=""):
@@ -21,7 +26,26 @@ class Quotes(commands.Cog):
             await ctx.send("No quotes found!")
             return
 
-        await ctx.send(quote[0][0])
+        quote = quote[0][0]
+
+        if self._var_pretty.get(ctx.guild.id) == "0":
+            await ctx.send(quote)
+            return
+
+        # Try to split quote
+        quoteparts = quote.rsplit(' - ', 1)
+
+        embedargs = {
+            'description': f"*{quoteparts[0]}*",
+            'color': 0x36393F
+        }
+
+        if len(quoteparts) > 1 and quoteparts[1].strip() != "":
+            embedargs['title'] = quoteparts[1]
+
+        embed = discord.Embed(**embedargs)
+
+        await ctx.send(embed=embed)
 
     @quote.command()
     @commands.has_permissions(administrator=True)
