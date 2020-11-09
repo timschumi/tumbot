@@ -48,11 +48,7 @@ class InviteManager(commands.Cog):
 
         self.invites[guild.id] = await guild.invites()
 
-    @commands.group(invoke_without_command=True)
-    async def invite(self, ctx):
-        """Manages invites."""
 
-        await ctx.send_help(ctx.command)
 
     def _get_inv_channel(self, guild, default=None):
         # Get stored channel
@@ -95,7 +91,8 @@ class InviteManager(commands.Cog):
         try:
             await member.send(f"Invite: <{invite.url}>, reason: {_reason_to_text(reason)}")
         except discord.errors.Forbidden:
-            await messageable.send("Could not message you the invite link. Do you have messages from server members enabled?")
+            await messageable.send(
+                "Could not message you the invite link. Do you have messages from server members enabled?")
             await invite.delete(reason="Could not message the invite link.")
             return False
 
@@ -105,6 +102,31 @@ class InviteManager(commands.Cog):
                        (invite.code, member.id, reason, allowed_by.id))
 
         return True
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    async def ban(self, ctx, member: discord.Member, reason="Ban-Command"):
+        if ctx.author.top_role <= member.top_role:
+            await ctx.send("Your role is too low to ban this member")
+            return
+        if ctx.guild.me.top_role <= member.top_role:
+            await ctx.send("My Role is not high enough to ban this member.")
+            return
+        await member.ban(reason=reason)
+        await ctx.send(f"User **{member}** has been banned. for {reason}")
+        for g in self.bot.guilds:
+            channel = self._get_inv_channel(guild=g)
+            if channel is not None:
+                await channel.send(
+                    f":red_circle: {member} ({member.id}) has been banned on {ctx.guild} for {reason}. "
+                    f"The member is on this server."
+                    if member in g.members else f":yellow_circle: {member} ({member.id}) has been banned "
+                                                f"on {ctx.guild} for {reason}. The member is not on this server.")
+
+    @commands.group(invoke_without_command=True)
+    async def invite(self, ctx):
+        """Manages invites."""
+        await ctx.send_help(ctx.command)
 
     @invite.command(name="create")
     @commands.bot_has_permissions(create_instant_invite=True)
