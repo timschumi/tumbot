@@ -106,7 +106,7 @@ class InviteManager(commands.Cog):
     async def ban(self, ctx, member: discord.Member, reason="Ban-Command"):
         """Ban user and announce it to other servers"""
 
-        if ctx.author.top_role <= member.top_role:
+        if ctx.author.top_role <= member.top_role and ctx.author != ctx.guild.owner:
             await ctx.send("You don't have a high enough role to ban this member.")
             return
 
