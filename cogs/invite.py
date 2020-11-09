@@ -103,7 +103,7 @@ class InviteManager(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, reason="Ban-Command"):
+    async def ban(self, ctx, member: discord.Member, *, reason="Ban-Command"):
         """Ban user and announce it to other servers"""
 
         if ctx.author.top_role <= member.top_role and ctx.author != ctx.guild.owner:
