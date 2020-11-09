@@ -103,7 +103,7 @@ class InviteManager(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, *, reason="Ban-Command"):
+    async def ban(self, ctx, member: discord.Member, *, reason=None):
         """Ban user and announce it to other servers"""
 
         if ctx.author.top_role <= member.top_role and ctx.author != ctx.guild.owner:
@@ -114,8 +114,8 @@ class InviteManager(commands.Cog):
             await ctx.send("I don't have a high enough role to ban this member.")
             return
 
-        await member.ban(reason=reason)
-        await ctx.send(f"User **{member}** has been banned (reason: {reason}).")
+        await member.ban(reason=f"{ctx.author} ({ctx.author.id}): {_reason_to_text(reason)}")
+        await ctx.send(f"User **{member}** has been banned by **{ctx.author}** (reason: {_reason_to_text(reason)}).")
 
         for g in self.bot.guilds:
             channel = self._var_channel.get(g.id)
@@ -134,7 +134,7 @@ class InviteManager(commands.Cog):
 
             await channel.send(
                 (":red_circle:" if user_on_server else ":yellow_circle:") +
-                f" {member} ({member.id}) has been banned on {ctx.guild} (reason: {reason}). " +
+                f" {member} ({member.id}) has been banned on {ctx.guild} (reason: {_reason_to_text(reason)}). " +
                 ("The member is on this server." if user_on_server else "The member is not on this server.")
             )
 
