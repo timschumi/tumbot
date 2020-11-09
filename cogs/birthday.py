@@ -88,7 +88,7 @@ class Birthdays(commands.Cog):
             users = self.bot.db.get(guild.id).execute(
                 "SELECT userId FROM birthdays WHERE day = ? AND month = ?", (day, month)).fetchall()
             if len(users) == 0:
-                return
+                continue
             for user in users:
                 text += f"\n    :tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <@{user[0]}> " \
                         f":partying_face: :fireworks: :tada: "
@@ -96,7 +96,7 @@ class Birthdays(commands.Cog):
             channel = self._var_channel.get(guild.id)
 
             if channel is None:
-                return
+                continue
 
             channel = await self.bot.fetch_channel(channel)
 
