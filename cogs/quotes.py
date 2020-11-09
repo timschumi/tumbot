@@ -31,6 +31,13 @@ class Quotes(commands.Cog):
         content = await commands.clean_content(fix_channel_mentions=True).convert(ctx, content)
 
         with self.bot.db.get(ctx.guild.id) as db:
+            result = db.execute("SELECT COUNT(*) FROM quotes WHERE content = ?", (content,)).fetchall()
+
+        if result[0][0] > 0:
+            await ctx.send("This quote already exists.")
+            return
+
+        with self.bot.db.get(ctx.guild.id) as db:
             db.execute("INSERT INTO quotes (content) VALUES (?)", (content,))
 
         await ctx.message.add_reaction('\U00002705')
