@@ -118,7 +118,15 @@ class InviteManager(commands.Cog):
         await ctx.send(f"User **{member}** has been banned (reason: {reason}).")
 
         for g in self.bot.guilds:
-            channel = self._get_inv_channel(guild=g)
+            channel = self._var_channel.get(g.id)
+
+            # Channel not set?
+            if channel is None:
+                continue
+
+            channel = g.get_channel(int(channel))
+
+            # Could not resolve channel?
             if channel is None:
                 continue
 
