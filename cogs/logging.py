@@ -4,8 +4,7 @@ from discord.ext import commands
 class Logging(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._var_channel = self.bot.conf.register('logging.channel',
-                                                   description="The channel where various activities are logged.")
+        self._var_channel = self.bot.conf.var('logging.channel')
 
     async def log_stuff(self, guild, message):
         logchannelid = self._var_channel.get(guild.id)
@@ -57,4 +56,6 @@ class Logging(commands.Cog):
 
 
 def setup(bot):
+    bot.conf.register('logging.channel',
+                      description="The channel where various activities are logged.")
     bot.add_cog(Logging(bot))

@@ -8,9 +8,7 @@ class Quotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        self._var_pretty = self.bot.conf.register('quotes.pretty',
-                                                  default="0",
-                                                  description="Whether to make quotes prettier.")
+        self._var_pretty = self.bot.conf.var('quotes.pretty')
 
     @commands.group(invoke_without_command=True)
     async def quote(self, ctx, search=""):
@@ -108,4 +106,7 @@ class Quotes(commands.Cog):
 
 
 def setup(bot):
+    bot.conf.register('quotes.pretty',
+                      default="0",
+                      description="Whether to make quotes prettier.")
     bot.add_cog(Quotes(bot))

@@ -14,24 +14,13 @@ class InviteManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.invites = dict()
-        self._var_channel = self.bot.conf.register('invite.channel',
-                                                   description="The channel where invite tracking is logged.")
-        self._var_perm_backend = self.bot.conf.register('invite.perm_backend',
-                                                        default="permission",
-                                                        description="The control mechanism for who gets to create invites [permission/role].")
-        self._var_perm_role = self.bot.conf.register('invite.perm_role',
-                                                     description="The role that is allowed to create invites.")
-        self._var_inv_channel = self.bot.conf.register('invite.inv_channel',
-                                                       description="The channel where invites will point to (None = current).")
-        self._var_inv_count = self.bot.conf.register('invite.inv_count',
-                                                     default="1",
-                                                     description="The amount of people that can be invited (0 = infinite).")
-        self._var_inv_age = self.bot.conf.register('invite.inv_age',
-                                                   default="0",
-                                                   description="The lifetime of an invite in seconds (0 = infinite).")
-        self._var_allow_requests = self.bot.conf.register('invite.allow_requests',
-                                                          default="0",
-                                                          description="If not 0, allows users to request invites (requires [invite.channel] and [invite.inv_channel] to be set).")
+        self._var_channel = self.bot.conf.var('invite.channel')
+        self._var_perm_backend = self.bot.conf.var('invite.perm_backend')
+        self._var_perm_role = self.bot.conf.var('invite.perm_role')
+        self._var_inv_channel = self.bot.conf.var('invite.inv_channel')
+        self._var_inv_count = self.bot.conf.var('invite.inv_count')
+        self._var_inv_age = self.bot.conf.var('invite.inv_age')
+        self._var_allow_requests = self.bot.conf.var('invite.allow_requests')
 
         self.bot.loop.create_task(self.init_invites())
 
@@ -346,4 +335,23 @@ class InviteManager(commands.Cog):
 
 
 def setup(bot):
+    bot.conf.register('invite.channel',
+                      description="The channel where invite tracking is logged.")
+    bot.conf.register('invite.perm_backend',
+                      default="permission",
+                      description="The control mechanism for who gets to create invites [permission/role].")
+    bot.conf.register('invite.perm_role',
+                      description="The role that is allowed to create invites.")
+    bot.conf.register('invite.inv_channel',
+                      description="The channel where invites will point to (None = current).")
+    bot.conf.register('invite.inv_count',
+                      default="1",
+                      description="The amount of people that can be invited (0 = infinite).")
+    bot.conf.register('invite.inv_age',
+                      default="0",
+                      description="The lifetime of an invite in seconds (0 = infinite).")
+    bot.conf.register('invite.allow_requests',
+                      default="0",
+                      description="If not 0, allows users to request invites (requires [invite.channel] and [invite.inv_channel] to be set).")
+
     bot.add_cog(InviteManager(bot))
