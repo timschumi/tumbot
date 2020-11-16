@@ -132,6 +132,8 @@ class ShutTheBoxGame:
 
             self._round += 1
 
+        await self._msg.clear_reactions()
+
         if self._points[0] == self._points[1]:
             await self._msg.edit(content="Draw! Nobody wins. Or both?")
             return
@@ -159,7 +161,7 @@ class ShutTheBox(commands.Cog):
         p1 = ctx.author
 
         if p1.id is p2.id or p2.bot:
-            await ctx.send("Don't you have any driends that you can play with? :(")
+            await ctx.send("Don't you have any friends that you can play with? :(")
             return
 
         if p1.id in self._running_games:
