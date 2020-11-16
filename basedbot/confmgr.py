@@ -16,19 +16,20 @@ class ConfigAccessLevel(Enum):
 
 
 class ConfigVar:
-    def __init__(self, db, name, default=None, access=ConfigAccessLevel.ADMIN, description=None):
+    def __init__(self, db, name, default=None, access=ConfigAccessLevel.ADMIN, description=None, scope='guild'):
         self._db = db
 
         self.name = name
         self.default = default
         self.access = access
         self.description = description
+        self.scope = scope
 
     def get(self, dbid, default=None):
         if default is None:
             default = self.default
 
-        result = self._db.get(dbid).execute("SELECT value FROM config WHERE name = ?", (self.name,)).fetchall()
+        result = self._db.get(dbid, self.scope).execute("SELECT value FROM config WHERE name = ?", (self.name,)).fetchall()
 
         if len(result) < 1:
             return default
@@ -36,11 +37,11 @@ class ConfigVar:
         return str(result[0][0])
 
     def set(self, dbid, value):
-        with self._db.get(dbid) as db:
+        with self._db.get(dbid, self.scope) as db:
             db.execute("REPLACE INTO config (name, value) VALUES (?, ?)", (self.name, value))
 
     def unset(self, dbid):
-        with self._db.get(dbid) as db:
+        with self._db.get(dbid, self.scope) as db:
             db.execute("DELETE FROM config WHERE name = ?", (self.name,))
 
 

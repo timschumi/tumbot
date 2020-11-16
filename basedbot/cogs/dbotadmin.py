@@ -13,14 +13,31 @@ class DBotAdmin(commands.Cog):
     async def sql(self, ctx, *, query):
         """Executes an SQL-query"""
 
-        matches = re.match(r'`(.*)`', query)
+        # Set default scope
+        if ctx.guild is not None:
+            scope = 'guild'
+        else:
+            scope = 'user'
+
+        matches = re.match(r'`(.*)`(?: (\w+)(?:/(\d+))?)?', query)
         if not matches:
             await ctx.send("Couldn't filter out the query that should be executed.")
             return
 
+        if matches.group(2) is not None:
+            scope = matches.group(2)
+
+        if matches.group(3) is None:
+            if scope == 'guild':
+                dbid = ctx.guild.id
+            else:
+                dbid = ctx.author.id
+        else:
+            dbid = matches.group(3)
+
         query = matches.group(1)
         try:
-            with self.bot.db.get(ctx.guild.id) as db:
+            with self.bot.db.get(dbid, scope) as db:
                 result = [dict(row) for row in db.execute(query).fetchall()]
         except sqlite3.OperationalError as e:
             await ctx.send(f"```{e}```")

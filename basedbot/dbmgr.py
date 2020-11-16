@@ -10,8 +10,15 @@ class DatabaseManager:
         self._dbpath = dbpath
         self._sqlpaths = []
 
-    def get(self, dbid):
-        dbid = str(dbid)
+    @classmethod
+    def _get_dbname(cls, dbid, scope):
+        if scope == "global":
+            return "global"
+
+        return f"{scope}_{dbid}"
+
+    def get(self, dbid, scope='guild'):
+        dbid = self._get_dbname(dbid, scope)
 
         if dbid not in self._db_handles:
             # Create the database directory if it doesn't exist
@@ -26,12 +33,15 @@ class DatabaseManager:
             self._upgrade_db_internal(self._db_handles[dbid])
 
             # Update database structure from external sources
-            self._upgrade_db_external(self._db_handles[dbid])
+            self._upgrade_db_external(self._db_handles[dbid], scope)
 
         return self._db_handles[dbid]
 
-    def add_sql_path(self, path):
-        self._sqlpaths.append(path)
+    def add_sql_path(self, path, scope='guild'):
+        self._sqlpaths.append({
+            'path': path,
+            'scope': scope,
+        })
 
     @classmethod
     def _get_user_version(cls, conn):
@@ -68,8 +78,8 @@ class DatabaseManager:
             with open(path) as file:
                 conn.executescript(file.read())
 
-    def _upgrade_db_external(self, conn):
-        schemas = self._find_schemas()
+    def _upgrade_db_external(self, conn, scope):
+        schemas = self._find_schemas(scope)
 
         for schema, directory in schemas.items():
             # Insert a default starting version if it doesn't exist
@@ -95,15 +105,19 @@ class DatabaseManager:
                 self._set_schema_version(conn, schema, self._get_user_version(conn))
                 self._set_user_version(conn, user_ver)
 
-    def _find_schemas(self):
+    def _find_schemas(self, scope):
         schemas = {}
 
         for sqldir in self._sqlpaths:
-            for filepath in Path(sqldir).glob('*_*.sql'):
+            # Skip if not the correct scope
+            if sqldir['scope'] != scope:
+                continue
+
+            for filepath in Path(sqldir['path']).glob('*_*.sql'):
                 name = re.match(r'(\S+)_\d+', filepath.stem).group(1)
 
                 if name in schemas and schemas[name] is not sqldir:
-                    raise ValueError(f"Duplicate schema `{name}` found at `{sqldir}`,"
+                    raise ValueError(f"Duplicate schema `{name}` found at `{sqldir['path']}`,"
                                      f" but already present at `{schemas[name]}`")
 
                 schemas[name] = sqldir
