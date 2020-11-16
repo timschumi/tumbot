@@ -21,6 +21,14 @@ async def _decode_raw_reaction(bot, payload: discord.RawReactionActionEvent):
 def decode_reaction(func):
     @functools.wraps(func)
     async def wrapper(self, payload: discord.RawReactionActionEvent):
+        # Ignore private messages
+        if payload.guild_id is None:
+            return
+
+        # Ignore own reactions
+        if payload.user_id == self.bot.user.id:
+            return
+
         reaction, member = await _decode_raw_reaction(self.bot, payload)
         return await func(self, reaction, member)
 

@@ -6,6 +6,9 @@ def _is_cs_server(guild_id):
 
 
 async def _check_cs_server(ctx):
+    if ctx.guild is None:
+        return False
+
     return _is_cs_server(ctx.guild.id)
 
 
@@ -23,6 +26,9 @@ class Johannes(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
+            return
+
+        if message.guild is None:
             return
 
         if not _is_cs_server(message.guild.id):

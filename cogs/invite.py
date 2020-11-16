@@ -273,18 +273,22 @@ class InviteManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        guild = self.bot.get_guild(payload.guild_id)
-        channel = self.bot.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        member = guild.get_member(payload.user_id)
+        # Ignore private messages
+        if payload.guild_id is None:
+            return
 
         # Ignore own reactions
-        if member == guild.me:
+        if payload.user_id == self.bot.user.id:
             return
 
         # Check if its a yes/no reaction
         if payload.emoji.name != '\U00002705' and payload.emoji.name != '\U0000274E':
             return
+
+        guild = self.bot.get_guild(payload.guild_id)
+        channel = self.bot.get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        member = guild.get_member(payload.user_id)
 
         # Check if the user can invite
         if not self._can_user_invite(member):
