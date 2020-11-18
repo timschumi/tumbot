@@ -36,7 +36,7 @@ class Quotes(commands.Cog):
         if not match:
             quoteparts = [quote]
         else:
-            quoteparts = [quote[0:match.start()], quote[match.end():]]
+            quoteparts = [quote[0:match.start()].strip(), quote[match.end():].strip()]
 
         embed = discord.Embed(description=f"*{quoteparts[0]}*", color=0x36393F)
 
