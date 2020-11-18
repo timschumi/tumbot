@@ -31,11 +31,12 @@ class Quotes(commands.Cog):
             return
 
         # Try to split quote
-        match = re.search(r' [-~] ', quote)
+        matches = [m for m in re.finditer(r' [-~] ', quote)]
 
-        if not match:
+        if len(matches) < 1:
             quoteparts = [quote]
         else:
+            match = matches[-1]
             quoteparts = [quote[0:match.start()].strip(), quote[match.end():].strip()]
 
         embed = discord.Embed(description=f"*{quoteparts[0]}*", color=0x36393F)
