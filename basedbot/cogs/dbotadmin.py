@@ -1,7 +1,25 @@
+import ast
 import re
 import sqlite3
+import traceback
 
 from discord.ext import commands
+
+
+def _insert_returns(body):
+    # insert return statement if the last statement is an expression
+    if isinstance(body[-1], ast.Expr):
+        body[-1] = ast.Return(body[-1].value)
+        ast.fix_missing_locations(body[-1])
+
+    # for if statements, we insert returns into the body and the orelse
+    if isinstance(body[-1], ast.If):
+        _insert_returns(body[-1].body)
+        _insert_returns(body[-1].orelse)
+
+    # for with blocks we insert returns into the body
+    if isinstance(body[-1], (ast.With, ast.AsyncWith)):
+        _insert_returns(body[-1].body)
 
 
 class DBotAdmin(commands.Cog):
@@ -48,6 +66,54 @@ class DBotAdmin(commands.Cog):
             return
 
         await self.bot.send_table(ctx, result[0].keys(), result)
+
+    @commands.command()
+    @commands.is_owner()
+    async def eval(self, ctx, *, cmd):
+        """Runs a Python command or script"""
+
+        # Remove surrounding code block and parse it
+        cmd = cmd.strip("` ")
+        try:
+            parsed_cmd = ast.parse(cmd)
+        except Exception:
+            await ctx.send(f"Exception while parsing command:\n```{traceback.format_exc()}```")
+            return
+
+        # Create a fake function stub and parse it
+        parsed_fn = ast.parse("async def _eval(): pass")
+
+        # Correct line numbers
+        for node in parsed_cmd.body:
+            ast.increment_lineno(node)
+
+        # Add returns for convenience
+        _insert_returns(parsed_cmd.body)
+
+        # Insert our code into the fake function
+        parsed_fn.body[0].body = parsed_cmd.body
+
+        # Define our execution environment
+        env = {
+            'ctx': ctx,
+        }
+
+        # Compile our function for execution and load it
+        exec(compile(parsed_fn, filename="<ast>", mode="exec"), env)
+
+        try:
+            output = await eval("_eval()", env)
+        except Exception:
+            await ctx.send(f"Exception while running command:\n```{traceback.format_exc()}```")
+            return
+
+        # Nothing returned? If so, show that the command actually ran.
+        if output is None:
+            await ctx.message.add_reaction('\U00002705')
+            return
+
+        await ctx.send(f"```{output}```")
+        return
 
     @commands.command()
     @commands.is_owner()
