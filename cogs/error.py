@@ -30,6 +30,10 @@ class ErrorHandler(commands.Cog):
             await ctx.message.add_reaction('\U0001F6AB')
             return
 
+        if isinstance(error, commands.errors.CommandOnCooldown):
+            await ctx.send(error)
+            return
+
         # Standard handler: Einfach den Traceback ausgeben
         print(f'ERRORHANDLER! Fehler beim Ausführen des Befehls `{ctx.command}`:', file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
