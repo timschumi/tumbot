@@ -11,7 +11,7 @@ class Quotes(commands.Cog):
         self._var_pretty = self.bot.conf.var('quotes.pretty')
 
     @commands.group(invoke_without_command=True)
-    async def quote(self, ctx, search=""):
+    async def quote(self, ctx, *, search=""):
         """Displays one random quote"""
 
         search = "%" + re.sub(r'[^\x00-\x7F]+','_', search) + "%"
@@ -31,17 +31,17 @@ class Quotes(commands.Cog):
             return
 
         # Try to split quote
-        quoteparts = quote.rsplit(' - ', 1)
+        match = re.search(r' [-~] ', quote)
 
-        embedargs = {
-            'title': quoteparts[0],
-            'color': 0x36393F
-        }
+        if not match:
+            quoteparts = [quote]
+        else:
+            quoteparts = [quote[0:match.start()], quote[match.end():]]
+
+        embed = discord.Embed(description=f"*{quoteparts[0]}*", color=0x36393F)
 
         if len(quoteparts) > 1 and quoteparts[1].strip() != "":
-            embedargs['description'] = f"*{quoteparts[1]}*"
-
-        embed = discord.Embed(**embedargs)
+            embed.add_field(name=f"- **{quoteparts[1]}**", value='\u200b')
 
         await ctx.send(embed=embed)
 
@@ -66,7 +66,7 @@ class Quotes(commands.Cog):
 
     @quote.command()
     @commands.has_permissions(manage_channels=True)
-    async def list(self, ctx, search=""):
+    async def list(self, ctx, *, search=""):
         """Lists all the quotes"""
 
         search = "%" + re.sub(r'[^\x00-\x7F]+','_', search) + "%"
@@ -83,7 +83,7 @@ class Quotes(commands.Cog):
 
     @quote.command()
     @commands.has_permissions(administrator=True)
-    async def delete(self, ctx, search):
+    async def delete(self, ctx, *, search):
         """Removes a quote"""
 
         search = "%" + re.sub(r'[^\x00-\x7F]+','_', search) + "%"
