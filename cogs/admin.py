@@ -1,9 +1,12 @@
 from discord.ext import commands
 
+from basedbot import ConfigAccessLevel
+
 
 class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self._var_clear_max = self.bot.conf.var('admin.clear_max')
 
     @commands.command(aliases=['purge'])
     @commands.cooldown(2, 600, type=commands.BucketType.default)
@@ -14,9 +17,13 @@ class Admin(commands.Cog):
         if amount <= 0:
             await ctx.send('"Was bist du für ein Idiot" ~ Johannes Stöhr (Betrag <= 0 ist unmöglich!)')
             return
-        if amount > 20:
-            await ctx.send("Zu großer Betrag!")
+
+        clear_max = int(self._var_clear_max.get(ctx.guild.id))
+
+        if clear_max != 0 and amount > clear_max:
+            await ctx.send(f"You can't remove more than {clear_max} messages!")
             return
+
         await ctx.channel.purge(limit=amount + 1)
         await ctx.send(f"**{amount}** Nachrichten wurden von **{ctx.author}** gelöscht.")
 
@@ -31,4 +38,8 @@ class Admin(commands.Cog):
 
 
 def setup(bot):
+    bot.conf.register('admin.clear_max',
+                      default="0",
+                      access=ConfigAccessLevel.OWNER,
+                      description="How many messages the clear command can remove (0 = infinite).")
     bot.add_cog(Admin(bot))
