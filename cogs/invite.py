@@ -12,22 +12,22 @@ def _reason_to_text(reason):
 class InviteManager(commands.Cog):
 
     def __init__(self, bot):
-        self.bot = bot
-        self.invites = dict()
-        self._var_channel = self.bot.conf.var('invite.channel')
-        self._var_perm_backend = self.bot.conf.var('invite.perm_backend')
-        self._var_perm_role = self.bot.conf.var('invite.perm_role')
-        self._var_inv_channel = self.bot.conf.var('invite.inv_channel')
-        self._var_inv_count = self.bot.conf.var('invite.inv_count')
-        self._var_inv_age = self.bot.conf.var('invite.inv_age')
-        self._var_allow_requests = self.bot.conf.var('invite.allow_requests')
+        self._bot = bot
+        self._invs = dict()
+        self._var_channel = self._bot.conf.var('invite.channel')
+        self._var_perm_backend = self._bot.conf.var('invite.perm_backend')
+        self._var_perm_role = self._bot.conf.var('invite.perm_role')
+        self._var_inv_channel = self._bot.conf.var('invite.inv_channel')
+        self._var_inv_count = self._bot.conf.var('invite.inv_count')
+        self._var_inv_age = self._bot.conf.var('invite.inv_age')
+        self._var_allow_requests = self._bot.conf.var('invite.allow_requests')
 
-        self.bot.loop.create_task(self.init_invites())
+        self._bot.loop.create_task(self.init_invites())
 
     async def init_invites(self):
-        await self.bot.wait_until_ready()
+        await self._bot.wait_until_ready()
 
-        for g in self.bot.guilds:
+        for g in self._bot.guilds:
             await self.update_invites(g)
 
     async def update_invites(self, guild):
@@ -35,7 +35,7 @@ class InviteManager(commands.Cog):
         if not guild.me.guild_permissions.manage_guild:
             return
 
-        self.invites[guild.id] = await guild.invites()
+        self._invs[guild.id] = await guild.invites()
 
     def _get_inv_channel(self, guild, default=None):
         # Get stored channel
@@ -84,7 +84,7 @@ class InviteManager(commands.Cog):
             return False
 
         # Store invite in database
-        with self.bot.db.get(member.guild.id) as db:
+        with self._bot.db.get(member.guild.id) as db:
             db.execute("INSERT INTO invite_active (code, user, reason, allowed_by) VALUES (?, ?, ?, ?)",
                        (invite.code, member.id, reason, allowed_by.id))
 
@@ -106,7 +106,7 @@ class InviteManager(commands.Cog):
         await member.ban(reason=f"{ctx.author} ({ctx.author.id}): {_reason_to_text(reason)}")
         await ctx.send(f"User **{member}** has been banned by **{ctx.author}** (reason: {_reason_to_text(reason)}).")
 
-        for g in self.bot.guilds:
+        for g in self._bot.guilds:
             channel = self._var_channel.get(g.id)
 
             # Channel not set?
@@ -180,7 +180,7 @@ class InviteManager(commands.Cog):
         if channel is None:
             return
 
-        channel = self.bot.get_channel(int(channel))
+        channel = self._bot.get_channel(int(channel))
         if channel is None:
             return
 
@@ -191,7 +191,7 @@ class InviteManager(commands.Cog):
         await message.add_reaction('\U0000274E')
 
         # Store request in database
-        with self.bot.db.get(ctx.guild.id) as db:
+        with self._bot.db.get(ctx.guild.id) as db:
             db.execute("INSERT INTO invite_requests (message, user, reason) VALUES (?, ?, ?)",
                        (message.id, ctx.author.id, reason))
 
@@ -203,7 +203,7 @@ class InviteManager(commands.Cog):
         inviter = invite.inviter
 
         # Do we have that invite in the database?
-        with self.bot.db.get(invite.guild.id) as db:
+        with self._bot.db.get(invite.guild.id) as db:
             result = db.execute("SELECT * FROM invite_active WHERE code = ?", (invite.code,)).fetchall()
         invite_data = result[0] if len(result) > 0 else None
 
@@ -232,24 +232,24 @@ class InviteManager(commands.Cog):
         if not guild.me.guild_permissions.manage_guild:
             return
 
-        old = self.invites[guild.id]
-        self.invites[guild.id] = await guild.invites()
+        old = self._invs[guild.id]
+        self._invs[guild.id] = await guild.invites()
 
         channel = self._var_channel.get(guild.id)
 
         if channel is None:
             return
 
-        channel = self.bot.get_channel(int(channel))
+        channel = self._bot.get_channel(int(channel))
         if channel is None:
             return
 
         for i, v in enumerate(old):
-            if v not in self.invites[guild.id]:
+            if v not in self._invs[guild.id]:
                 invite = v
                 break
 
-            if v.uses != self.invites[guild.id][i].uses:
+            if v.uses != self._invs[guild.id][i].uses:
                 invite = v
                 break
         else:
@@ -271,7 +271,7 @@ class InviteManager(commands.Cog):
         await self.update_invites(invite.guild)
 
         # TODO: Clean up expired invites
-        with self.bot.db.get(invite.guild.id) as db:
+        with self._bot.db.get(invite.guild.id) as db:
             db.execute("DELETE FROM invite_active WHERE code = ?", (invite.code,))
 
     @commands.Cog.listener()
@@ -281,15 +281,15 @@ class InviteManager(commands.Cog):
             return
 
         # Ignore own reactions
-        if payload.user_id == self.bot.user.id:
+        if payload.user_id == self._bot.user.id:
             return
 
         # Check if its a yes/no reaction
         if payload.emoji.name != '\U00002705' and payload.emoji.name != '\U0000274E':
             return
 
-        guild = self.bot.get_guild(payload.guild_id)
-        channel = self.bot.get_channel(payload.channel_id)
+        guild = self._bot.get_guild(payload.guild_id)
+        channel = self._bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
         member = guild.get_member(payload.user_id)
 
@@ -298,7 +298,7 @@ class InviteManager(commands.Cog):
             return
 
         # Check if there is a pending request in the database
-        with self.bot.db.get(guild.id) as db:
+        with self._bot.db.get(guild.id) as db:
             result = db.execute("SELECT rowid, user, reason FROM invite_requests WHERE message = ?",
                                 (message.id,)).fetchall()
 
@@ -308,7 +308,7 @@ class InviteManager(commands.Cog):
         entry = result[0]
 
         # Remove invite from pending requests
-        with self.bot.db.get(guild.id) as db:
+        with self._bot.db.get(guild.id) as db:
             db.execute("DELETE FROM invite_requests WHERE rowid = ?", (entry["rowid"],))
 
         # Resolve the user
