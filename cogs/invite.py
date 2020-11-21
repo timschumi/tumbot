@@ -202,6 +202,49 @@ class InviteManager(commands.Cog):
             db.execute("INSERT INTO invite_requests (message, user, reason) VALUES (?, ?, ?)",
                        (message.id, ctx.author.id, reason))
 
+    def _get_last_invite(self, member):
+        with self._bot.db.get(member.guild.id) as db:
+            res = db.execute("SELECT code FROM invite_active WHERE user = ? OR allowed_by = ? ORDER BY rowid DESC LIMIT 1",
+                             (member.id, member.id)).fetchall()
+
+        if len(res) < 1:
+            return None
+
+        return res[0][0]
+
+    @invite.command(name="close")
+    @commands.bot_has_permissions(manage_channels=True)
+    async def invite_close(self, ctx, code=None):
+        """
+        Deletes the given invite
+
+        If no invite is given, the last invite requested or approved is closed instead.
+        """
+        if code is None and ctx.guild is not None:
+            code = self._get_last_invite(ctx.author)
+
+        if code is None:
+            await ctx.send("Could not find last invite.")
+            return
+
+        # Check if invite is managed by bot and is related to user
+        with self._bot.db.get(ctx.guild.id) as db:
+            res = db.execute("SELECT code FROM invite_active WHERE (user = ? OR allowed_by = ?) AND code = ?",
+                             (ctx.author.id, ctx.author.id, code)).fetchall()
+
+        if len(res) < 1:
+            await ctx.message.add_reaction('\U0001F6AB')
+            return
+
+        try:
+            invite = await self._bot.fetch_invite(code)
+        except discord.errors.NotFound:
+            await ctx.send("Could not find the given invite.")
+            return
+
+        await invite.delete(reason=f"Closed manually by {ctx.author} [{ctx.author.id}]")
+        await ctx.message.add_reaction('\U00002705')
+
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         await self.update_invites(guild)
