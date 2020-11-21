@@ -28,6 +28,7 @@ class InviteManager(commands.Cog):
         self._var_inv_count = self._bot.conf.var('invite.inv_count')
         self._var_inv_age = self._bot.conf.var('invite.inv_age')
         self._var_allow_requests = self._bot.conf.var('invite.allow_requests')
+        self._var_notify_deleted = self._bot.conf.var('invite.notify_deleted')
 
         self._bot.loop.create_task(self.init_invites())
 
@@ -321,9 +322,32 @@ class InviteManager(commands.Cog):
     async def on_invite_create(self, invite):
         await self.update_invites(invite.guild)
 
+    async def _notify_invite_owner(self, invite, message):
+        # Do we have that invite in the database?
+        with self._bot.db.get(invite.guild.id) as db:
+            result = db.execute("SELECT user FROM invite_active WHERE code = ?", (invite.code,)).fetchall()
+
+        if len(result) == 0:
+            return
+
+        # Resolve the user
+        inv_user = invite.guild.get_member(result[0][0])
+
+        if inv_user is None:
+            return
+
+        await inv_user.send(message)
+
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
         await self.update_invites(invite.guild)
+
+        if self._var_notify_deleted.get(invite.guild.id) != "0":
+            try:
+                await self._notify_invite_owner(invite, f"Invite **{invite.code}** has been deleted.")
+            except discord.errors.Forbidden:
+                # If we can't send messages to the user, just ignore
+                pass
 
         # TODO: Clean up expired invites
         with self._bot.db.get(invite.guild.id) as db:
@@ -417,5 +441,8 @@ def setup(bot):
     bot.conf.register('invite.allow_requests',
                       default="0",
                       description="If not 0, allows users to request invites (requires [invite.channel] and [invite.inv_channel] to be set).")
+    bot.conf.register('invite.notify_deleted',
+                      default="0",
+                      description="If not 0, messages the invite owner if an invite gets deleted.")
 
     bot.add_cog(InviteManager(bot))
