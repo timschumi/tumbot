@@ -9,6 +9,13 @@ def _reason_to_text(reason):
     return reason
 
 
+def _find_match(li, v):
+    if v not in li:
+        return None
+
+    return li[li.index(v)]
+
+
 class InviteManager(commands.Cog):
 
     def __init__(self, bot):
@@ -244,23 +251,28 @@ class InviteManager(commands.Cog):
         if channel is None:
             return
 
-        for i, v in enumerate(old):
-            if v not in self._invs[guild.id]:
-                invite = v
-                break
+        invs = [e for e in old if e not in self._invs[guild.id] or _find_match(self._invs[guild.id], e).uses != e.uses]
 
-            if v.uses != self._invs[guild.id][i].uses:
-                invite = v
-                break
-        else:
-            await channel.send("Konnte Invite nicht tracken!")
+        if len(invs) == 0:
+            await channel.send(f"I don't know how **{member}** [{member.id}] joined the server.")
             return
 
-        # Invite has been used, so add one to the counter
-        invite.uses += 1
+        if len(invs) == 1:
+            invite = invs[0]
 
-        await channel.send(f"**{member}** [{member.id}] joined the server via invite ({invite.code})."
-                           f" {self._invite_info_to_text(invite)}")
+            # Invite been used, so add one to the counter
+            invite.uses += 1
+
+            await channel.send(f"**{member}** [{member.id}] joined the server via invite ({invite.code})."
+                               f" {self._invite_info_to_text(invite)}")
+            return
+
+        text = f"I wasn't able to reliably determine how **{member}** [{member.id}] joined the server:"
+        for e in invs:
+            text += f"\n - Invite **{e.code}** {self._invite_info_to_text(e)}."
+
+        await channel.send(text)
+        return
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
