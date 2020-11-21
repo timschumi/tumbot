@@ -331,8 +331,9 @@ class InviteManager(commands.Cog):
 
         # Invite denied?
         if payload.emoji.name == '\U0000274E':
-            # Remove the "allow" reaction
+            # Mark as "denied"
             await message.clear_reaction('\U00002705')
+            await message.edit(content=f"{message.content} (Denied by: **{member}**)")
 
             try:
                 await inv_user.send("Your request has been denied.")
@@ -349,8 +350,9 @@ class InviteManager(commands.Cog):
         if not await self._create_invite(channel, inv_user, inv_channel, reason=entry["reason"], allowed_by=member):
             return
 
-        # Remove the "denied" reaction
+        # Mark as "approved"
         await message.clear_reaction('\U0000274E')
+        await message.edit(content=f"{message.content} (Approved by: **{member}**)")
 
 
 def setup(bot):
