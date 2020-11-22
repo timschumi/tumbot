@@ -1,5 +1,9 @@
+import asyncio
+import datetime
+import time
+
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 
 def _reason_to_text(reason):
@@ -422,6 +426,70 @@ class InviteManager(commands.Cog):
         await message.edit(content=f"{message.content} (Approved by: **{member}**)")
 
 
+class ExpiredInvitesTracker(commands.Cog):
+    def __init__(self, bot):
+        self._bot = bot
+        self._exp_times = {}
+
+        self._bot.loop.create_task(self._init_invites())
+
+    @classmethod
+    def _calc_exp_time(cls, invite):
+        exp_time = invite.created_at + datetime.timedelta(seconds=invite.max_age)
+        return time.mktime(exp_time.timetuple())
+
+    async def _init_invites(self):
+        await self._bot.wait_until_ready()
+
+        for g in self._bot.guilds:
+            if not g.me.guild_permissions.manage_guild:
+                continue
+
+            for i in await g.invites():
+                await self.on_invite_create(i)
+
+    @commands.Cog.listener()
+    async def on_invite_create(self, invite):
+        # Don't track if the invite doesn't expire
+        if invite.max_age == 0:
+            return
+
+        self._exp_times[invite] = self._calc_exp_time(invite)
+
+        # Restart loop in case new invite has a smaller max_age
+        if self.check_invites.is_running():
+            self.check_invites.restart()
+        else:
+            self.check_invites.start()
+
+    @commands.Cog.listener()
+    async def on_invite_delete(self, invite):
+        # Don't do anything if the invite wasn't tracked
+        if invite not in self._exp_times:
+            return
+
+        del self._exp_times[invite]
+
+        if len(self._exp_times) == 0 and self.check_invites.is_running():
+            self.check_invites.cancel()
+
+    @tasks.loop()
+    async def check_invites(self):
+        # Stop if no invites are left
+        if len(self._exp_times) == 0:
+            self.check_invites.cancel()
+
+        # Get next invite that expires
+        invite = min(self._exp_times, key=self._exp_times.get)
+        exp_time = self._exp_times[invite]
+
+        # Sleep until then
+        await asyncio.sleep(exp_time - time.mktime(datetime.datetime.utcnow().timetuple()))
+
+        # Send out the event
+        self._bot.dispatch('invite_delete', invite)
+
+
 def setup(bot):
     bot.conf.register('invite.channel',
                       description="The channel where invite tracking is logged.")
@@ -446,3 +514,4 @@ def setup(bot):
                       description="If not 0, messages the invite owner if an invite gets deleted.")
 
     bot.add_cog(InviteManager(bot))
+    bot.add_cog(ExpiredInvitesTracker(bot))
