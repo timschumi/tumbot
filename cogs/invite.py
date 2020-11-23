@@ -223,6 +223,8 @@ class InviteManager(commands.Cog):
         """
         Deletes the given invite
 
+        Uses invite codes or row IDs returned by the list command.
+
         If no invite is given, the last invite requested or approved is closed instead.
         """
         if code is None and ctx.guild is not None:
@@ -234,8 +236,8 @@ class InviteManager(commands.Cog):
 
         # Check if invite is managed by bot and is related to user
         with self._bot.db.get(ctx.guild.id) as db:
-            res = db.execute("SELECT code FROM invite_active WHERE (user = ? OR allowed_by = ?) AND code = ?",
-                             (ctx.author.id, ctx.author.id, code)).fetchall()
+            res = db.execute("SELECT code FROM invite_active WHERE (user = ? OR allowed_by = ?) AND (code = ? OR rowid = ?)",
+                             (ctx.author.id, ctx.author.id, code, code)).fetchall()
 
         if len(res) < 1:
             await ctx.message.add_reaction('\U0001F6AB')
@@ -249,6 +251,41 @@ class InviteManager(commands.Cog):
 
         await invite.delete(reason=f"Closed manually by {ctx.author} [{ctx.author.id}]")
         await ctx.message.add_reaction('\U00002705')
+
+    @invite.command(name="list")
+    async def invite_list(self, ctx):
+        see_all = ctx.author.guild_permissions.manage_guild
+
+        query = "SELECT rowid, user, reason, allowed_by FROM invite_active"
+        args = ()
+
+        if not see_all:
+            query += " WHERE (user = ? OR allowed_by = ?)"
+            args += (ctx.author.id, ctx.author.id)
+
+        with self._bot.db.get(ctx.guild.id) as db:
+            result = db.execute(query, args).fetchall()
+
+        if len(result) < 1:
+            await ctx.send("No active invites found.")
+            return
+
+        entries = []
+
+        for e in result:
+            entry = {
+                'ID': e['rowid'],
+                'User': str(ctx.guild.get_member(e['user'])),
+                'Reason': _reason_to_text(e['reason']),
+                'Approver': "<redacted>",
+            }
+
+            if see_all or ctx.author.id == e['allowed_by']:
+                entry['Approver'] = str(ctx.guild.get_member(e['allowed_by']))
+
+            entries.append(entry)
+
+        await self._bot.send_table(ctx, ["ID", "User", "Reason", "Approver"], entries)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
