@@ -1,5 +1,7 @@
 import asyncio
 import datetime
+import json
+import re
 import time
 
 import discord
@@ -78,14 +80,21 @@ class InviteManager(commands.Cog):
         # Fallback for "permission" and everything else
         return member.guild_permissions.create_instant_invite
 
-    async def _create_invite(self, messageable, member, channel, reason=None, allowed_by=None):
+    async def _create_invite(self, messageable, member, channel, reason=None, allowed_by=None, options=None):
         # Set allowed_by if not set
         if allowed_by is None:
             allowed_by = member
 
+        full_opt = {
+            "max_age": self._var_inv_age.get(member.guild.id),
+            "max_uses": self._var_inv_count.get(member.guild.id),
+        }
+
+        if options is not None:
+            full_opt.update(options)
+
         invite = await channel.create_invite(reason=f"{member} ({member.id}): {_reason_to_text(reason)}",
-                                             max_age=self._var_inv_age.get(member.guild.id),
-                                             max_uses=self._var_inv_count.get(member.guild.id))
+                                             max_age=full_opt["max_age"], max_uses=full_opt["max_uses"])
 
         try:
             await member.send(f"Invite: <{invite.url}>, reason: {_reason_to_text(reason)}")
@@ -147,13 +156,45 @@ class InviteManager(commands.Cog):
     @invite.command(name="create")
     @commands.bot_has_permissions(create_instant_invite=True)
     async def invite_create(self, ctx, *, reason=None):
+        """
+        Creates a tracked invite
+
+        The reason (if given) is stored in the audit log and invite tracker.
+
+        With the appropriate permissions, additional options can be set using backticked JSON at the end of the reason:
+         - `max_age`: How long the before the invite expires in seconds.
+         - `max_uses`: How many times the invite can be used.
+        """
+
         if not self._can_user_invite(ctx.author):
             await ctx.message.add_reaction('\U0001F6AB')
             return
 
+        options = {}
+
+        if reason is not None:
+            matches = re.match(r'^(.*?)(?: `(.*)`)?$', reason)
+            if not matches:
+                await ctx.send("Could not parse the reason/options.")
+                return
+
+            reason = matches.group(1)
+            raw_options = matches.group(2)
+
+            if raw_options is not None:
+                if not ctx.author.guild_permissions.create_instant_invite:
+                    await ctx.send("You are not allowed to create invites with custom options.")
+                    return
+
+                try:
+                    options = json.loads(raw_options)
+                except json.JSONDecodeError as e:
+                    await ctx.send(f"Failed to parse JSON:\n```{e}```")
+                    return
+
         channel = self._get_inv_channel(ctx.guild, default=ctx.channel)
 
-        if not await self._create_invite(ctx, ctx.author, channel, reason=reason):
+        if not await self._create_invite(ctx, ctx.author, channel, reason=reason, options=options):
             return
 
         await ctx.message.add_reaction('\U00002705')
