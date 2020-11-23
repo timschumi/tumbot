@@ -390,7 +390,6 @@ class InviteManager(commands.Cog):
                 # If we can't send messages to the user, just ignore
                 pass
 
-        # TODO: Clean up expired invites
         with self._bot.db.get(invite.guild.id) as db:
             db.execute("DELETE FROM invite_active WHERE code = ?", (invite.code,))
 
