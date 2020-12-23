@@ -11,9 +11,8 @@ class Physik(commands.Cog):
             return
 
         await member.send(
-            f'Hey {member.mention}, bitte schreibe einem der Admins eine private Nachricht, damit sie hinter deinen '
-            f'Discord-Tag deinen Vornamen setzen können. Um mehr Informationen zu erhalten, schaue in den Textkanal '
-            f'<#702154018490941480>')
+            f'Hey {member.mention}, Willkommen auf dem Physik Server! Schau am besten mal im Channel <#640285216245809186> vorbei, '
+            f'dort wird das wichtigste zum Server erklärt. Viel Spaß und eine exzellente Zeit!')
 
 
 def setup(bot):
