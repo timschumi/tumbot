@@ -5,6 +5,7 @@ import discord.ext.commands
 
 from .dbmgr import DatabaseManager
 from .confmgr import ConfigManager
+from .permmgr import PermissionManager
 
 
 class DBot(discord.ext.commands.Bot):
@@ -12,6 +13,7 @@ class DBot(discord.ext.commands.Bot):
         super().__init__(**options)
         self.db = DatabaseManager(os.environ.get('DBOT_DBPATH', "db"))
         self.conf = ConfigManager(self.db)
+        self.perm = PermissionManager(self.db)
         self._cogpaths = ['basedbot/cogs']
 
     async def close(self):
