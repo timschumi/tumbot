@@ -64,7 +64,7 @@ class DBotPerm(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(aliases=["pm", "permission", "permissions"], invoke_without_command=True)
     @commands.has_permissions(administrator=True)
     async def perm(self, ctx):
         """Manages the bot-specific permissions"""
@@ -89,7 +89,7 @@ class DBotPerm(commands.Cog):
 
         await self.bot.send_table(ctx, ["name", "description"], entries)
 
-    @perm.command(name="get")
+    @perm.command(name="get", aliases=["show"])
     @commands.has_permissions(administrator=True)
     @check_perm_exists
     async def perm_get(self, ctx, name):
@@ -98,7 +98,7 @@ class DBotPerm(commands.Cog):
         perm = self.bot.perm.get(name)
         await ctx.send(f"```{_perm_to_string(perm, ctx.guild)}```")
 
-    @perm.command(name="grant")
+    @perm.command(name="grant", aliases=["allow"])
     @commands.has_permissions(administrator=True)
     @check_perm_exists
     async def perm_grant(self, ctx, permission, target: typing.Union[discord.Role, discord.Member]):
@@ -109,7 +109,7 @@ class DBotPerm(commands.Cog):
 
         await ctx.message.add_reaction('\U00002705')
 
-    @perm.command(name="deny")
+    @perm.command(name="deny", aliases=["disallow"])
     @commands.has_permissions(administrator=True)
     @check_perm_exists
     async def perm_deny(self, ctx, permission, target: typing.Union[discord.Role, discord.Member]):
@@ -120,7 +120,7 @@ class DBotPerm(commands.Cog):
 
         await ctx.message.add_reaction('\U00002705')
 
-    @perm.command(name="default")
+    @perm.command(name="default", aliases=["reset"])
     @commands.has_permissions(administrator=True)
     @check_perm_exists
     async def perm_default(self, ctx, permission, target: typing.Union[discord.Role, discord.Member]):
