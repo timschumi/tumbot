@@ -29,7 +29,7 @@ def _id_to_string(guild, id):
     member = guild.get_member(id)
 
     if member is not None:
-        return f"@{member.display_name}"
+        return f"{member}"
 
     return f"@{id}"
 
