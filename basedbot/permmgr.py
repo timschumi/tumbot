@@ -34,12 +34,11 @@ def _build_id_list(member: discord.Member):
 
 
 class Permission:
-    def __init__(self, db, name, base=None, description=None, pretty_name=None):
+    def __init__(self, db, name, base=None, pretty_name=None):
         self._db = db
 
         self.name = name
         self.base = base
-        self.description = description
         self.pretty_name = pretty_name if pretty_name is not None else name
 
     def definitions(self, guild: discord.Guild):
