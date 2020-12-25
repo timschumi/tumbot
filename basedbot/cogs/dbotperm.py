@@ -60,6 +60,14 @@ def _perm_to_string(perm, guild):
     return string
 
 
+class RoleConverterExt(commands.RoleConverter):
+    async def convert(self, ctx, argument):
+        if argument == 'everyone':
+            return ctx.guild.get_role(ctx.guild.id)
+
+        return await super().convert(ctx, argument)
+
+
 class DBotPerm(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -101,7 +109,7 @@ class DBotPerm(commands.Cog):
     @perm.command(name="grant", aliases=["allow"])
     @commands.has_permissions(administrator=True)
     @check_perm_exists
-    async def perm_grant(self, ctx, permission, target: typing.Union[discord.Role, discord.Member]):
+    async def perm_grant(self, ctx, permission, target: typing.Union[RoleConverterExt, discord.Member]):
         """Grants a permission to a user or role"""
 
         perm = self.bot.perm.get(permission)
@@ -112,7 +120,7 @@ class DBotPerm(commands.Cog):
     @perm.command(name="deny", aliases=["disallow"])
     @commands.has_permissions(administrator=True)
     @check_perm_exists
-    async def perm_deny(self, ctx, permission, target: typing.Union[discord.Role, discord.Member]):
+    async def perm_deny(self, ctx, permission, target: typing.Union[RoleConverterExt, discord.Member]):
         """Denies a permission to a user or role"""
 
         perm = self.bot.perm.get(permission)
@@ -123,7 +131,7 @@ class DBotPerm(commands.Cog):
     @perm.command(name="default", aliases=["reset"])
     @commands.has_permissions(administrator=True)
     @check_perm_exists
-    async def perm_default(self, ctx, permission, target: typing.Union[discord.Role, discord.Member]):
+    async def perm_default(self, ctx, permission, target: typing.Union[RoleConverterExt, discord.Member]):
         """Resets a permission to default for a user or role"""
 
         perm = self.bot.perm.get(permission)
