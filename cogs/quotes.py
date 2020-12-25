@@ -3,6 +3,8 @@ import re
 import discord
 from discord.ext import commands
 
+import basedbot
+
 
 class Quotes(commands.Cog):
     def __init__(self, bot):
@@ -47,7 +49,7 @@ class Quotes(commands.Cog):
         await ctx.send(embed=embed)
 
     @quote.command()
-    @commands.has_permissions(administrator=True)
+    @basedbot.has_permissions("quotes.add")
     async def add(self, ctx, *, content):
         """Adds a quote"""
 
@@ -66,7 +68,7 @@ class Quotes(commands.Cog):
         await ctx.message.add_reaction('\U00002705')
 
     @quote.command()
-    @commands.has_permissions(manage_channels=True)
+    @basedbot.has_permissions("quotes.list")
     async def list(self, ctx, *, search=""):
         """Lists all the quotes"""
 
@@ -83,7 +85,7 @@ class Quotes(commands.Cog):
         await self.bot.send_paginated(ctx, [quote[0] for quote in quotes], linefmt="{}\n\n")
 
     @quote.command()
-    @commands.has_permissions(administrator=True)
+    @basedbot.has_permissions("quotes.delete")
     async def delete(self, ctx, *, search):
         """Removes a quote"""
 
@@ -110,4 +112,16 @@ def setup(bot):
     bot.conf.register('quotes.pretty',
                       default="0",
                       description="Whether to make quotes prettier.")
+    bot.perm.register('quotes.add',
+                      description="Add quotes.",
+                      base="administrator",
+                      pretty_name="Add quotes")
+    bot.perm.register('quotes.delete',
+                      description="Delete quotes.",
+                      base="administrator",
+                      pretty_name="Delete quotes")
+    bot.perm.register('quotes.list',
+                      description="List quotes.",
+                      base="administrator",
+                      pretty_name="List quotes")
     bot.add_cog(Quotes(bot))

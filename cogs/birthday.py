@@ -5,6 +5,8 @@ from typing import Pattern
 import asyncio
 from discord.ext import commands, tasks
 
+import basedbot
+
 
 class Birthdays(commands.Cog):
     DATEPATTERN: Pattern[str] = re.compile(r"(((0?[1-9])|([12][0-9]))\."  # 01.-29.
@@ -30,6 +32,7 @@ class Birthdays(commands.Cog):
         await ctx.send_help(ctx.command)
 
     @birthdays.command()
+    @basedbot.has_permissions("birthday.list")
     async def list(self, ctx, query=""):
         """Lists all birthdays
 
@@ -117,4 +120,8 @@ class Birthdays(commands.Cog):
 
 
 def setup(bot):
+    bot.perm.register('birthday.list',
+                      description="List birthdays.",
+                      base="send_messages",
+                      pretty_name="List birthdays")
     bot.add_cog(Birthdays(bot))

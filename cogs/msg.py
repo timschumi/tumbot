@@ -1,12 +1,15 @@
 from discord.ext import commands
 import re
 
+import basedbot
+
 
 class MessageStore(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.group(invoke_without_command=True)
+    @basedbot.has_permissions("msg.list")
     async def msg(self, ctx):
         """Allows for saving larger chunks of text using a shorthand"""
 
@@ -25,7 +28,7 @@ class MessageStore(commands.Cog):
         await ctx.send(f"Available shorthands:\n{text}")
 
     @msg.command()
-    @commands.has_permissions(manage_channels=True)
+    @basedbot.has_permissions("msg.set")
     async def set(self, ctx, name, *, content):
         """Assigns content to a shorthand"""
 
@@ -40,7 +43,7 @@ class MessageStore(commands.Cog):
         await ctx.message.add_reaction('\U00002705')
 
     @msg.command()
-    @commands.has_permissions(manage_channels=True)
+    @basedbot.has_permissions("msg.delete")
     async def delete(self, ctx, name):
         """Removes a shorthand"""
 
@@ -71,4 +74,16 @@ class MessageStore(commands.Cog):
 
 
 def setup(bot):
+    bot.perm.register('msg.list',
+                      description="List shorthands (!msg).",
+                      base="send_messages",
+                      pretty_name="List shorthands (msg.list)")
+    bot.perm.register('msg.set',
+                      description="Create/Update shorthands (!msg).",
+                      base="administrator",
+                      pretty_name="Create/Update shorthands (msg.set)")
+    bot.perm.register('msg.delete',
+                      description="Delete shorthands (!msg).",
+                      base="administrator",
+                      pretty_name="Delete shorthands (msg.delete)")
     bot.add_cog(MessageStore(bot))
