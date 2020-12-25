@@ -36,7 +36,7 @@ def _id_to_string(guild, id):
 
 def _perm_to_string(perm, guild):
     roleids = [role.id for role in reversed(guild.roles)]
-    string = f"{perm.name} - \"{perm.description}\":"
+    string = f"{perm.pretty_name}:"
 
     defs = perm.definitions(guild)
 
@@ -81,7 +81,7 @@ class DBotPerm(commands.Cog):
 
         for permname in sorted(self.bot.perm.registered_permissions):
             perm = self.bot.perm.get(permname)
-            entries.append({'name': perm.name, 'description': perm.description})
+            entries.append({'name': perm.name, 'description': perm.pretty_name})
 
         if len(entries) == 0:
             await ctx.send("There aren't any registered permissions.")
