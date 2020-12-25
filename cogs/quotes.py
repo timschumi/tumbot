@@ -113,15 +113,12 @@ def setup(bot):
                       default="0",
                       description="Whether to make quotes prettier.")
     bot.perm.register('quotes.add',
-                      description="Add quotes.",
                       base="administrator",
                       pretty_name="Add quotes")
     bot.perm.register('quotes.delete',
-                      description="Delete quotes.",
                       base="administrator",
                       pretty_name="Delete quotes")
     bot.perm.register('quotes.list',
-                      description="List quotes.",
                       base="administrator",
                       pretty_name="List quotes")
     bot.add_cog(Quotes(bot))

@@ -75,15 +75,12 @@ class MessageStore(commands.Cog):
 
 def setup(bot):
     bot.perm.register('msg.list',
-                      description="List shorthands (!msg).",
                       base="send_messages",
-                      pretty_name="List shorthands (msg.list)")
+                      pretty_name="List shorthands (msg)")
     bot.perm.register('msg.set',
-                      description="Create/Update shorthands (!msg).",
                       base="administrator",
-                      pretty_name="Create/Update shorthands (msg.set)")
+                      pretty_name="Create/Update shorthands (msg)")
     bot.perm.register('msg.delete',
-                      description="Delete shorthands (!msg).",
                       base="administrator",
-                      pretty_name="Delete shorthands (msg.delete)")
+                      pretty_name="Delete shorthands (msg)")
     bot.add_cog(MessageStore(bot))
