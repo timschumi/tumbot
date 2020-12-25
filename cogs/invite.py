@@ -173,13 +173,16 @@ class InviteManager(commands.Cog):
         options = {}
 
         if reason is not None:
-            matches = re.match(r'^(.*?)(?: `(.*)`)?$', reason)
+            matches = re.match(r'^(.*?)(?: *)(?:`(.*)`)?$', reason)
             if not matches:
                 await ctx.send("Could not parse the reason/options.")
                 return
 
             reason = matches.group(1)
             raw_options = matches.group(2)
+
+            if reason == "":
+                reason = None
 
             if raw_options is not None:
                 if not ctx.author.guild_permissions.create_instant_invite:
