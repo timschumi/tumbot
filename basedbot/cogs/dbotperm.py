@@ -56,6 +56,8 @@ def _perm_to_string(perm, guild):
 
     if perm.base is not None:
         string += f"\n - Fallback permission: {perm.base} (if none of the above rules match)"
+    else:
+        string += f"\n - Denied by default (if none of the above rules match)"
 
     return string
 
