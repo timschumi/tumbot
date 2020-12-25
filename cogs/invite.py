@@ -7,6 +7,8 @@ import time
 import discord
 from discord.ext import commands, tasks
 
+import basedbot
+
 
 def _reason_to_text(reason):
     if reason is None:
@@ -28,13 +30,13 @@ class InviteManager(commands.Cog):
         self._bot = bot
         self._invs = dict()
         self._var_channel = self._bot.conf.var('invite.channel')
-        self._var_perm_backend = self._bot.conf.var('invite.perm_backend')
-        self._var_perm_role = self._bot.conf.var('invite.perm_role')
         self._var_inv_channel = self._bot.conf.var('invite.inv_channel')
         self._var_inv_count = self._bot.conf.var('invite.inv_count')
         self._var_inv_age = self._bot.conf.var('invite.inv_age')
-        self._var_allow_requests = self._bot.conf.var('invite.allow_requests')
         self._var_notify_deleted = self._bot.conf.var('invite.notify_deleted')
+        self._perm_create = self._bot.perm.get('invite.create')
+        self._perm_create_custom = self._bot.perm.get('invite.create_custom')
+        self._perm_request = self._bot.perm.get('invite.request')
 
         self._bot.loop.create_task(self.init_invites())
 
@@ -63,22 +65,6 @@ class InviteManager(commands.Cog):
             return default
 
         return channel
-
-    def _can_user_invite(self, member):
-        backend = self._var_perm_backend.get(member.guild.id)
-
-        if backend == "role":
-            role = self._var_perm_role.get(member.guild.id)
-
-            if role is None:
-                return False
-
-            role = member.guild.get_role(int(role))
-
-            return role in member.roles
-
-        # Fallback for "permission" and everything else
-        return member.guild_permissions.create_instant_invite
 
     async def _create_invite(self, messageable, member, channel, reason=None, allowed_by=None, options=None):
         # Set allowed_by if not set
@@ -155,6 +141,7 @@ class InviteManager(commands.Cog):
 
     @invite.command(name="create")
     @commands.bot_has_permissions(create_instant_invite=True)
+    @basedbot.has_permissions("invite.create")
     async def invite_create(self, ctx, *, reason=None):
         """
         Creates a tracked invite
@@ -165,10 +152,6 @@ class InviteManager(commands.Cog):
          - `max_age`: How long the before the invite expires in seconds.
          - `max_uses`: How many times the invite can be used.
         """
-
-        if not self._can_user_invite(ctx.author):
-            await ctx.message.add_reaction('\U0001F6AB')
-            return
 
         options = {}
 
@@ -185,7 +168,7 @@ class InviteManager(commands.Cog):
                 reason = None
 
             if raw_options is not None:
-                if not ctx.author.guild_permissions.create_instant_invite:
+                if not self._perm_create_custom.allowed(ctx.author):
                     await ctx.send("You are not allowed to create invites with custom options.")
                     return
 
@@ -203,10 +186,6 @@ class InviteManager(commands.Cog):
         await ctx.message.add_reaction('\U00002705')
 
     def _invite_requests_enabled(self, guild):
-        # Setting enabled (i.e. not 0)?
-        if self._var_allow_requests.get(guild.id) == "0":
-            return False
-
         # invite.channel set?
         if self._var_channel.get(guild.id) is None:
             return False
@@ -219,6 +198,7 @@ class InviteManager(commands.Cog):
 
     @invite.command(name="request")
     @commands.bot_has_permissions(create_instant_invite=True)
+    @basedbot.has_permissions("invite.request")
     async def invite_request(self, ctx, *, reason=None):
         # Do we have invite requesting enabled?
         if not self._invite_requests_enabled(ctx.guild):
@@ -457,7 +437,7 @@ class InviteManager(commands.Cog):
         member = guild.get_member(payload.user_id)
 
         # Check if the user can invite
-        if not self._can_user_invite(member):
+        if not self._perm_create.allowed(member):
             return
 
         # Check if there is a pending request in the database
@@ -573,11 +553,6 @@ class ExpiredInvitesTracker(commands.Cog):
 def setup(bot):
     bot.conf.register('invite.channel',
                       description="The channel where invite tracking is logged.")
-    bot.conf.register('invite.perm_backend',
-                      default="permission",
-                      description="The control mechanism for who gets to create invites [permission/role].")
-    bot.conf.register('invite.perm_role',
-                      description="The role that is allowed to create invites.")
     bot.conf.register('invite.inv_channel',
                       description="The channel where invites will point to (None = current).")
     bot.conf.register('invite.inv_count',
@@ -586,12 +561,18 @@ def setup(bot):
     bot.conf.register('invite.inv_age',
                       default="0",
                       description="The lifetime of an invite in seconds (0 = infinite).")
-    bot.conf.register('invite.allow_requests',
-                      default="0",
-                      description="If not 0, allows users to request invites (requires [invite.channel] and [invite.inv_channel] to be set).")
     bot.conf.register('invite.notify_deleted',
                       default="0",
                       description="If not 0, messages the invite owner if an invite gets deleted.")
+    bot.perm.register('invite.create',
+                      base="create_instant_invite",
+                      pretty_name="Create invites")
+    bot.perm.register('invite.create_custom',
+                      base="create_instant_invite",
+                      pretty_name="Create invites with custom settings")
+    bot.perm.register('invite.request',
+                      base=False,
+                      pretty_name="Request invites")
 
     bot.add_cog(InviteManager(bot))
     bot.add_cog(ExpiredInvitesTracker(bot))
