@@ -121,6 +121,6 @@ class Birthdays(commands.Cog):
 
 def setup(bot):
     bot.perm.register('birthday.list',
-                      base="send_messages",
+                      base=True,
                       pretty_name="List birthdays")
     bot.add_cog(Birthdays(bot))

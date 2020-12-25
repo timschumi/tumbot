@@ -75,7 +75,7 @@ class MessageStore(commands.Cog):
 
 def setup(bot):
     bot.perm.register('msg.list',
-                      base="send_messages",
+                      base=True,
                       pretty_name="List shorthands (msg)")
     bot.perm.register('msg.set',
                       base="administrator",
