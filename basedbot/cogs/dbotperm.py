@@ -55,7 +55,7 @@ def _perm_to_string(perm, guild):
         string += f"\n - {'Granted' if defs[id] else 'Denied'} for {_id_to_string(guild, id)}"
 
     if perm.base is not None:
-        string += f"\n - Fallback: {perm.base} (if none of the above rules match)"
+        string += f"\n - Fallback permission: {perm.base} (if none of the above rules match)"
 
     return string
 
