@@ -34,7 +34,7 @@ def _build_id_list(member: discord.Member):
 
 
 class Permission:
-    def __init__(self, db, name, base=None, pretty_name=None):
+    def __init__(self, db, name, base=False, pretty_name=None):
         self._db = db
 
         self.name = name
@@ -58,10 +58,10 @@ class Permission:
             return perms[i]
 
         # If we are here, no rule matched. Fall back to builtin permission.
-        if self.base is None:
-            return False
+        if isinstance(self.base, str):
+            return getattr(member.guild_permissions, self.base, False)
 
-        return getattr(member.guild_permissions, self.base, False)
+        return self.base is True
 
     def grant(self, guild, id):
         with self._db.get(guild.id) as db:
