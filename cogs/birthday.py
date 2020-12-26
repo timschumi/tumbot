@@ -109,7 +109,7 @@ class Birthdays(commands.Cog):
     async def congratulate_align(self):
         current = datetime.datetime.now()
         next_time = current + datetime.timedelta(days=1)  # Tomorrow
-        next_time = datetime.datetime(next_time.year, next_time.month, next_time.day, 0, 1, 0, 0)  # Clip to 00:01
+        next_time = datetime.datetime(next_time.year, next_time.month, next_time.day, 0, 0, 1, 0)  # Clip to 00:00:01
 
         # Convert into timestamps
         current = time.mktime(current.timetuple())
