@@ -386,8 +386,22 @@ class InviteManager(commands.Cog):
 
             data = self._get_invite_data(invite)
 
-            await channel.send(f"**{member}** [{member.id}] joined the server via invite ({invite.code})."
-                               f" {self._invite_data_to_text(data)}")
+            embed = discord.Embed(title=f"**{member}** ({member.id}) joined the server.", color=0x0065bd)
+
+            if invite.max_uses != 0:
+                embed.add_field(name="Invite", value=f"{invite.code} ({invite.uses}/{invite.max_uses})", inline=False)
+            else:
+                embed.add_field(name="Invite", value=invite.code, inline=False)
+
+            embed.add_field(name="Creator", value=f"{data['inviter'].mention} ({data['inviter'].id})", inline=False)
+
+            if 'approver' in data:
+                embed.add_field(name="Approver", value=f"{data['approver'].mention} ({data['approver'].id})", inline=False)
+
+            if 'reason' in data:
+                embed.add_field(name="Reason", value=data['reason'], inline=False)
+
+            await channel.send(embed=embed)
             return
 
         text = f"I wasn't able to reliably determine how **{member}** [{member.id}] joined the server:"
