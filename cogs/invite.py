@@ -366,6 +366,10 @@ class InviteManager(commands.Cog):
     async def on_member_join(self, member):
         guild = member.guild
 
+        # Ignore bots
+        if member.bot:
+            return
+
         # Don't do anything if we don't have necessary permissions
         if not guild.me.guild_permissions.manage_guild:
             return
