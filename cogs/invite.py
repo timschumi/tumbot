@@ -111,7 +111,7 @@ class InviteManager(commands.Cog):
             return
 
         await member.ban(reason=f"{ctx.author} ({ctx.author.id}): {_reason_to_text(reason)}")
-        await ctx.send(f"User **{member}** has been banned by **{ctx.author}** (reason: {_reason_to_text(reason)}).")
+        await ctx.message.add_reaction('\U00002705')
 
         for g in self._bot.guilds:
             channel = self._var_channel.get(g.id)
@@ -130,6 +130,9 @@ class InviteManager(commands.Cog):
 
             embed = discord.Embed(title=f"{member} ({member.id}) has been banned on '{ctx.guild}'",
                                   color=(0xed3e32 if user_on_server else 0xf0bb2b))
+
+            if g == ctx.guild:
+                embed.add_field(name="Banned by", value=f"{ctx.author.mention} ({ctx.author.id})", inline=False)
 
             if reason:
                 embed.add_field(name="Reason", value=reason, inline=False)
