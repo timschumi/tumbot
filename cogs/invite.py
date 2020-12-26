@@ -315,8 +315,11 @@ class InviteManager(commands.Cog):
     async def on_guild_join(self, guild):
         await self.update_invites(guild)
 
-    def _invite_info_to_text(self, invite):
-        inviter = invite.inviter
+    def _get_invite_data(self, invite):
+        data = {
+            'invite': invite,
+            'inviter': invite.inviter,
+        }
 
         # Do we have that invite in the database?
         with self._bot.db.get(invite.guild.id) as db:
@@ -324,19 +327,28 @@ class InviteManager(commands.Cog):
         invite_data = result[0] if len(result) > 0 else None
 
         if invite_data:
-            inviter = invite.guild.get_member(invite_data["user"])
-
-        text = f"(Creator: **{inviter}** [{inviter.id}])"
+            data['inviter'] = invite.guild.get_member(invite_data["user"])
 
         if invite_data and invite_data["reason"]:
-            text += f" (Reason: {invite_data['reason']})"
+            data['reason'] = invite_data["reason"]
 
         if invite_data and invite_data["allowed_by"] != invite_data["user"]:
-            allowed_by = invite.guild.get_member(invite_data["allowed_by"])
-            text += f" (Approver: **{allowed_by}** [{allowed_by.id}])"
+            data['approver'] = invite.guild.get_member(invite_data["allowed_by"])
 
-        if invite.max_uses != 0:
-            text += f" (Uses: {invite.uses}/{invite.max_uses})"
+        return data
+
+    @classmethod
+    def _invite_data_to_text(cls, data):
+        text = f"(Creator: **{data['inviter']}** [{data['inviter'].id}])"
+
+        if 'reason' in data:
+            text += f" (Reason: {data['reason']})"
+
+        if 'approver' in data:
+            text += f" (Approver: **{data['approver']}** [{data['approver'].id}])"
+
+        if data['invite'].max_uses != 0:
+            text += f" (Uses: {data['invite'].uses}/{data['invite'].max_uses})"
 
         return text
 
@@ -372,13 +384,16 @@ class InviteManager(commands.Cog):
             # Invite been used, so add one to the counter
             invite.uses += 1
 
+            data = self._get_invite_data(invite)
+
             await channel.send(f"**{member}** [{member.id}] joined the server via invite ({invite.code})."
-                               f" {self._invite_info_to_text(invite)}")
+                               f" {self._invite_data_to_text(data)}")
             return
 
         text = f"I wasn't able to reliably determine how **{member}** [{member.id}] joined the server:"
         for e in invs:
-            text += f"\n - Invite **{e.code}** {self._invite_info_to_text(e)}."
+            data = self._get_invite_data(e)
+            text += f"\n - Invite **{e.code}** {self._invite_data_to_text(data)}."
 
         await channel.send(text)
         return
