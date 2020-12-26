@@ -128,11 +128,18 @@ class InviteManager(commands.Cog):
 
             user_on_server = member in g.members
 
-            await channel.send(
-                (":red_circle:" if user_on_server else ":yellow_circle:") +
-                f" {member} ({member.id}) has been banned on {ctx.guild} (reason: {_reason_to_text(reason)}). " +
-                ("The member is on this server." if user_on_server else "The member is not on this server.")
-            )
+            embed = discord.Embed(title=f"{member} ({member.id}) has been banned on '{ctx.guild}'",
+                                  color=(0xed3e32 if user_on_server else 0xf0bb2b))
+
+            if reason:
+                embed.add_field(name="Reason", value=reason, inline=False)
+
+            if user_on_server:
+                embed.add_field(name="Status", value=f"The member is on this server.", inline=False)
+            else:
+                embed.add_field(name="Status", value=f"The member is not on this server.", inline=False)
+
+            await channel.send(embed=embed)
 
     @commands.group(invoke_without_command=True)
     async def invite(self, ctx):
