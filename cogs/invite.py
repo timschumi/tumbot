@@ -29,6 +29,7 @@ class InviteManager(commands.Cog):
     def __init__(self, bot):
         self._bot = bot
         self._invs = dict()
+        self._vanity = dict()
         self._var_channel = self._bot.conf.var('invite.channel')
         self._var_inv_channel = self._bot.conf.var('invite.inv_channel')
         self._var_inv_count = self._bot.conf.var('invite.inv_count')
@@ -46,12 +47,26 @@ class InviteManager(commands.Cog):
         for g in self._bot.guilds:
             await self.update_invites(g)
 
+    @classmethod
+    async def _get_vanity_invite(cls, guild):
+        if "VANITY_URL" not in guild.features:
+            return None
+
+        try:
+            return await guild.vanity_invite()
+        except discord.errors.NotFound:
+            return None
+
     async def update_invites(self, guild):
         # Don't do anything if we don't have necessary permissions
         if not guild.me.guild_permissions.manage_guild:
             return
 
         self._invs[guild.id] = await guild.invites()
+
+        vanity_invite = await self._get_vanity_invite(guild)
+        if vanity_invite is not None:
+            self._vanity[guild.id] = vanity_invite
 
     def _get_inv_channel(self, guild, default=None):
         # Get stored channel
@@ -328,8 +343,10 @@ class InviteManager(commands.Cog):
     def _get_invite_data(self, invite):
         data = {
             'invite': invite,
-            'inviter': invite.inviter,
         }
+
+        if invite.inviter is not None:
+            data['inviter'] = invite.inviter
 
         # Do we have that invite in the database?
         with self._bot.db.get(invite.guild.id) as db:
@@ -349,7 +366,10 @@ class InviteManager(commands.Cog):
 
     @classmethod
     def _invite_data_to_text(cls, data):
-        text = f"(Creator: **{data['inviter']}** [{data['inviter'].id}])"
+        if 'inviter' in data:
+            text = f"(Creator: **{data['inviter']}** [{data['inviter'].id}])"
+        else:
+            text = f"(Creator: **Vanity URL**)"
 
         if 'reason' in data:
             text += f" (Reason: {data['reason']})"
@@ -388,8 +408,17 @@ class InviteManager(commands.Cog):
 
         invs = [e for e in old if e not in self._invs[guild.id] or _find_match(self._invs[guild.id], e).uses != e.uses]
 
+        if guild.id in self._vanity:
+            old_vanity = self._vanity[guild.id]
+            self._vanity[guild.id] = await self._get_vanity_invite(guild)
+
+            if self._vanity[guild.id] is None:
+                del self._vanity[guild.id]
+            elif old_vanity.uses != self._vanity[guild.id].uses:
+                invs.append(old_vanity)
+
         if len(invs) == 0:
-            await channel.send(f"I don't know how **{member}** [{member.id}] joined the server.")
+            await channel.send(f"I don't know how **{member}** ({member.id}) joined the server.")
             return
 
         if len(invs) == 1:
@@ -407,7 +436,10 @@ class InviteManager(commands.Cog):
             else:
                 embed.add_field(name="Invite", value=invite.code, inline=False)
 
-            embed.add_field(name="Creator", value=f"{data['inviter'].mention} ({data['inviter'].id})", inline=False)
+            if 'inviter' in data:
+                embed.add_field(name="Creator", value=f"{data['inviter'].mention} ({data['inviter'].id})", inline=False)
+            else:
+                embed.add_field(name="Creator", value="Vanity URL", inline=False)
 
             if 'approver' in data:
                 embed.add_field(name="Approver", value=f"{data['approver'].mention} ({data['approver'].id})", inline=False)
@@ -429,6 +461,10 @@ class InviteManager(commands.Cog):
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
         await self.update_invites(invite.guild)
+
+    @commands.Cog.listener()
+    async def on_guild_update(self, before, after):
+        await self.update_invites(after)
 
     async def _notify_invite_owner(self, invite, message):
         # Do we have that invite in the database?
