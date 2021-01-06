@@ -97,53 +97,6 @@ class InviteManager(commands.Cog):
 
         return True
 
-    @commands.command()
-    @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, *, reason=None):
-        """Ban user and announce it to other servers"""
-
-        if ctx.author.top_role <= member.top_role and ctx.author != ctx.guild.owner:
-            await ctx.send("You don't have a high enough role to ban this member.")
-            return
-
-        if ctx.guild.me.top_role <= member.top_role:
-            await ctx.send("I don't have a high enough role to ban this member.")
-            return
-
-        await member.ban(reason=f"{ctx.author} ({ctx.author.id}): {_reason_to_text(reason)}")
-        await ctx.message.add_reaction('\U00002705')
-
-        for g in self._bot.guilds:
-            channel = self._var_channel.get(g.id)
-
-            # Channel not set?
-            if channel is None:
-                continue
-
-            channel = g.get_channel(int(channel))
-
-            # Could not resolve channel?
-            if channel is None:
-                continue
-
-            user_on_server = member in g.members
-
-            embed = discord.Embed(title=f"{member} ({member.id}) has been banned on '{ctx.guild}'",
-                                  color=(0xed3e32 if user_on_server else 0xf0bb2b))
-
-            if g == ctx.guild:
-                embed.add_field(name="Banned by", value=f"{ctx.author.mention} ({ctx.author.id})", inline=False)
-
-            if reason:
-                embed.add_field(name="Reason", value=reason, inline=False)
-
-            if user_on_server:
-                embed.add_field(name="Status", value=f"The member is on this server.", inline=False)
-            else:
-                embed.add_field(name="Status", value=f"The member is not on this server.", inline=False)
-
-            await channel.send(embed=embed)
-
     @commands.group(invoke_without_command=True)
     async def invite(self, ctx):
         """Manages invites."""
