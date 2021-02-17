@@ -300,7 +300,7 @@ class InviteManager(commands.Cog):
             return
 
         try:
-            invite = await self._bot.fetch_invite(code)
+            invite = await self._bot.fetch_invite(res[0][0])
         except discord.errors.NotFound:
             await ctx.send("Could not find the given invite.")
             return
