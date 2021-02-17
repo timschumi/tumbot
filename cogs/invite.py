@@ -38,6 +38,7 @@ class InviteManager(commands.Cog):
         self._perm_create = self._bot.perm.get('invite.create')
         self._perm_create_custom = self._bot.perm.get('invite.create_custom')
         self._perm_request = self._bot.perm.get('invite.request')
+        self._perm_manage = self._bot.perm.get('invite.manage')
 
         self._bot.loop.create_task(self.init_invites())
 
@@ -303,7 +304,7 @@ class InviteManager(commands.Cog):
 
     @invite.command(name="list")
     async def invite_list(self, ctx):
-        see_all = ctx.author.guild_permissions.manage_guild
+        see_all = self._perm_manage.allowed(ctx.author)
 
         query = "SELECT rowid, user, reason, allowed_by FROM invite_active"
         args = ()
@@ -652,6 +653,9 @@ def setup(bot):
     bot.perm.register('invite.request',
                       base=False,
                       pretty_name="Request invites")
+    bot.perm.register('invite.manage',
+                      base="manage_guild",
+                      pretty_name="Manage invites")
 
     bot.add_cog(InviteManager(bot))
     bot.add_cog(ExpiredInvitesTracker(bot))
