@@ -284,10 +284,16 @@ class InviteManager(commands.Cog):
             await ctx.send("Could not find last invite.")
             return
 
-        # Check if invite is managed by bot and is related to user
+        query = "SELECT code FROM invite_active WHERE (code = ? OR rowid = ?)"
+        args = (code, code)
+
+        if not self._perm_manage.allowed(ctx.author):
+            query += " AND (user = ? OR allowed_by = ?)"
+            args += (ctx.author.id, ctx.author.id)
+
+        # Check if invite is managed by bot (and is related to user)
         with self._bot.db.get(ctx.guild.id) as db:
-            res = db.execute("SELECT code FROM invite_active WHERE (user = ? OR allowed_by = ?) AND (code = ? OR rowid = ?)",
-                             (ctx.author.id, ctx.author.id, code, code)).fetchall()
+            res = db.execute(query, args).fetchall()
 
         if len(res) < 1:
             await ctx.message.add_reaction('\U0001F6AB')
