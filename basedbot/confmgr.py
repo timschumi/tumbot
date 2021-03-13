@@ -25,14 +25,11 @@ class ConfigVar:
         self.description = description
         self.scope = scope
 
-    def get(self, dbid, default=None):
-        if default is None:
-            default = self.default
-
+    def get(self, dbid):
         result = self._db.get(dbid, self.scope).execute("SELECT value FROM config WHERE name = ?", (self.name,)).fetchall()
 
         if len(result) < 1:
-            return default
+            return self.default
 
         return str(result[0][0])
 
