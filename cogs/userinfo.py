@@ -11,7 +11,7 @@ class Userinfo(commands.Cog):
     async def userinfo(self, ctx, member: discord.Member):
         """Displays the most relevent stats of a user"""
 
-        roles = [role for role in member.roles]
+        roles = [role for role in reversed(member.roles)]
 
         userinfoembed = discord.Embed(colour=member.color, timestamp=ctx.message.created_at)
 
