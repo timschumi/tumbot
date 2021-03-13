@@ -2,6 +2,32 @@ import os
 import re
 import sqlite3
 from pathlib import Path
+from discord.ext.commands import Context
+
+
+class NoValidContextException(Exception):
+    pass
+
+
+def _ctx_to_dbid(ctx, scope):
+    # Global doesn't have a dbid, so just return 'global'
+    if scope == "global":
+        return "global"
+
+    # If we got a string or int, we can only hope the developer knows what he is doing
+    if isinstance(ctx, (str, int)):
+        return str(ctx)
+
+    if not isinstance(ctx, Context):
+        raise NoValidContextException(f"{ctx} is not of type {Context}")
+
+    if scope == "guild" and ctx.guild is not None:
+        return str(ctx.guild.id)
+
+    if scope == "user" and ctx.author is not None:
+        return str(ctx.author.id)
+
+    raise NoValidContextException(f"Context could not be converted for scope '{scope}'")
 
 
 class DatabaseManager:
@@ -17,7 +43,8 @@ class DatabaseManager:
 
         return f"{scope}_{dbid}"
 
-    def get(self, dbid, scope='guild'):
+    def get(self, ctx, scope='guild'):
+        dbid = _ctx_to_dbid(ctx, scope)
         dbid = self._get_dbname(dbid, scope)
 
         if dbid not in self._db_handles:

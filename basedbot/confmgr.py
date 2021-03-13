@@ -25,20 +25,20 @@ class ConfigVar:
         self.description = description
         self.scope = scope
 
-    def get(self, dbid):
-        result = self._db.get(dbid, self.scope).execute("SELECT value FROM config WHERE name = ?", (self.name,)).fetchall()
+    def get(self, ctx):
+        result = self._db.get(ctx, self.scope).execute("SELECT value FROM config WHERE name = ?", (self.name,)).fetchall()
 
         if len(result) < 1:
             return self.default
 
         return str(result[0][0])
 
-    def set(self, dbid, value):
-        with self._db.get(dbid, self.scope) as db:
+    def set(self, ctx, value):
+        with self._db.get(ctx, self.scope) as db:
             db.execute("REPLACE INTO config (name, value) VALUES (?, ?)", (self.name, value))
 
-    def unset(self, dbid):
-        with self._db.get(dbid, self.scope) as db:
+    def unset(self, ctx):
+        with self._db.get(ctx, self.scope) as db:
             db.execute("DELETE FROM config WHERE name = ?", (self.name,))
 
 
@@ -73,10 +73,10 @@ class ConfigManager:
 
         return self._vars[name]
 
-    def get(self, dbid, name, **kwargs):
+    def get(self, ctx, name, **kwargs):
         existing = self.var(name)
-        return existing.get(dbid, **kwargs)
+        return existing.get(ctx, **kwargs)
 
-    def set(self, dbid, name, **kwargs):
+    def set(self, ctx, name, **kwargs):
         existing = self.var(name)
-        existing.set(dbid, **kwargs)
+        existing.set(ctx, **kwargs)
