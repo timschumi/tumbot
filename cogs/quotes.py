@@ -28,7 +28,7 @@ class Quotes(commands.Cog):
 
         quote = quote[0][0]
 
-        if self._var_pretty.get(ctx.guild.id) == "0":
+        if self._var_pretty.get(ctx.guild.id) == "0" or "\n" in quote or re.search(r'<([@#])[0-9]+>', quote):
             await ctx.send(quote)
             return
 
