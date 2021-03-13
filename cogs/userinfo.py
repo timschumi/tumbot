@@ -31,7 +31,7 @@ class Userinfo(commands.Cog):
                                 value=member.created_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"))
         userinfoembed.add_field(name='Beigetreten:', value=member.joined_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"))
 
-        userinfoembed.add_field(name=f'Rollen ({len(roles)})', value='  '.join([role.mention for role in roles]))
+        userinfoembed.add_field(name=f'Rollen ({len(roles)})', value="\n".join([role.mention for role in roles]))
         userinfoembed.add_field(name='Höchste Rolle:', value=str(member.top_role.mention))
 
         userinfoembed.add_field(name='Bot?', value=str(member.bot))
