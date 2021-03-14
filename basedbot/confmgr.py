@@ -1,4 +1,7 @@
 from enum import Enum
+from . import converter as converters
+from .converter import converter_from_def
+from typing import Optional
 
 
 class UnregisteredVariableException(Exception):
@@ -16,7 +19,8 @@ class ConfigAccessLevel(Enum):
 
 
 class ConfigVar:
-    def __init__(self, db, name, default=None, access=ConfigAccessLevel.ADMIN, description=None, scope='guild'):
+    def __init__(self, db, name, default=None, access=ConfigAccessLevel.ADMIN, description=None, scope='guild',
+                 conv=Optional[str]):
         self._db = db
 
         self.name = name
@@ -24,6 +28,7 @@ class ConfigVar:
         self.access = access
         self.description = description
         self.scope = scope
+        self.conv = converter_from_def(conv)
 
     def get(self, ctx):
         result = self._db.get(ctx, self.scope).execute("SELECT value FROM config WHERE name = ?", (self.name,)).fetchall()
@@ -33,13 +38,24 @@ class ConfigVar:
 
         return str(result[0][0])
 
+    async def cget(self, ctx):
+        value = self.get(ctx)
+        return await self.conv.load(ctx, value)
+
     def set(self, ctx, value):
         with self._db.get(ctx, self.scope) as db:
             db.execute("REPLACE INTO config (name, value) VALUES (?, ?)", (self.name, value))
 
+    async def cset(self, ctx, value):
+        value = await self.conv.store(ctx, value)
+        self.set(ctx, value)
+
     def unset(self, ctx):
         with self._db.get(ctx, self.scope) as db:
             db.execute("DELETE FROM config WHERE name = ?", (self.name,))
+
+    async def show(self, ctx):
+        return await self.conv.show(ctx, self.get(ctx))
 
 
 class ConfigManager:
