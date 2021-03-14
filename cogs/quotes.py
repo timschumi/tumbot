@@ -111,6 +111,7 @@ class Quotes(commands.Cog):
 def setup(bot):
     bot.conf.register('quotes.pretty',
                       default="0",
+                      conv=bool,
                       description="Whether to make quotes prettier.")
     bot.perm.register('quotes.add',
                       base="administrator",

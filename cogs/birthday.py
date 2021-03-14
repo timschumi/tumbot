@@ -1,8 +1,10 @@
 import datetime
 import time
 import re
-from typing import Pattern
+from typing import Pattern, Optional
 import asyncio
+
+import discord
 from discord.ext import commands, tasks
 
 import basedbot
@@ -19,6 +21,7 @@ class Birthdays(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._var_channel = self.bot.conf.register('birthday.channel',
+                                                   conv=Optional[discord.TextChannel],
                                                    description="The channel where birthday messages are sent to.")
         self.congratulate.start()
 

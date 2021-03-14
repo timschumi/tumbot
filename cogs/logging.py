@@ -1,3 +1,6 @@
+from typing import Optional
+
+import discord
 from discord.ext import commands
 
 
@@ -57,5 +60,6 @@ class Logging(commands.Cog):
 
 def setup(bot):
     bot.conf.register('logging.channel',
+                      conv=Optional[discord.TextChannel],
                       description="The channel where various activities are logged.")
     bot.add_cog(Logging(bot))

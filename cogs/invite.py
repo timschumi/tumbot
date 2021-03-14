@@ -3,6 +3,7 @@ import datetime
 import json
 import re
 import time
+from typing import Optional
 
 import discord
 from discord.ext import commands, tasks
@@ -638,18 +639,23 @@ class ExpiredInvitesTracker(commands.Cog):
 
 def setup(bot):
     bot.conf.register('invite.channel',
+                      conv=Optional[discord.TextChannel],
                       description="The channel where invite tracking is logged.")
     bot.conf.register('invite.inv_channel',
+                      conv=Optional[discord.TextChannel],
                       description="The channel where invites will point to (None = current).")
     bot.conf.register('invite.inv_count',
                       default="1",
+                      conv=int,
                       description="The amount of people that can be invited (0 = infinite).")
     bot.conf.register('invite.inv_age',
                       default="0",
+                      conv=int,
                       description="The lifetime of an invite in seconds (0 = infinite).")
     bot.conf.register('invite.notify_deleted',
                       default="0",
-                      description="If not 0, messages the invite owner if an invite gets deleted.")
+                      conv=bool,
+                      description="If true, messages the invite owner if an invite gets deleted.")
     bot.perm.register('invite.create',
                       base="create_instant_invite",
                       pretty_name="Create invites")
