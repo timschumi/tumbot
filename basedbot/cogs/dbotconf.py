@@ -1,6 +1,7 @@
 from discord.ext import commands
 
 from basedbot import ConfigAccessLevel
+from basedbot.converter import InvalidConversionException
 
 
 def _is_admin(member):
@@ -24,8 +25,16 @@ def _has_access_to_var(member, var):
     return False
 
 
-def _var_to_string(ctx, var):
-    string = f"{var.name} = \"{var.get(ctx.guild.id)}\" (def. \"{var.default}\")"
+async def _var_value_to_string(ctx, var):
+    try:
+        return await var.show(ctx)
+    except InvalidConversionException:
+        return "<conversion error>"
+
+
+async def _var_to_string(ctx, var):
+    string = f"{var.name} = {await _var_value_to_string(ctx, var)}"
+    string += f" ({var.conv.name()}, def. {await var.conv.show(ctx, var.default)})"
 
     if var.description is not None:
         string += f"\n - {var.description}"
@@ -84,7 +93,12 @@ class DBotConf(commands.Cog):
             if not _has_access_to_var(ctx.author, var):
                 continue
 
-            entries.append({'name': var.name, 'value': var.get(ctx.guild.id)})
+            entry = {
+                'name': var.name,
+                'value': await _var_value_to_string(ctx, var)
+            }
+
+            entries.append(entry)
 
         if len(entries) == 0:
             await ctx.send("You don't have access to any variables.")
@@ -99,7 +113,7 @@ class DBotConf(commands.Cog):
         """Retrieves a single configuration variable"""
 
         var = self.bot.conf.var(name)
-        await ctx.send(f"```{_var_to_string(ctx, var)}```")
+        await ctx.send(f"```{await _var_to_string(ctx, var)}```")
 
     @conf.command(name="set")
     @commands.has_permissions(administrator=True)
@@ -108,7 +122,12 @@ class DBotConf(commands.Cog):
         """Sets the value of a specific configuration variable"""
 
         var = self.bot.conf.var(name)
-        var.set(ctx.guild.id, value)
+
+        try:
+            await var.cset(ctx, value)
+        except InvalidConversionException as e:
+            await ctx.send(f"```{e}```")
+            return
 
         await ctx.message.add_reaction('\U00002705')
 
