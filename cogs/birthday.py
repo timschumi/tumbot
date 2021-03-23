@@ -121,6 +121,14 @@ class Birthdays(commands.Cog):
         # Sleep until then
         await asyncio.sleep(next_time - current)
 
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        # Delete user from database
+        with self.bot.db.get(member.guild.id) as db:
+            db.execute("DELETE FROM birthdays WHERE userId = ?", (member.id,))
+
+        return
+
 
 def setup(bot):
     bot.perm.register('birthday.list',
