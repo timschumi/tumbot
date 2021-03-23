@@ -23,6 +23,7 @@ class Birthdays(commands.Cog):
         self._var_channel = self.bot.conf.register('birthday.channel',
                                                    conv=Optional[discord.TextChannel],
                                                    description="The channel where birthday messages are sent to.")
+        self._var_role = self.bot.conf.var('birthday.role')
         self.congratulate.start()
 
     def cog_unload(self):
@@ -86,18 +87,65 @@ class Birthdays(commands.Cog):
         date = datetime.datetime.now()
         return date.day, date.month
 
+    async def _clear_roles(self, guild):
+        if not guild.me.guild_permissions.manage_roles:
+            return
+
+        with self.bot.db.get(guild.id) as db:
+            users = db.execute("SELECT userId, role FROM birthdays WHERE role IS NOT NULL").fetchall()
+
+        for e in users:
+            member = guild.get_member(e[0])
+            role = guild.get_role(e[1])
+
+            if not member or not role:
+                continue
+
+            if role >= guild.me.top_role:
+                continue
+
+            await member.remove_roles(role)
+
+            with self.bot.db.get(guild.id) as db:
+                db.execute("UPDATE birthdays SET role = NULL WHERE userId = ?", (member.id,))
+
+    def _get_birthday_role(self, guild):
+        role = self._var_role.get(guild.id)
+
+        if role is None:
+            return None
+
+        return guild.get_role(int(role))
+
     @tasks.loop(hours=24)
     async def congratulate(self):
         day, month = self.get_current_date()
         for guild in self.bot.guilds:
+            # Clear old birthday roles
+            await self._clear_roles(guild)
+
+            role = self._get_birthday_role(guild)
+
             text = f"Geburtstage am {day}.{month}.:"
             users = self.bot.db.get(guild.id).execute(
                 "SELECT userId FROM birthdays WHERE day = ? AND month = ?", (day, month)).fetchall()
             if len(users) == 0:
                 continue
-            for user in users:
-                text += f"\n    :tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, <@{user[0]}> " \
+
+            for e in users:
+                member = guild.get_member(e[0])
+
+                if not member:
+                    continue
+
+                text += f"\n    :tada: :fireworks: :partying_face: **Alles Gute zum Geburtstag**, {member.mention} " \
                         f":partying_face: :fireworks: :tada: "
+
+                if role is not None and guild.me.guild_permissions.manage_roles and guild.me.top_role > role:
+                    await member.add_roles(role)
+
+                    with self.bot.db.get(guild.id) as db:
+                        db.execute("UPDATE birthdays SET role = ? WHERE userId = ?", (role.id, member.id))
 
             channel = self._var_channel.get(guild.id)
 
@@ -131,6 +179,9 @@ class Birthdays(commands.Cog):
 
 
 def setup(bot):
+    bot.conf.register('birthday.role',
+                      conv=Optional[discord.Role],
+                      description="The role that birthday-people should get.")
     bot.perm.register('birthday.list',
                       base=True,
                       pretty_name="List birthdays")
