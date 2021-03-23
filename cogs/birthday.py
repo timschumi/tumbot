@@ -20,9 +20,7 @@ class Birthdays(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self._var_channel = self.bot.conf.register('birthday.channel',
-                                                   conv=Optional[discord.TextChannel],
-                                                   description="The channel where birthday messages are sent to.")
+        self._var_channel = self.bot.conf.var('birthday.channel')
         self._var_role = self.bot.conf.var('birthday.role')
         self.congratulate.start()
 
@@ -179,6 +177,9 @@ class Birthdays(commands.Cog):
 
 
 def setup(bot):
+    bot.conf.register('birthday.channel',
+                      conv=Optional[discord.TextChannel],
+                      description="The channel where birthday messages are sent to.")
     bot.conf.register('birthday.role',
                       conv=Optional[discord.Role],
                       description="The role that birthday-people should get.")
