@@ -358,6 +358,14 @@ class GuildNetworks(commands.Cog):
 
         return guild.get_channel(int(channel))
 
+    async def _send_network_channel(self, guild, *args, **kwargs):
+        channel = self._get_network_channel(guild)
+
+        if channel is None:
+            return
+
+        await channel.send(*args, **kwargs)
+
     @network.command(name="ban")
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
@@ -371,11 +379,6 @@ class GuildNetworks(commands.Cog):
         guilds = self._get_neighbor_guilds(ctx.guild, pred=lambda nwm: self._get_network_channel(nwm.guild) is not None)
 
         for g in guilds:
-            channel = self._get_network_channel(g)
-
-            if channel is None:
-                continue
-
             user_in_guild = member in g.members
 
             embed = discord.Embed(title=f"{member} ({member.id}) has been banned on '{ctx.guild}'",
@@ -392,7 +395,7 @@ class GuildNetworks(commands.Cog):
             else:
                 embed.add_field(name="Status", value=f"The member is not on this server.", inline=False)
 
-            await channel.send(embed=embed)
+            await self._send_network_channel(g, embed=embed)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
