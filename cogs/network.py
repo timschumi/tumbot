@@ -399,6 +399,39 @@ class GuildNetworks(commands.Cog):
 
             await self._send_network_channel(g, embed=embed)
 
+    @network.command(name="kick")
+    @commands.has_permissions(kick_members=True)
+    @commands.bot_has_permissions(kick_members=True)
+    @_check_affect_member
+    async def network_kick(self, ctx, member: discord.Member, *, reason=None):
+        """Kick user and announce it to other guilds in the network"""
+
+        await member.kick(reason=f"{ctx.author} ({ctx.author.id}): {reason if reason else 'No reason given.'}")
+        await ctx.message.add_reaction('\U00002705')
+
+        guilds = self._get_neighbor_guilds(ctx.guild, pred=lambda nwm: self._get_network_channel(nwm.guild) is not None)
+
+        for g in guilds:
+            user_in_guild = member in g.members
+
+            embed = discord.Embed(title=f"{member} ({member.id}) has been kicked from '{ctx.guild}'",
+                                  color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN))
+
+            embed.set_thumbnail(url=ctx.guild.icon_url)
+
+            if g == ctx.guild:
+                embed.add_field(name="Kicked by", value=f"{ctx.author.mention} ({ctx.author.id})", inline=False)
+
+            if reason:
+                embed.add_field(name="Reason", value=reason, inline=False)
+
+            if user_in_guild:
+                embed.add_field(name="Status", value=f"The member is on this server.", inline=False)
+            else:
+                embed.add_field(name="Status", value=f"The member is not on this server.", inline=False)
+
+            await self._send_network_channel(g, embed=embed)
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         # Ignore private messages
