@@ -47,7 +47,7 @@ class GuildNetworkMember:
 
     @admin.setter
     def admin(self, value):
-        self.admin = value
+        self._admin = value
 
         with self._db.get('', scope='global') as db:
             db.execute("UPDATE network_member SET admin = ? WHERE nid = ? AND gid = ?",
