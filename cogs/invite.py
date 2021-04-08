@@ -566,6 +566,10 @@ class ExpiredInvitesTracker(commands.Cog):
         if next_invite is not None and self._exp_times[next_invite] < self._exp_times[invite]:
             return
 
+        # Avoid cancelling if we are already cancelling
+        if self.check_invites.is_being_cancelled():
+            return
+
         # Restart loop in case new invite has a smaller max_age
         if self.check_invites.is_running():
             self.check_invites.restart()
