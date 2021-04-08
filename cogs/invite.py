@@ -538,6 +538,12 @@ class ExpiredInvitesTracker(commands.Cog):
         exp_time = invite.created_at + datetime.timedelta(seconds=invite.max_age)
         return time.mktime(exp_time.timetuple())
 
+    def _get_next_invite(self):
+        if len(self._exp_times) == 0:
+            return None
+
+        return min(self._exp_times, key=self._exp_times.get)
+
     async def _init_invites(self):
         await self._bot.wait_until_ready()
 
@@ -580,7 +586,7 @@ class ExpiredInvitesTracker(commands.Cog):
             self.check_invites.cancel()
 
         # Get next invite that expires
-        invite = min(self._exp_times, key=self._exp_times.get)
+        invite = self._get_next_invite()
         exp_time = self._exp_times[invite]
 
         # Sleep until then
