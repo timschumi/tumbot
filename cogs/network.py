@@ -6,6 +6,9 @@ from discord.ext import commands
 
 import basedbot
 
+COLOR_NETWORK_JOIN = 0x00d100
+COLOR_MESSAGE_WARN = 0xf0bb2b
+COLOR_MESSAGE_CRIT = 0xed3e32
 
 class GuildNetworkMember:
     def __init__(self, bot, db, network, data):
@@ -348,7 +351,7 @@ class GuildNetworks(commands.Cog):
             user_in_guild = member in g.members
 
             embed = discord.Embed(title=f"{member} ({member.id}) has been banned on '{ctx.guild}'",
-                                  color=(0xed3e32 if user_in_guild else 0xf0bb2b))
+                                  color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN))
 
             if g == ctx.guild:
                 embed.add_field(name="Banned by", value=f"{ctx.author.mention} ({ctx.author.id})", inline=False)
@@ -423,7 +426,7 @@ class GuildNetworks(commands.Cog):
         inviter = self._bot.get_guild(entry["inviter"])
 
         # Construct the Embed
-        embed = discord.Embed(title=f"**{guild}** ({guild.id}) joined the network.", color=0x00d100)
+        embed = discord.Embed(title=f"**{guild}** ({guild.id}) joined the network.", color=COLOR_NETWORK_JOIN)
         embed.add_field(name="Network", value=f"{network.name} ({network.id})", inline=False)
         if inviter is not None:
             embed.add_field(name="Invited by", value=f"{inviter} ({inviter.id})", inline=False)
