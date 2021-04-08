@@ -40,6 +40,7 @@ class Admin(commands.Cog):
 def setup(bot):
     bot.conf.register('admin.clear_max',
                       default="0",
+                      conv=int,
                       access=ConfigAccessLevel.OWNER,
                       description="How many messages the clear command can remove (0 = infinite).")
     bot.add_cog(Admin(bot))

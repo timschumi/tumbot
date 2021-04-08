@@ -3,6 +3,7 @@ import datetime
 import json
 import re
 import time
+from typing import Optional
 
 import discord
 from discord.ext import commands, tasks
@@ -29,6 +30,7 @@ class InviteManager(commands.Cog):
     def __init__(self, bot):
         self._bot = bot
         self._invs = dict()
+        self._vanity = dict()
         self._var_channel = self._bot.conf.var('invite.channel')
         self._var_inv_channel = self._bot.conf.var('invite.inv_channel')
         self._var_inv_count = self._bot.conf.var('invite.inv_count')
@@ -37,6 +39,7 @@ class InviteManager(commands.Cog):
         self._perm_create = self._bot.perm.get('invite.create')
         self._perm_create_custom = self._bot.perm.get('invite.create_custom')
         self._perm_request = self._bot.perm.get('invite.request')
+        self._perm_manage = self._bot.perm.get('invite.manage')
 
         self._bot.loop.create_task(self.init_invites())
 
@@ -46,12 +49,26 @@ class InviteManager(commands.Cog):
         for g in self._bot.guilds:
             await self.update_invites(g)
 
+    @classmethod
+    async def _get_vanity_invite(cls, guild):
+        if "VANITY_URL" not in guild.features:
+            return None
+
+        try:
+            return await guild.vanity_invite()
+        except discord.errors.NotFound:
+            return None
+
     async def update_invites(self, guild):
         # Don't do anything if we don't have necessary permissions
         if not guild.me.guild_permissions.manage_guild:
             return
 
         self._invs[guild.id] = await guild.invites()
+
+        vanity_invite = await self._get_vanity_invite(guild)
+        if vanity_invite is not None:
+            self._vanity[guild.id] = vanity_invite
 
     def _get_inv_channel(self, guild, default=None):
         # Get stored channel
@@ -221,17 +238,23 @@ class InviteManager(commands.Cog):
             await ctx.send("Could not find last invite.")
             return
 
-        # Check if invite is managed by bot and is related to user
+        query = "SELECT code FROM invite_active WHERE (code = ? OR rowid = ?)"
+        args = (code, code)
+
+        if not self._perm_manage.allowed(ctx.author):
+            query += " AND (user = ? OR allowed_by = ?)"
+            args += (ctx.author.id, ctx.author.id)
+
+        # Check if invite is managed by bot (and is related to user)
         with self._bot.db.get(ctx.guild.id) as db:
-            res = db.execute("SELECT code FROM invite_active WHERE (user = ? OR allowed_by = ?) AND (code = ? OR rowid = ?)",
-                             (ctx.author.id, ctx.author.id, code, code)).fetchall()
+            res = db.execute(query, args).fetchall()
 
         if len(res) < 1:
             await ctx.message.add_reaction('\U0001F6AB')
             return
 
         try:
-            invite = await self._bot.fetch_invite(code)
+            invite = await self._bot.fetch_invite(res[0][0])
         except discord.errors.NotFound:
             await ctx.send("Could not find the given invite.")
             return
@@ -241,7 +264,7 @@ class InviteManager(commands.Cog):
 
     @invite.command(name="list")
     async def invite_list(self, ctx):
-        see_all = ctx.author.guild_permissions.manage_guild
+        see_all = self._perm_manage.allowed(ctx.author)
 
         query = "SELECT rowid, user, reason, allowed_by FROM invite_active"
         args = ()
@@ -281,8 +304,10 @@ class InviteManager(commands.Cog):
     def _get_invite_data(self, invite):
         data = {
             'invite': invite,
-            'inviter': invite.inviter,
         }
+
+        if invite.inviter is not None:
+            data['inviter'] = invite.inviter
 
         # Do we have that invite in the database?
         with self._bot.db.get(invite.guild.id) as db:
@@ -302,7 +327,10 @@ class InviteManager(commands.Cog):
 
     @classmethod
     def _invite_data_to_text(cls, data):
-        text = f"(Creator: **{data['inviter']}** [{data['inviter'].id}])"
+        if 'inviter' in data:
+            text = f"(Creator: **{data['inviter']}** [{data['inviter'].id}])"
+        else:
+            text = f"(Creator: **Vanity URL**)"
 
         if 'reason' in data:
             text += f" (Reason: {data['reason']})"
@@ -341,8 +369,17 @@ class InviteManager(commands.Cog):
 
         invs = [e for e in old if e not in self._invs[guild.id] or _find_match(self._invs[guild.id], e).uses != e.uses]
 
+        if guild.id in self._vanity:
+            old_vanity = self._vanity[guild.id]
+            self._vanity[guild.id] = await self._get_vanity_invite(guild)
+
+            if self._vanity[guild.id] is None:
+                del self._vanity[guild.id]
+            elif old_vanity.uses != self._vanity[guild.id].uses:
+                invs.append(old_vanity)
+
         if len(invs) == 0:
-            await channel.send(f"I don't know how **{member}** [{member.id}] joined the server.")
+            await channel.send(f"I don't know how **{member}** ({member.id}) joined the server.")
             return
 
         if len(invs) == 1:
@@ -360,7 +397,10 @@ class InviteManager(commands.Cog):
             else:
                 embed.add_field(name="Invite", value=invite.code, inline=False)
 
-            embed.add_field(name="Creator", value=f"{data['inviter'].mention} ({data['inviter'].id})", inline=False)
+            if 'inviter' in data:
+                embed.add_field(name="Creator", value=f"{data['inviter'].mention} ({data['inviter'].id})", inline=False)
+            else:
+                embed.add_field(name="Creator", value="Vanity URL", inline=False)
 
             if 'approver' in data:
                 embed.add_field(name="Approver", value=f"{data['approver'].mention} ({data['approver'].id})", inline=False)
@@ -382,6 +422,10 @@ class InviteManager(commands.Cog):
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
         await self.update_invites(invite.guild)
+
+    @commands.Cog.listener()
+    async def on_guild_update(self, before, after):
+        await self.update_invites(after)
 
     async def _notify_invite_owner(self, invite, message):
         # Do we have that invite in the database?
@@ -548,18 +592,23 @@ class ExpiredInvitesTracker(commands.Cog):
 
 def setup(bot):
     bot.conf.register('invite.channel',
+                      conv=Optional[discord.TextChannel],
                       description="The channel where invite tracking is logged.")
     bot.conf.register('invite.inv_channel',
+                      conv=Optional[discord.TextChannel],
                       description="The channel where invites will point to (None = current).")
     bot.conf.register('invite.inv_count',
                       default="1",
+                      conv=int,
                       description="The amount of people that can be invited (0 = infinite).")
     bot.conf.register('invite.inv_age',
                       default="0",
+                      conv=int,
                       description="The lifetime of an invite in seconds (0 = infinite).")
     bot.conf.register('invite.notify_deleted',
                       default="0",
-                      description="If not 0, messages the invite owner if an invite gets deleted.")
+                      conv=bool,
+                      description="If true, messages the invite owner if an invite gets deleted.")
     bot.perm.register('invite.create',
                       base="create_instant_invite",
                       pretty_name="Create invites")
@@ -569,6 +618,9 @@ def setup(bot):
     bot.perm.register('invite.request',
                       base=False,
                       pretty_name="Request invites")
+    bot.perm.register('invite.manage',
+                      base="manage_guild",
+                      pretty_name="Manage invites")
 
     bot.add_cog(InviteManager(bot))
     bot.add_cog(ExpiredInvitesTracker(bot))

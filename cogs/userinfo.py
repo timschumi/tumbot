@@ -11,7 +11,7 @@ class Userinfo(commands.Cog):
     async def userinfo(self, ctx, member: discord.Member):
         """Displays the most relevent stats of a user"""
 
-        roles = [role for role in member.roles]
+        roles = [role for role in reversed(member.roles)]
 
         userinfoembed = discord.Embed(colour=member.color, timestamp=ctx.message.created_at)
 
@@ -31,7 +31,7 @@ class Userinfo(commands.Cog):
                                 value=member.created_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"))
         userinfoembed.add_field(name='Beigetreten:', value=member.joined_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"))
 
-        userinfoembed.add_field(name=f'Rollen ({len(roles)})', value='  '.join([role.mention for role in roles]))
+        userinfoembed.add_field(name=f'Rollen ({len(roles)})', value="\n".join([role.mention for role in roles]))
         userinfoembed.add_field(name='Höchste Rolle:', value=str(member.top_role.mention))
 
         userinfoembed.add_field(name='Bot?', value=str(member.bot))

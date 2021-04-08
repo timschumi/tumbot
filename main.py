@@ -15,7 +15,7 @@ def get_prefix(bot, message):
 
 
 bot = DBot(command_prefix=get_prefix, intents=Intents.all())
-bot.conf.register('prefix', default='!', description="The command prefix that the bot reacts to.")
+bot.conf.register('prefix', default='!', description="The command prefix that the bot reacts to.", conv=str)
 
 bot.add_cog_path('cogs')
 bot.add_cog_path('cogs/legacy')

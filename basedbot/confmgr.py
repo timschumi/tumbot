@@ -1,4 +1,7 @@
 from enum import Enum
+from . import converter as converters
+from .converter import converter_from_def
+from typing import Optional
 
 
 class UnregisteredVariableException(Exception):
@@ -16,7 +19,8 @@ class ConfigAccessLevel(Enum):
 
 
 class ConfigVar:
-    def __init__(self, db, name, default=None, access=ConfigAccessLevel.ADMIN, description=None, scope='guild'):
+    def __init__(self, db, name, default=None, access=ConfigAccessLevel.ADMIN, description=None, scope='guild',
+                 conv=Optional[str]):
         self._db = db
 
         self.name = name
@@ -24,25 +28,34 @@ class ConfigVar:
         self.access = access
         self.description = description
         self.scope = scope
+        self.conv = converter_from_def(conv)
 
-    def get(self, dbid, default=None):
-        if default is None:
-            default = self.default
-
-        result = self._db.get(dbid, self.scope).execute("SELECT value FROM config WHERE name = ?", (self.name,)).fetchall()
+    def get(self, ctx):
+        result = self._db.get(ctx, self.scope).execute("SELECT value FROM config WHERE name = ?", (self.name,)).fetchall()
 
         if len(result) < 1:
-            return default
+            return self.default
 
         return str(result[0][0])
 
-    def set(self, dbid, value):
-        with self._db.get(dbid, self.scope) as db:
+    async def cget(self, ctx):
+        value = self.get(ctx)
+        return await self.conv.load(ctx, value)
+
+    def set(self, ctx, value):
+        with self._db.get(ctx, self.scope) as db:
             db.execute("REPLACE INTO config (name, value) VALUES (?, ?)", (self.name, value))
 
-    def unset(self, dbid):
-        with self._db.get(dbid, self.scope) as db:
+    async def cset(self, ctx, value):
+        value = await self.conv.store(ctx, value)
+        self.set(ctx, value)
+
+    def unset(self, ctx):
+        with self._db.get(ctx, self.scope) as db:
             db.execute("DELETE FROM config WHERE name = ?", (self.name,))
+
+    async def show(self, ctx):
+        return await self.conv.show(ctx, self.get(ctx))
 
 
 class ConfigManager:
@@ -76,10 +89,10 @@ class ConfigManager:
 
         return self._vars[name]
 
-    def get(self, dbid, name, **kwargs):
+    def get(self, ctx, name, **kwargs):
         existing = self.var(name)
-        return existing.get(dbid, **kwargs)
+        return existing.get(ctx, **kwargs)
 
-    def set(self, dbid, name, **kwargs):
+    def set(self, ctx, name, **kwargs):
         existing = self.var(name)
-        existing.set(dbid, **kwargs)
+        existing.set(ctx, **kwargs)
