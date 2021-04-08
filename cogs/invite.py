@@ -560,7 +560,11 @@ class ExpiredInvitesTracker(commands.Cog):
         if invite.max_age == 0:
             return
 
+        next_invite = self._get_next_invite()
         self._exp_times[invite] = self._calc_exp_time(invite)
+
+        if next_invite is not None and self._exp_times[next_invite] < self._exp_times[invite]:
+            return
 
         # Restart loop in case new invite has a smaller max_age
         if self.check_invites.is_running():
