@@ -1,4 +1,5 @@
 import sqlite3
+from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -444,6 +445,7 @@ class GuildNetworks(commands.Cog):
 
 def setup(bot):
     bot.conf.register('network.channel',
+                      conv=Optional[discord.TextChannel],
                       description="The channel where guild network messages are logged.")
     bot.perm.register('network.invite',
                       base="administrator",
