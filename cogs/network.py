@@ -303,6 +303,10 @@ class GuildNetworks(commands.Cog):
             return
 
         network.leave(ctx.guild.id)
+
+        if len(network.members) == 0:
+            self._delete_network(network.id)
+
         await ctx.message.add_reaction('\U00002705')
 
 
