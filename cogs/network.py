@@ -19,18 +19,6 @@ class GuildNetworkMember:
         self._guild = self._bot.get_guild(data["gid"])
         self._admin = (data["admin"] > 0)
 
-    def __eq__(self, other):
-        if isinstance(other, discord.Guild):
-            return self._guild == other
-
-        if isinstance(other, GuildNetworkMember):
-            return self._guild == other._guild
-
-        return False
-
-    def __hash__(self):
-        return hash(self._guild)
-
     def __str__(self):
         return str(self._guild)
 
@@ -242,7 +230,7 @@ class GuildNetworks(commands.Cog):
 
         network = self.get_network(network)
 
-        if network is None or ctx.guild not in network.members:
+        if network is None:
             await ctx.send("Network not found!")
             return
 
@@ -253,6 +241,10 @@ class GuildNetworks(commands.Cog):
             return
 
         nw_member = network.get_member(ctx.guild.id)
+
+        if nw_member is None:
+            await ctx.send("Network Member not found!")
+            return
 
         if not nw_member.admin:
             await ctx.send("Only network admins can invite to the network.")
@@ -292,13 +284,15 @@ class GuildNetworks(commands.Cog):
 
         entries = []
         for n in self._networks.values():
-            if ctx.guild not in n.members:
+            member = n.get_member(ctx.guild.id)
+
+            if member is None:
                 continue
 
             entries.append({
                 "id": n.id,
                 "name": n.name,
-                "members": len(n.members) if n.get_member(ctx.guild.id).admin else '?',
+                "members": len(n.members) if member.admin else '?',
                 "owner": str(n.owner)
             })
 
@@ -335,7 +329,7 @@ class GuildNetworks(commands.Cog):
 
         for n in self._networks.values():
             # Skip networks that the guild is not a member of
-            if guild not in n.members:
+            if n.get_member(guild.id) is None:
                 continue
 
             for g in n.members:
