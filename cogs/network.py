@@ -330,7 +330,7 @@ class GuildNetworks(commands.Cog):
 
         await ctx.message.add_reaction('\U00002705')
 
-    def _get_neighbor_guilds(self, guild):
+    def _get_neighbor_guilds(self, guild, pred=None):
         guilds = []
 
         for n in self._networks.values():
@@ -340,6 +340,9 @@ class GuildNetworks(commands.Cog):
 
             for g in n.members:
                 if g.guild in guilds:
+                    continue
+
+                if pred is not None and not pred(g):
                     continue
 
                 guilds.append(g.guild)
@@ -365,7 +368,7 @@ class GuildNetworks(commands.Cog):
         await member.ban(reason=f"{ctx.author} ({ctx.author.id}): {reason if reason else 'No reason given.'}")
         await ctx.message.add_reaction('\U00002705')
 
-        guilds = self._get_neighbor_guilds(ctx.guild)
+        guilds = self._get_neighbor_guilds(ctx.guild, pred=lambda nwm: self._get_network_channel(nwm.guild) is not None)
 
         for g in guilds:
             channel = self._get_network_channel(g)
