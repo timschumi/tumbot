@@ -384,6 +384,8 @@ class GuildNetworks(commands.Cog):
             embed = discord.Embed(title=f"{member} ({member.id}) has been banned from '{ctx.guild}'",
                                   color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN))
 
+            embed.set_thumbnail(url=ctx.guild.icon_url)
+
             if g == ctx.guild:
                 embed.add_field(name="Banned by", value=f"{ctx.author.mention} ({ctx.author.id})", inline=False)
 
