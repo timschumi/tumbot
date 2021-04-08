@@ -1,3 +1,5 @@
+import functools
+
 from discord.ext import commands
 
 from basedbot import ConfigAccessLevel
@@ -43,6 +45,7 @@ async def _var_to_string(ctx, var):
 
 
 def check_var_exists(func):
+    @functools.wraps(func)
     async def wrapper(self, ctx, name, *args):
         if name not in self.bot.conf.registered_variables:
             await ctx.send(f"Variable **{name}** does not exist.")
@@ -54,6 +57,7 @@ def check_var_exists(func):
 
 
 def check_var_access(func):
+    @functools.wraps(func)
     @check_var_exists
     async def wrapper(self, ctx, name, *args):
         var = self.bot.conf.var(name)
