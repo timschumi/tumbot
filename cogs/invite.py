@@ -552,10 +552,12 @@ class ExpiredInvitesTracker(commands.Cog):
                 continue
 
             for i in await g.invites():
-                await self.on_invite_create(i)
+                await self.on_invite_create(i, skip_start=True)
+
+        self.check_invites.start()
 
     @commands.Cog.listener()
-    async def on_invite_create(self, invite):
+    async def on_invite_create(self, invite, skip_start=False):
         # Don't track if the invite doesn't expire
         if invite.max_age == 0:
             return
@@ -563,7 +565,7 @@ class ExpiredInvitesTracker(commands.Cog):
         next_invite = self._get_next_invite()
         self._exp_times[invite] = self._calc_exp_time(invite)
 
-        if next_invite is not None and self._exp_times[next_invite] < self._exp_times[invite]:
+        if skip_start or (next_invite is not None and self._exp_times[next_invite] < self._exp_times[invite]):
             return
 
         # Avoid cancelling if we are already cancelling
