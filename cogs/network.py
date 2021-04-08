@@ -1,3 +1,4 @@
+import functools
 import sqlite3
 from typing import Optional
 
@@ -144,6 +145,22 @@ class GuildNetwork:
         if self.owner.guild.id == gid:
             admins = self.admins
             self.owner = admins[0] if len(admins) != 0 else self.members[0]
+
+
+def _check_affect_member(func):
+    @functools.wraps(func)
+    async def wrapper(self, ctx, member, *args, **kwargs):
+        if ctx.author.top_role <= member.top_role and ctx.author != ctx.guild.owner:
+            await ctx.send("You don't have a high enough role to modify this member.")
+            return
+
+        if ctx.guild.me.top_role <= member.top_role:
+            await ctx.send("I don't have a high enough role to modify this member.")
+            return
+
+        await func(self, ctx, member, *args, **kwargs)
+
+    return wrapper
 
 
 class GuildNetworks(commands.Cog):
@@ -341,16 +358,9 @@ class GuildNetworks(commands.Cog):
     @network.command(name="ban")
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
+    @_check_affect_member
     async def network_ban(self, ctx, member: discord.Member, *, reason=None):
         """Ban user and announce it to other guilds in the network"""
-
-        if ctx.author.top_role <= member.top_role and ctx.author != ctx.guild.owner:
-            await ctx.send("You don't have a high enough role to ban this member.")
-            return
-
-        if ctx.guild.me.top_role <= member.top_role:
-            await ctx.send("I don't have a high enough role to ban this member.")
-            return
 
         await member.ban(reason=f"{ctx.author} ({ctx.author.id}): {reason if reason else 'No reason given.'}")
         await ctx.message.add_reaction('\U00002705')
