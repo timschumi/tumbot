@@ -254,11 +254,7 @@ class GuildNetworks(commands.Cog):
             await ctx.send("The guild is already a member of the network.")
             return
 
-        if self._var_channel.get(guild.id) is None:
-            await ctx.send("The guild has not set up a channel for network messages.")
-            return
-
-        channel = self._bot.get_channel(int(self._var_channel.get(guild.id)))
+        channel = self._get_network_channel(guild)
 
         if channel is None:
             await ctx.send("The guild does not have a channel for network messages.")
@@ -493,12 +489,8 @@ class GuildNetworks(commands.Cog):
 
         for nw_member in network.members:
             g = nw_member.guild
-            nw_channel = self._var_channel.get(g.id)
 
-            if nw_channel is None:
-                continue
-
-            nw_channel = self._bot.get_channel(int(nw_channel))
+            nw_channel = self._get_network_channel(g)
 
             if nw_channel is None:
                 continue
