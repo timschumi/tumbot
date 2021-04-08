@@ -381,7 +381,7 @@ class GuildNetworks(commands.Cog):
         for g in guilds:
             user_in_guild = member in g.members
 
-            embed = discord.Embed(title=f"{member} ({member.id}) has been banned on '{ctx.guild}'",
+            embed = discord.Embed(title=f"{member} ({member.id}) has been banned from '{ctx.guild}'",
                                   color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN))
 
             if g == ctx.guild:
