@@ -313,6 +313,30 @@ class GuildNetworks(commands.Cog):
 
         await ctx.message.add_reaction('\U00002705')
 
+    def _get_neighbor_guilds(self, guild):
+        guilds = []
+
+        for n in self._networks.values():
+            # Skip networks that the guild is not a member of
+            if guild not in n.members:
+                continue
+
+            for g in n.members:
+                if g.guild in guilds:
+                    continue
+
+                guilds.append(g.guild)
+
+        return guilds
+
+    def _get_network_channel(self, guild):
+        channel = self._var_channel.get(guild.id)
+
+        # Channel not set?
+        if channel is None:
+            return None
+
+        return guild.get_channel(int(channel))
 
     @network.command(name="ban")
     @commands.has_permissions(ban_members=True)
@@ -331,28 +355,11 @@ class GuildNetworks(commands.Cog):
         await member.ban(reason=f"{ctx.author} ({ctx.author.id}): {reason if reason else 'No reason given.'}")
         await ctx.message.add_reaction('\U00002705')
 
-        guilds = []
-
-        for n in self._networks.values():
-            if ctx.guild not in n.members:
-                continue
-
-            for g in n.members:
-                if g.guild in guilds:
-                    continue
-
-                guilds.append(g.guild)
+        guilds = self._get_neighbor_guilds(ctx.guild)
 
         for g in guilds:
-            channel = self._var_channel.get(g.id)
+            channel = self._get_network_channel(g)
 
-            # Channel not set?
-            if channel is None:
-                continue
-
-            channel = g.get_channel(int(channel))
-
-            # Could not resolve channel?
             if channel is None:
                 continue
 
