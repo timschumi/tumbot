@@ -302,6 +302,10 @@ class GuildNetworks(commands.Cog):
             await ctx.send("Network could not be resolved.")
             return
 
+        if network.get_member(ctx.guild.id) is None:
+            await ctx.send("Network member could not be resolved.")
+            return
+
         network.leave(ctx.guild.id)
 
         if len(network.members) == 0:
