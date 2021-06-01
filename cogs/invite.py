@@ -116,7 +116,7 @@ class InviteManager(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     async def invite(self, ctx):
-        """Manages invites."""
+        """Manages invites"""
         await ctx.send_help(ctx.command)
 
     @invite.command(name="create")
