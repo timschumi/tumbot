@@ -9,7 +9,7 @@ class Userinfo(commands.Cog):
 
     @commands.command(aliases=['userinfos', 'whois'])
     async def userinfo(self, ctx, member: discord.Member):
-        """Displays the most relevent stats of a user"""
+        """Displays the most relevant stats of a user"""
 
         roles = [role for role in reversed(member.roles)]
 

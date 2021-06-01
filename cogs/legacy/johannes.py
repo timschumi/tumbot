@@ -20,7 +20,7 @@ class Johannes(commands.Cog):
     @commands.command()
     @commands.check(_check_cs_server)
     async def johannes(self, ctx):
-        """Sends a cute Animal"""
+        """Sends a cute animal"""
         await ctx.send("\U0001F427")
 
     @commands.Cog.listener()

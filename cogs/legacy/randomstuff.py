@@ -21,7 +21,7 @@ class Randomstuff(commands.Cog):
 
     @commands.command(aliases=["penguinfact"])
     async def pinguinfakt(self, ctx):
-        """Displays cool penguinfacts"""
+        """Displays cool penguin facts"""
         await ctx.send(self.randomstring("pinguinfakten"))
 
     @commands.command(aliases=['source', 'sauce'])
@@ -31,7 +31,7 @@ class Randomstuff(commands.Cog):
 
     @commands.command(aliases=['gettumbot'])
     async def botinvite(self, ctx):
-        """Displays the Invitelink for the bot"""
+        """Displays the invite link for the bot"""
         await ctx.send(f"https://discord.com/oauth2/authorize?&client_id={self.bot.user.id}&scope=bot&permissions=8")
 
     @commands.command(aliases=["mf"])
