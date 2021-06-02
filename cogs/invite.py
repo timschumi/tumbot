@@ -180,6 +180,7 @@ class InviteManager(commands.Cog):
     @commands.bot_has_permissions(create_instant_invite=True)
     @basedbot.has_permissions("invite.request")
     async def invite_request(self, ctx, *, reason=None):
+        """Request an invite to the server"""
         # Do we have invite requesting enabled?
         if not self._invite_requests_enabled(ctx.guild):
             await ctx.send("Sorry, invite requests are not enabled on this server.")
@@ -264,6 +265,11 @@ class InviteManager(commands.Cog):
 
     @invite.command(name="list")
     async def invite_list(self, ctx):
+        """
+        List open invites
+
+        Unless the user is allowed to manage invites through the bot, this will just list invites that the user created or approved.
+        """
         see_all = self._perm_manage.allowed(ctx.author)
 
         query = "SELECT rowid, user, reason, allowed_by FROM invite_active"
