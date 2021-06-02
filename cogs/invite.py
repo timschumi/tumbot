@@ -180,11 +180,7 @@ class InviteManager(commands.Cog):
     @commands.bot_has_permissions(create_instant_invite=True)
     @basedbot.has_permissions("invite.request")
     async def invite_request(self, ctx, *, reason=None):
-        """
-        Request an invite to the server
-
-        Users that are not verified have to request an invite-link. An admin will then approve this request.
-        """
+        """Request an invite to the server"""
         # Do we have invite requesting enabled?
         if not self._invite_requests_enabled(ctx.guild):
             await ctx.send("Sorry, invite requests are not enabled on this server.")
