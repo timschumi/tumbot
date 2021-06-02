@@ -270,9 +270,9 @@ class InviteManager(commands.Cog):
     @invite.command(name="list")
     async def invite_list(self, ctx):
         """
-        List all open invites
+        List open invites
 
-        These are only invites that were opened/requested by the user.
+        Unless the user is allowed to manage invites through the bot, this will just list invites that the user created or approved.
         """
         see_all = self._perm_manage.allowed(ctx.author)
 
