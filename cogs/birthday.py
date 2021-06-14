@@ -10,6 +10,15 @@ from discord.ext import commands, tasks
 import basedbot
 
 
+def _get_clean_name(ctx, userid):
+    user = ctx.guild.get_member(userid)
+
+    if user is None:
+        return userid
+
+    return user.display_name.replace('```', '').strip()
+
+
 class Birthdays(commands.Cog):
     DATEPATTERN: Pattern[str] = re.compile(r"(((0?[1-9])|([12][0-9]))\."  # 01.-29.
                                            r"((0?[1-9])|(1[0-2]))\.?)"  # all months have 1..29 days
@@ -61,8 +70,7 @@ class Birthdays(commands.Cog):
         lines = []
 
         for result in results:
-            user = ctx.guild.get_member(result[0])
-            lines.append(f"{result[1]:02}.{result[2]:02}. -> {user.display_name if user else result[0]}")
+            lines.append(f"{result[1]:02}.{result[2]:02}. -> {_get_clean_name(ctx, result[0])}")
 
         await self.bot.send_paginated(ctx, lines, textfmt="```{}```")
 
