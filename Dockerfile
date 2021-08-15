@@ -1,13 +1,13 @@
 FROM python:3
 
+RUN groupadd dbot && useradd --no-log-init -g dbot dbot
+RUN mkdir -p /dbot-db && chown -R dbot:dbot /dbot-db
+VOLUME /dbot-db
+
 WORKDIR /usr/src/app
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-
-RUN groupadd dbot && useradd --no-log-init -g dbot dbot
-RUN mkdir -p /dbot-db && chown -R dbot:dbot /dbot-db
-VOLUME /dbot-db
 
 COPY . .
 
