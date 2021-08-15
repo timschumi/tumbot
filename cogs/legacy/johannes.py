@@ -2,7 +2,7 @@ from discord.ext import commands
 
 
 def _is_cs_server(guild_id):
-    return guild_id in [628452781199589377, 752114765148455012]
+    return guild_id in [628452781199589377, 752114765148455012, 753556257377353738]
 
 
 async def _check_cs_server(ctx):
