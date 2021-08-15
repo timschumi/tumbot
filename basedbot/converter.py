@@ -131,10 +131,10 @@ class UnionConverter(Converter):
 
 class BoolConverter(Converter):
     async def store(self, ctx, value):
-        if value in (True, 'yes', 'y', 'true', 't', '1', 'enable', 'on'):
+        if value in (True, 'yes', 'y', 'true', 'True', 't', '1', 'enable', 'on'):
             return "1"
 
-        if value in (False, 'no', 'n', 'false', 'f', '0', 'disable', 'off'):
+        if value in (False, 'no', 'n', 'false', 'False', 'f', '0', 'disable', 'off'):
             return "0"
 
         raise InvalidConversionException(f"'{value}' is not recognized as a boolean value")
