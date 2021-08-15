@@ -8,6 +8,7 @@ class Logging(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._var_channel = self.bot.conf.var('logging.channel')
+        self._var_ignore_deleted_messages = self.bot.conf.var('logging.ignore_deleted_messages')
 
     async def log_stuff(self, guild, message):
         logchannelid = self._var_channel.get(guild.id)
@@ -30,6 +31,9 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
         if payload.guild_id is None:
+            return
+
+        if self._var_ignore_deleted_messages.get(payload.guild_id):
             return
 
         guild = self.bot.get_guild(payload.guild_id)
@@ -62,4 +66,8 @@ def setup(bot):
     bot.conf.register('logging.channel',
                       conv=Optional[discord.TextChannel],
                       description="The channel where various activities are logged.")
+    bot.conf.register('logging.ignore_deleted_messages',
+                      conv=bool,
+                      default=False,
+                      description="If true, disables logging deleted messages.")
     bot.add_cog(Logging(bot))
