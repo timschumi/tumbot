@@ -600,6 +600,7 @@ class ExpiredInvitesTracker(commands.Cog):
         # Stop if no invites are left
         if len(self._exp_times) == 0:
             self.check_invites.cancel()
+            return
 
         # Get next invite that expires
         invite = self._get_next_invite()
