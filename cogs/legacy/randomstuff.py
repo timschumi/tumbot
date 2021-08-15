@@ -27,7 +27,7 @@ class Randomstuff(commands.Cog):
     @commands.command(aliases=['source', 'sauce'])
     async def repo(self, ctx):
         """Displays the repo link"""
-        await ctx.send("<https://github.com/timschumi/TUMbot>")
+        await ctx.send("<https://github.com/timschumi/tumbot>")
 
     @commands.command(aliases=['gettumbot'])
     async def botinvite(self, ctx):
