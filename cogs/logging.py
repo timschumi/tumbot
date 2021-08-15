@@ -1,5 +1,6 @@
 from typing import Optional
 
+from datetime import datetime
 import discord
 from discord.ext import commands
 
@@ -9,13 +10,14 @@ class Logging(commands.Cog):
         self.bot = bot
         self._var_channel = self.bot.conf.var('logging.channel')
         self._var_ignore_deleted_messages = self.bot.conf.var('logging.ignore_deleted_messages')
+        self._var_clear_deleted_messages = self.bot.conf.var('logging.clear_deleted_messages')
 
-    async def log_stuff(self, guild, message):
+    async def log_stuff(self, guild, message, delete_after=None):
         logchannelid = self._var_channel.get(guild.id)
         if logchannelid is None:
             return
         logch = self.bot.get_channel(int(logchannelid))
-        await logch.send(message)
+        await logch.send(message, delete_after=delete_after)
 
     # Memberleave
     @commands.Cog.listener()
@@ -54,12 +56,20 @@ class Logging(commands.Cog):
         if message.author.bot and str(logchannelid) != str(channel.id):
             return
 
+        delete_after = self._var_clear_deleted_messages.get(guild.id)
+
+        if delete_after:
+            delete_after = int(delete_after)
+
         # Skip pretty presentation if we are deleting a log message from the log channel
         if message.author.bot and str(logchannelid) == str(channel.id):
-            await self.log_stuff(guild, message.clean_content)
+            if delete_after and (datetime.utcnow() - message.created_at).total_seconds() >= delete_after:
+                return
+
+            await self.log_stuff(guild, message.clean_content, delete_after=delete_after)
         else:
             await self.log_stuff(guild, f":recycle: Nachricht ({message.id}) von **{message.author}** ({message.author.id}) in Channel **{channel}** ({channel.id}) "
-                f"gelöscht mit dem Inhalt:\n{message.clean_content}")
+                f"gelöscht mit dem Inhalt:\n{message.clean_content}", delete_after=delete_after)
 
 
 def setup(bot):
@@ -70,4 +80,7 @@ def setup(bot):
                       conv=bool,
                       default=False,
                       description="If true, disables logging deleted messages.")
+    bot.conf.register('logging.clear_deleted_messages',
+                      conv=Optional[int],
+                      description="The number of seconds until deleted messages are removed from the log.")
     bot.add_cog(Logging(bot))
