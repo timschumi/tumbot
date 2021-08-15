@@ -46,6 +46,9 @@ class Permission:
         return {row['id']: (row['state'] == 1) for row in result}
 
     def allowed(self, member: discord.Member):
+        if not isinstance(member, discord.Member):
+            return False
+
         ids = _build_id_list(member)
         perms = self.definitions(member.guild)
 
