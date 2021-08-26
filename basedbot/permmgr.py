@@ -42,8 +42,9 @@ class Permission:
         self.pretty_name = pretty_name if pretty_name is not None else name
 
     def definitions(self, guild: discord.Guild):
-        result = self._db.get(guild.id).execute("SELECT * FROM permissions WHERE name = ?", (self.name,)).fetchall()
-        return {row['id']: (row['state'] == 1) for row in result}
+        with self._db.get(guild.id) as db:
+            res = db.execute("SELECT * FROM permissions WHERE name = ?", (self.name,)).fetchall()
+        return {row['id']: (row['state'] == 1) for row in res}
 
     def allowed(self, member: discord.Member):
         if not isinstance(member, discord.Member):
@@ -68,15 +69,18 @@ class Permission:
 
     def grant(self, guild, id):
         with self._db.get(guild.id) as db:
-            db.execute("REPLACE INTO permissions (name, id, state) VALUES (?, ?, ?)", (self.name, id, 1))
+            db.execute("REPLACE INTO permissions (name, id, state) VALUES (?, ?, ?)",
+                       (self.name, id, 1))
 
     def deny(self, guild, id):
         with self._db.get(guild.id) as db:
-            db.execute("REPLACE INTO permissions (name, id, state) VALUES (?, ?, ?)", (self.name, id, 0))
+            db.execute("REPLACE INTO permissions (name, id, state) VALUES (?, ?, ?)",
+                       (self.name, id, 0))
 
     def default(self, guild, id):
         with self._db.get(guild.id) as db:
-            db.execute("DELETE FROM permissions WHERE name = ? AND id = ?", (self.name, id))
+            db.execute("DELETE FROM permissions WHERE name = ? AND id = ?",
+                       (self.name, id))
 
 
 class PermissionManager:
@@ -96,7 +100,8 @@ class PermissionManager:
                 continue
 
             if getattr(existing, key) != kwargs[key]:
-                raise ConflictingPermissionException(f"Attribute `{key}` conflicts with existing permission definition.")
+                raise ConflictingPermissionException(f"Attribute `{key}` conflicts with "
+                                                     f"existing permission definition.")
 
         return self._perms[name]
 

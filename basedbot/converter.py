@@ -2,7 +2,7 @@ import typing
 import inspect
 
 import discord
-from discord.ext.commands import converter, ChannelNotFound, RoleNotFound, MemberNotFound, UserNotFound
+from discord.ext import commands
 
 
 class InvalidConversionException(Exception):
@@ -82,7 +82,7 @@ class OptionalConverter(Converter):
 
     async def store(self, ctx, value):
         if value is None:
-            raise InvalidConversionException("Can't convert None to appropriate String representation")
+            raise InvalidConversionException("Can't convert None to String")
 
         return await self._conv.store(ctx, value)
 
@@ -197,8 +197,8 @@ class MemberConverter(Converter):
             return str(value.id)
 
         try:
-            value = await converter.MemberConverter().convert(ctx, value)
-        except MemberNotFound:
+            value = await commands.converter.MemberConverter().convert(ctx, value)
+        except commands.MemberNotFound:
             raise InvalidConversionException(f"Member '{value}' not found")
 
         return str(value.id)
@@ -224,8 +224,8 @@ class UserConverter(Converter):
             return str(value.id)
 
         try:
-            value = await converter.UserConverter().convert(ctx, value)
-        except UserNotFound:
+            value = await commands.converter.UserConverter().convert(ctx, value)
+        except commands.UserNotFound:
             raise InvalidConversionException(f"User '{value}' not found")
 
         return str(value.id)
@@ -251,8 +251,8 @@ class TextChannelConverter(Converter):
             return str(value.id)
 
         try:
-            value = await converter.TextChannelConverter().convert(ctx, value)
-        except ChannelNotFound:
+            value = await commands.converter.TextChannelConverter().convert(ctx, value)
+        except commands.ChannelNotFound:
             raise InvalidConversionException(f"TextChannel '{value}' not found")
 
         return str(value.id)
@@ -281,8 +281,8 @@ class RoleConverter(Converter):
             return str(ctx.guild.id)
 
         try:
-            value = await converter.RoleConverter().convert(ctx, value)
-        except RoleNotFound:
+            value = await commands.converter.RoleConverter().convert(ctx, value)
+        except commands.RoleNotFound:
             raise InvalidConversionException(f"Role '{value}' not found")
 
         return str(value.id)

@@ -26,7 +26,8 @@ class DBot(discord.ext.commands.Bot):
         await super().close()
         self.db.close()
 
-    async def send_paginated(self, msg: discord.abc.Messageable, lines, linefmt="{}\n", textfmt="{}", maxlen=2000):
+    async def send_paginated(self, msg: discord.abc.Messageable, lines,
+                             linefmt="{}\n", textfmt="{}", maxlen=2000):
         linefmt_len = len(linefmt.format(""))
         textfmt_len = len(textfmt.format(""))
 

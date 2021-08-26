@@ -19,8 +19,8 @@ class ConfigAccessLevel(Enum):
 
 
 class ConfigVar:
-    def __init__(self, db, name, default=None, access=ConfigAccessLevel.ADMIN, description=None, scope='guild',
-                 conv=Optional[str]):
+    def __init__(self, db, name, default=None, access=ConfigAccessLevel.ADMIN,
+                 description=None, scope='guild', conv=Optional[str]):
         self._db = db
 
         self.name = name
@@ -31,7 +31,9 @@ class ConfigVar:
         self.conv = converter_from_def(conv)
 
     def get(self, ctx):
-        result = self._db.get(ctx, self.scope).execute("SELECT value FROM config WHERE name = ?", (self.name,)).fetchall()
+        with self._db.get(ctx, self.scope) as db:
+            result = db.execute("SELECT value FROM config WHERE name = ?",
+                                (self.name,)).fetchall()
 
         if len(result) < 1:
             return self.default
@@ -75,7 +77,8 @@ class ConfigManager:
                 continue
 
             if getattr(existing, key) != kwargs[key]:
-                raise ConflictingVariableException(f"Attribute `{key}` conflicts with existing variable definition.")
+                raise ConflictingVariableException(f"Attribute `{key}` conflicts with "
+                                                   f"existing variable definition.")
 
         return self._vars[name]
 

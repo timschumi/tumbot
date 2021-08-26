@@ -55,9 +55,11 @@ def _perm_to_string(perm, guild):
         string += f"\n - {'Granted' if defs[id] else 'Denied'} for {_id_to_string(guild, id)}"
 
     if isinstance(perm.base, str):
-        string += f"\n - Fallback permission: '{perm.base}' (if none of the above rules match)"
+        string += f"\n - Fallback permission: '{perm.base}'"
     else:
-        string += f"\n - {'Granted' if perm.base is True else 'Denied'} by default (if none of the above rules match)"
+        string += f"\n - {'Granted' if perm.base is True else 'Denied'} by default"
+
+    string += " (if none of the above rules match)"
 
     return string
 
@@ -111,7 +113,8 @@ class DBotPerm(commands.Cog):
     @perm.command(name="grant", aliases=["allow"])
     @commands.has_permissions(administrator=True)
     @check_perm_exists
-    async def perm_grant(self, ctx, permission, target: typing.Union[RoleConverterExt, discord.Member]):
+    async def perm_grant(self, ctx, permission,
+                         target: typing.Union[RoleConverterExt, discord.Member]):
         """Grants a permission to a user or role"""
 
         perm = self.bot.perm.get(permission)
@@ -122,7 +125,8 @@ class DBotPerm(commands.Cog):
     @perm.command(name="deny", aliases=["disallow"])
     @commands.has_permissions(administrator=True)
     @check_perm_exists
-    async def perm_deny(self, ctx, permission, target: typing.Union[RoleConverterExt, discord.Member]):
+    async def perm_deny(self, ctx, permission,
+                        target: typing.Union[RoleConverterExt, discord.Member]):
         """Denies a permission to a user or role"""
 
         perm = self.bot.perm.get(permission)
@@ -133,7 +137,8 @@ class DBotPerm(commands.Cog):
     @perm.command(name="default", aliases=["reset"])
     @commands.has_permissions(administrator=True)
     @check_perm_exists
-    async def perm_default(self, ctx, permission, target: typing.Union[RoleConverterExt, discord.Member]):
+    async def perm_default(self, ctx, permission,
+                           target: typing.Union[RoleConverterExt, discord.Member]):
         """Resets a permission to default for a user or role"""
 
         perm = self.bot.perm.get(permission)

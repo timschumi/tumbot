@@ -53,7 +53,8 @@ class DatabaseManager:
                 os.mkdir(self._dbpath)
 
             # Create a new connection
-            self._db_handles[dbid] = sqlite3.connect(f"{self._dbpath}/{dbid}.db", check_same_thread=False)
+            self._db_handles[dbid] = sqlite3.connect(f"{self._dbpath}/{dbid}.db",
+                                                     check_same_thread=False)
             self._db_handles[dbid].row_factory = sqlite3.Row
 
             # Update database structure for internal usage
