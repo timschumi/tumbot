@@ -10,11 +10,17 @@ from .permmgr import PermissionManager
 
 class DBot(discord.ext.commands.Bot):
     def __init__(self, **options):
+        if "command_prefix" not in options:
+            options["command_prefix"] = DBot.fetch_prefix
+
         super().__init__(**options)
         self.db = DatabaseManager(os.environ.get('DBOT_DBPATH', "db"))
         self.conf = ConfigManager(self.db)
         self.perm = PermissionManager(self.db)
         self._cogpaths = ['basedbot/cogs']
+        self.conf.register('prefix', default='!', conv=str,
+                           description="The command prefix that the bot reacts to.")
+        self._var_prefix = self.conf.var('prefix')
 
     async def close(self):
         await super().close()
@@ -86,3 +92,10 @@ class DBot(discord.ext.commands.Bot):
                 cogs.append('.'.join(path.parent.parts + (path.stem,)))
 
         return cogs
+
+    def fetch_prefix(self, message):
+        """ Find the set prefix for a server """
+        if message.guild is None:
+            return '!'
+
+        return self._var_prefix.get(message.guild.id)
