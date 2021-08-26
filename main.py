@@ -3,6 +3,7 @@
 import os
 
 from basedbot import DBot
+from discord.ext.commands.errors import ExtensionError
 
 
 bot = DBot()
@@ -11,8 +12,7 @@ bot = DBot()
 for cog in bot.find_all_cogs():
     try:
         bot.load_extension(cog)
-    except Exception as e:
-        print(f"Exception while loading `{cog}`:")
-        print(f"{type(e).__name__}: {e}")
+    except ExtensionError as e:
+        print(e)
 
 bot.run(os.environ['DBOT_TOKEN'])
