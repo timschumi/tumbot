@@ -99,7 +99,7 @@ class PermissionManager:
             if not hasattr(existing, key):
                 continue
 
-            if getattr(existing, key) != kwargs[key]:
+            if getattr(existing, key) != value:
                 raise ConflictingPermissionException(f"Attribute `{key}` conflicts with "
                                                      f"existing permission definition.")
 

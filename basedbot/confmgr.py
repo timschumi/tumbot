@@ -75,7 +75,7 @@ class ConfigManager:
             if not hasattr(existing, key):
                 continue
 
-            if getattr(existing, key) != kwargs[key]:
+            if getattr(existing, key) != value:
                 raise ConflictingVariableException(f"Attribute `{key}` conflicts with "
                                                    f"existing variable definition.")
 
