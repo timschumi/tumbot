@@ -28,10 +28,11 @@ def converter_from_def(conv):
                 return UnionConverter([converter_from_def(e) for e in types])
 
             types = [e for e in types if not isinstance(None, e)]
+
             if len(types) == 1:
                 return OptionalConverter(converter_from_def(types[0]))
-            else:
-                return OptionalConverter(UnionConverter([converter_from_def(e) for e in types]))
+
+            return OptionalConverter(UnionConverter([converter_from_def(e) for e in types]))
 
     # Convert from standard typing definitions
     if isinstance(conv, type):
