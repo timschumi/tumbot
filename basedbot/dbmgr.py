@@ -153,7 +153,7 @@ class DatabaseManager:
         return schemas
 
     def close(self):
-        for dbid in self._db_handles:
-            self._db_handles[dbid].close()
+        for handle in self._db_handles.values():
+            handle.close()
 
         self._db_handles.clear()
