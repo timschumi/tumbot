@@ -76,7 +76,7 @@ class DBotAdmin(commands.Cog):
         cmd = cmd.strip("` ")
         try:
             parsed_cmd = ast.parse(cmd)
-        except Exception:
+        except SyntaxError:
             await ctx.send(f"Exception while parsing command:\n```{traceback.format_exc()}```")
             return
 
@@ -103,7 +103,7 @@ class DBotAdmin(commands.Cog):
 
         try:
             output = await eval("_eval()", env)  # pylint: disable=eval-used
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             await ctx.send(f"Exception while running command:\n```{traceback.format_exc()}```")
             return
 
