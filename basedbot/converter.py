@@ -73,6 +73,7 @@ class Converter:
     async def _tostr(self, ctx, value):
         """ Converts an actual object into a human-readable output """
 
+        del ctx
         return str(value)
 
     async def show(self, ctx, value):
