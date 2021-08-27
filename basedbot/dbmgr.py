@@ -103,7 +103,7 @@ class DatabaseManager:
             if not os.path.isfile(path):
                 break
 
-            with open(path) as file:
+            with open(path, encoding="utf-8") as file:
                 conn.executescript(file.read())
 
     def _upgrade_db_external(self, conn, scope):
@@ -126,7 +126,7 @@ class DatabaseManager:
                     if not os.path.isfile(path):
                         break
 
-                    with open(path) as file:
+                    with open(path, encoding="utf-8") as file:
                         conn.executescript(file.read())
             finally:
                 # Write back the current schema version and restore the old one
