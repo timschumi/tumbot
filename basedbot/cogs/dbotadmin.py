@@ -99,10 +99,10 @@ class DBotAdmin(commands.Cog):
         }
 
         # Compile our function for execution and load it
-        exec(compile(parsed_fn, filename="<ast>", mode="exec"), env)
+        exec(compile(parsed_fn, filename="<ast>", mode="exec"), env)  # pylint: disable=exec-used
 
         try:
-            output = await eval("_eval()", env)
+            output = await eval("_eval()", env)  # pylint: disable=eval-used
         except Exception:
             await ctx.send(f"Exception while running command:\n```{traceback.format_exc()}```")
             return
