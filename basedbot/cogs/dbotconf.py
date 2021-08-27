@@ -44,7 +44,7 @@ async def _var_to_string(ctx, var):
     return string
 
 
-def check_var_exists(func):
+def _check_var_exists(func):
     @functools.wraps(func)
     async def wrapper(self, ctx, name, *args):
         if name not in self.bot.conf.registered_variables:
@@ -56,9 +56,9 @@ def check_var_exists(func):
     return wrapper
 
 
-def check_var_access(func):
+def _check_var_access(func):
     @functools.wraps(func)
-    @check_var_exists
+    @_check_var_exists
     async def wrapper(self, ctx, name, *args):
         var = self.bot.conf.var(name)
 
@@ -114,7 +114,7 @@ class DBotConf(commands.Cog):
 
     @conf.command(name="get")
     @commands.has_permissions(administrator=True)
-    @check_var_exists
+    @_check_var_exists
     async def conf_get(self, ctx, name):
         """ Retrieves a single configuration variable """
 
@@ -123,7 +123,7 @@ class DBotConf(commands.Cog):
 
     @conf.command(name="set")
     @commands.has_permissions(administrator=True)
-    @check_var_access
+    @_check_var_access
     async def conf_set(self, ctx, name, value):
         """ Sets the value of a specific configuration variable """
 
@@ -139,7 +139,7 @@ class DBotConf(commands.Cog):
 
     @conf.command(name="unset")
     @commands.has_permissions(administrator=True)
-    @check_var_access
+    @_check_var_access
     async def conf_unset(self, ctx, name):
         """ Resets a configuration variable to its default """
 

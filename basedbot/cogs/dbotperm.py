@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 
-def check_perm_exists(func):
+def _check_perm_exists(func):
     @functools.wraps(func)
     async def wrapper(self, ctx, name, *args):
         if name not in self.bot.perm.registered_permissions:
@@ -123,7 +123,7 @@ class DBotPerm(commands.Cog):
 
     @perm.command(name="get", aliases=["show"])
     @commands.has_permissions(administrator=True)
-    @check_perm_exists
+    @_check_perm_exists
     async def perm_get(self, ctx, name):
         """ Retrieves information about a permission """
 
@@ -132,7 +132,7 @@ class DBotPerm(commands.Cog):
 
     @perm.command(name="grant", aliases=["allow"])
     @commands.has_permissions(administrator=True)
-    @check_perm_exists
+    @_check_perm_exists
     async def perm_grant(self, ctx, permission,
                          target: typing.Union[RoleConverterExt, discord.Member]):
         """ Grants a permission to a user or role """
@@ -144,7 +144,7 @@ class DBotPerm(commands.Cog):
 
     @perm.command(name="deny", aliases=["disallow"])
     @commands.has_permissions(administrator=True)
-    @check_perm_exists
+    @_check_perm_exists
     async def perm_deny(self, ctx, permission,
                         target: typing.Union[RoleConverterExt, discord.Member]):
         """ Denies a permission to a user or role """
@@ -156,7 +156,7 @@ class DBotPerm(commands.Cog):
 
     @perm.command(name="default", aliases=["reset"])
     @commands.has_permissions(administrator=True)
-    @check_perm_exists
+    @_check_perm_exists
     async def perm_default(self, ctx, permission,
                            target: typing.Union[RoleConverterExt, discord.Member]):
         """ Resets a permission to default for a user or role """
