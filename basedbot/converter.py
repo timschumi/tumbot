@@ -181,8 +181,8 @@ class IntConverter(Converter):
     async def load(self, ctx, value):
         try:
             return int(value)
-        except ValueError:
-            raise InvalidConversionException(f"{value} can not be converted to a number")
+        except ValueError as e:
+            raise InvalidConversionException(e) from e
 
     def name(self):
         return "Int"
@@ -198,8 +198,8 @@ class MemberConverter(Converter):
 
         try:
             value = await commands.converter.MemberConverter().convert(ctx, value)
-        except commands.MemberNotFound:
-            raise InvalidConversionException(f"Member '{value}' not found")
+        except commands.MemberNotFound as e:
+            raise InvalidConversionException(e) from e
 
         return str(value.id)
 
@@ -225,8 +225,8 @@ class UserConverter(Converter):
 
         try:
             value = await commands.converter.UserConverter().convert(ctx, value)
-        except commands.UserNotFound:
-            raise InvalidConversionException(f"User '{value}' not found")
+        except commands.UserNotFound as e:
+            raise InvalidConversionException(e) from e
 
         return str(value.id)
 
@@ -252,8 +252,8 @@ class TextChannelConverter(Converter):
 
         try:
             value = await commands.converter.TextChannelConverter().convert(ctx, value)
-        except commands.ChannelNotFound:
-            raise InvalidConversionException(f"TextChannel '{value}' not found")
+        except commands.ChannelNotFound as e:
+            raise InvalidConversionException(e) from e
 
         return str(value.id)
 
@@ -282,8 +282,8 @@ class RoleConverter(Converter):
 
         try:
             value = await commands.converter.RoleConverter().convert(ctx, value)
-        except commands.RoleNotFound:
-            raise InvalidConversionException(f"Role '{value}' not found")
+        except commands.RoleNotFound as e:
+            raise InvalidConversionException(e) from e
 
         return str(value.id)
 
