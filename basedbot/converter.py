@@ -6,10 +6,12 @@ from discord.ext import commands
 
 
 class InvalidConversionException(Exception):
-    pass
+    """ Thrown when a value can't be converted using a converter """
 
 
 def converter_from_def(conv):
+    """ Builds a converter object from a type definition """
+
     # If this already is an instance of a converter, return it
     if isinstance(conv, Converter):
         return conv
@@ -51,26 +53,31 @@ def converter_from_def(conv):
 
 
 class Converter:
-    """The common interface for a converter"""
+    """ The common interface for a converter """
 
     async def store(self, ctx, value):
-        """Converts a value into the internal string representation"""
+        """ Converts a value into the internal string representation """
+
         raise NotImplementedError("store has not been implemented")
 
     async def load(self, ctx, value):
-        """Converts an internal string representation into the actual value"""
+        """ Converts an internal string representation into the actual value """
+
         raise NotImplementedError("load has not been implemented")
 
     def name(self):
-        """Returns a human-readable name for the given type"""
+        """ Returns a human-readable name for the given type """
+
         raise NotImplementedError("name has not been implemented")
 
     async def _tostr(self, ctx, value):
-        """Converts an actual object into a human-readable output"""
+        """ Converts an actual object into a human-readable output """
+
         return str(value)
 
     async def show(self, ctx, value):
-        """Converts an object (actual object or internal string) into a human-readable output"""
+        """ Converts an object (actual object or internal string) into a human-readable output """
+
         if isinstance(value, str):
             value = await self.load(ctx, value)
 
@@ -78,6 +85,8 @@ class Converter:
 
 
 class OptionalConverter(Converter):
+    """ Converts a value to None or passes to the enclosed converter """
+
     def __init__(self, conv):
         self._conv = converter_from_def(conv)
 
@@ -104,6 +113,8 @@ class OptionalConverter(Converter):
 
 
 class UnionConverter(Converter):
+    """ Converts the value by trying all the enclosed converters in order """
+
     def __init__(self, *args):
         self._conv = [converter_from_def(conv) for conv in args]
 
@@ -131,6 +142,8 @@ class UnionConverter(Converter):
 
 
 class BoolConverter(Converter):
+    """ Converts boolean-like values and strings """
+
     async def store(self, ctx, value):
         if value in (True, 'yes', 'y', 'true', 'True', 't', '1', 'enable', 'on'):
             return "1"
@@ -154,7 +167,7 @@ class BoolConverter(Converter):
 
 
 class StringConverter(Converter):
-    """Converts internal string representations into themselves. Essentially a no-op."""
+    """ Converts internal string representations into themselves. Essentially a no-op. """
 
     async def store(self, ctx, value):
         return value
@@ -170,6 +183,8 @@ class StringConverter(Converter):
 
 
 class IntConverter(Converter):
+    """ Converts integers """
+
     async def store(self, ctx, value):
         if isinstance(value, int):
             return str(value)
@@ -193,6 +208,8 @@ class IntConverter(Converter):
 
 
 class MemberConverter(Converter):
+    """ Converts guild members """
+
     async def store(self, ctx, value):
         if isinstance(value, discord.Member):
             return str(value.id)
@@ -220,6 +237,8 @@ class MemberConverter(Converter):
 
 
 class UserConverter(Converter):
+    """ Converts users """
+
     async def store(self, ctx, value):
         if isinstance(value, discord.User):
             return str(value.id)
@@ -247,6 +266,8 @@ class UserConverter(Converter):
 
 
 class TextChannelConverter(Converter):
+    """ Converts text channels """
+
     async def store(self, ctx, value):
         if isinstance(value, discord.TextChannel):
             return str(value.id)
@@ -274,6 +295,8 @@ class TextChannelConverter(Converter):
 
 
 class RoleConverter(Converter):
+    """ Converts roles """
+
     async def store(self, ctx, value):
         if isinstance(value, discord.Role):
             return str(value.id)

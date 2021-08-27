@@ -80,7 +80,10 @@ def _perm_to_string(perm, guild):
 
 class RoleConverterExt(commands.RoleConverter):
     # pylint: disable=too-few-public-methods
+    """ Extends the RoleConverter to handle the 'everyone' role """
+
     async def convert(self, ctx, argument):
+        # pylint: disable=missing-function-docstring
         if argument == 'everyone':
             return ctx.guild.get_role(ctx.guild.id)
 
@@ -88,13 +91,15 @@ class RoleConverterExt(commands.RoleConverter):
 
 
 class DBotPerm(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self.bot = bot
 
     @commands.group(aliases=["pm", "permission", "permissions"], invoke_without_command=True)
     @commands.has_permissions(administrator=True)
     async def perm(self, ctx):
-        """Manages the bot-specific permissions"""
+        """ Bot permission management """
 
         await ctx.send_help(ctx.command)
         return
@@ -102,7 +107,7 @@ class DBotPerm(commands.Cog):
     @perm.command(name="list")
     @commands.has_permissions(administrator=True)
     async def perm_list(self, ctx):
-        """Lists all available permissions"""
+        """ Lists all available permissions """
 
         entries = []
 
@@ -120,7 +125,7 @@ class DBotPerm(commands.Cog):
     @commands.has_permissions(administrator=True)
     @check_perm_exists
     async def perm_get(self, ctx, name):
-        """Retrieves information about a permission"""
+        """ Retrieves information about a permission """
 
         perm = self.bot.perm.get(name)
         await ctx.send(f"```{_perm_to_string(perm, ctx.guild)}```")
@@ -130,7 +135,7 @@ class DBotPerm(commands.Cog):
     @check_perm_exists
     async def perm_grant(self, ctx, permission,
                          target: typing.Union[RoleConverterExt, discord.Member]):
-        """Grants a permission to a user or role"""
+        """ Grants a permission to a user or role """
 
         perm = self.bot.perm.get(permission)
         perm.grant(ctx.guild, target.id)
@@ -142,7 +147,7 @@ class DBotPerm(commands.Cog):
     @check_perm_exists
     async def perm_deny(self, ctx, permission,
                         target: typing.Union[RoleConverterExt, discord.Member]):
-        """Denies a permission to a user or role"""
+        """ Denies a permission to a user or role """
 
         perm = self.bot.perm.get(permission)
         perm.deny(ctx.guild, target.id)
@@ -154,7 +159,7 @@ class DBotPerm(commands.Cog):
     @check_perm_exists
     async def perm_default(self, ctx, permission,
                            target: typing.Union[RoleConverterExt, discord.Member]):
-        """Resets a permission to default for a user or role"""
+        """ Resets a permission to default for a user or role """
 
         perm = self.bot.perm.get(permission)
         perm.default(ctx.guild, target.id)
@@ -163,4 +168,5 @@ class DBotPerm(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.add_cog(DBotPerm(bot))

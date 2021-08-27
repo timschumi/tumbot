@@ -23,13 +23,15 @@ def _insert_returns(body):
 
 
 class DBotAdmin(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
     @commands.is_owner()
     async def sql(self, ctx, *, query):
-        """Executes an SQL-query"""
+        """ Executes an SQL-query """
 
         # Set default scope
         if ctx.guild is not None:
@@ -159,4 +161,5 @@ class DBotAdmin(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.add_cog(DBotAdmin(bot))

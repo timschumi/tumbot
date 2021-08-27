@@ -6,10 +6,11 @@ from discord.ext.commands import Context
 
 
 class NoValidContextException(Exception):
-    pass
+    """ Thrown when a Context does not apply for a specific scope """
 
 
 def _ctx_to_dbid(ctx, scope):
+    """ Fetches the correct database ID for a given scope from a Context """
     # Global doesn't have a dbid, so just return 'global'
     if scope == "global":
         return "global"
@@ -31,6 +32,8 @@ def _ctx_to_dbid(ctx, scope):
 
 
 class DatabaseManager:
+    """ Manages database handles and schemas for a set of IDs and scopes """
+
     def __init__(self, dbpath):
         self._db_handles = {}
         self._dbpath = dbpath
@@ -44,6 +47,8 @@ class DatabaseManager:
         return f"{scope}_{dbid}"
 
     def get(self, ctx, scope='guild'):
+        """ Returns a database handle matching the given Context and scope """
+
         dbid = _ctx_to_dbid(ctx, scope)
         dbid = self._get_dbname(dbid, scope)
 
@@ -66,6 +71,8 @@ class DatabaseManager:
         return self._db_handles[dbid]
 
     def add_sql_path(self, path, scope='guild'):
+        """ Adds a new entry to the list of database schema search paths """
+
         self._sqlinfo.append({
             'path': path,
             'scope': scope,
@@ -153,6 +160,8 @@ class DatabaseManager:
         return schemas
 
     def close(self):
+        """ Closes all open handles """
+
         for handle in self._db_handles.values():
             handle.close()
 

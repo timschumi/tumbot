@@ -9,6 +9,8 @@ from .permmgr import PermissionManager
 
 
 class DBot(discord.ext.commands.Bot):
+    """ Bot extension for the basedbot framework """
+
     def __init__(self, **options):
         if "command_prefix" not in options:
             options["command_prefix"] = DBot.fetch_prefix
@@ -23,11 +25,15 @@ class DBot(discord.ext.commands.Bot):
         self._var_prefix = self.conf.var('prefix')
 
     async def close(self):
+        """ Shuts down the bot """
+
         await super().close()
         self.db.close()
 
     async def send_paginated(self, msg: discord.abc.Messageable, lines,
                              linefmt="{}\n", textfmt="{}", maxlen=2000):
+        """ Sends the given list of strings in chunks, up to a maximum message length """
+
         linefmt_len = len(linefmt.format(""))
         textfmt_len = len(textfmt.format(""))
 
@@ -46,6 +52,8 @@ class DBot(discord.ext.commands.Bot):
         return
 
     async def send_table(self, messageable: discord.abc.Messageable, keys, table):
+        """ Sends an ASCII-table with the given keys and contents """
+
         key_length = {}
 
         for row in table:
@@ -74,9 +82,13 @@ class DBot(discord.ext.commands.Bot):
         await self.send_paginated(messageable, lines, textfmt="```{}```")
 
     def add_cog_path(self, path):
+        """ Adds a new entry to the list of cog search paths """
+
         self._cogpaths.append(path)
 
     def find_cog(self, name):
+        """ Finds a cog with the given name in the search path """
+
         name = name.lower()
 
         for path in self._cogpaths:
@@ -86,6 +98,8 @@ class DBot(discord.ext.commands.Bot):
         return None
 
     def find_all_cogs(self):
+        """ Lists all the cogs present in the search path """
+
         cogs = []
 
         for cogpath in self._cogpaths:
@@ -96,6 +110,7 @@ class DBot(discord.ext.commands.Bot):
 
     def fetch_prefix(self, message):
         """ Find the set prefix for a server """
+
         if message.guild is None:
             return '!'
 
