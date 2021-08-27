@@ -34,25 +34,39 @@ def _id_to_string(guild, discord_id):
     return f"@{discord_id}"
 
 
-def _perm_to_string(perm, guild):
+def _state_to_string(state):
+    return 'Granted' if state else 'Denied'
+
+
+def _sorted_defs(perm, guild):
     roleids = [role.id for role in reversed(guild.roles)]
-    string = f"{perm.pretty_name}:"
-
     defs = perm.definitions(guild)
+    sorted_defs = {}
 
-    # List user permissions
     for discord_id, state in defs.items():
+        # Skip role permissions on the first run
         if discord_id in roleids:
             continue
 
-        string += f"\n - {'Granted' if state else 'Denied'} for {_id_to_string(guild, discord_id)}"
+        sorted_defs[discord_id] = state
 
-    # List role permissions (in order)
+    # List remaining role permissions
     for discord_id in roleids:
         if discord_id not in defs:
             continue
 
-        string += f"\n - {'Granted' if defs[discord_id] else 'Denied'} for {_id_to_string(guild, discord_id)}"
+        sorted_defs[discord_id] = defs[discord_id]
+
+    return sorted_defs
+
+
+def _perm_to_string(perm, guild):
+    string = f"{perm.pretty_name}:"
+
+    defs = _sorted_defs(perm, guild)
+
+    for discord_id, state in defs.items():
+        string += f"\n - {_state_to_string(state)} for {_id_to_string(guild, discord_id)}"
 
     if isinstance(perm.base, str):
         string += f"\n - Fallback permission: '{perm.base}'"
