@@ -65,6 +65,7 @@ def _perm_to_string(perm, guild):
 
 
 class RoleConverterExt(commands.RoleConverter):
+    # pylint: disable=too-few-public-methods
     async def convert(self, ctx, argument):
         if argument == 'everyone':
             return ctx.guild.get_role(ctx.guild.id)
