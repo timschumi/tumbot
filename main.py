@@ -2,8 +2,8 @@
 
 import os
 
-from basedbot import DBot
 from discord.ext.commands.errors import ExtensionError
+from basedbot import DBot
 
 
 bot = DBot()

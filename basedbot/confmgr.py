@@ -1,7 +1,6 @@
 from enum import Enum
-from . import converter as converters
-from .converter import converter_from_def
 from typing import Optional
+from .converter import converter_from_def
 
 
 class UnregisteredVariableException(Exception):
