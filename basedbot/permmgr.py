@@ -67,20 +67,20 @@ class Permission:
 
         return self.base is True
 
-    def grant(self, guild, id):
+    def grant(self, guild, discord_id):
         with self._db.get(guild.id) as db:
             db.execute("REPLACE INTO permissions (name, id, state) VALUES (?, ?, ?)",
-                       (self.name, id, 1))
+                       (self.name, discord_id, 1))
 
-    def deny(self, guild, id):
+    def deny(self, guild, discord_id):
         with self._db.get(guild.id) as db:
             db.execute("REPLACE INTO permissions (name, id, state) VALUES (?, ?, ?)",
-                       (self.name, id, 0))
+                       (self.name, discord_id, 0))
 
-    def default(self, guild, id):
+    def default(self, guild, discord_id):
         with self._db.get(guild.id) as db:
             db.execute("DELETE FROM permissions WHERE name = ? AND id = ?",
-                       (self.name, id))
+                       (self.name, discord_id))
 
 
 class PermissionManager:

@@ -17,21 +17,21 @@ def check_perm_exists(func):
     return wrapper
 
 
-def _id_to_string(guild, id):
-    if id == guild.id:
+def _id_to_string(guild, discord_id):
+    if discord_id == guild.id:
         return "@everyone"
 
-    role = guild.get_role(id)
+    role = guild.get_role(discord_id)
 
     if role is not None:
         return f"@{role.name}"
 
-    member = guild.get_member(id)
+    member = guild.get_member(discord_id)
 
     if member is not None:
         return f"{member}"
 
-    return f"@{id}"
+    return f"@{discord_id}"
 
 
 def _perm_to_string(perm, guild):
@@ -41,18 +41,18 @@ def _perm_to_string(perm, guild):
     defs = perm.definitions(guild)
 
     # List user permissions
-    for id, state in defs.items():
-        if id in roleids:
+    for discord_id, state in defs.items():
+        if discord_id in roleids:
             continue
 
-        string += f"\n - {'Granted' if state else 'Denied'} for {_id_to_string(guild, id)}"
+        string += f"\n - {'Granted' if state else 'Denied'} for {_id_to_string(guild, discord_id)}"
 
     # List role permissions (in order)
-    for id in roleids:
-        if id not in defs:
+    for discord_id in roleids:
+        if discord_id not in defs:
             continue
 
-        string += f"\n - {'Granted' if defs[id] else 'Denied'} for {_id_to_string(guild, id)}"
+        string += f"\n - {'Granted' if defs[discord_id] else 'Denied'} for {_id_to_string(guild, discord_id)}"
 
     if isinstance(perm.base, str):
         string += f"\n - Fallback permission: '{perm.base}'"
