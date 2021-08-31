@@ -6,10 +6,11 @@ from discord.ext.commands import Context
 
 
 class NoValidContextException(Exception):
-    pass
+    """ Thrown when a Context does not apply for a specific scope """
 
 
 def _ctx_to_dbid(ctx, scope):
+    """ Fetches the correct database ID for a given scope from a Context """
     # Global doesn't have a dbid, so just return 'global'
     if scope == "global":
         return "global"
@@ -31,6 +32,8 @@ def _ctx_to_dbid(ctx, scope):
 
 
 class DatabaseManager:
+    """ Manages database handles and schemas for a set of IDs and scopes """
+
     def __init__(self, dbpath):
         self._db_handles = {}
         self._dbpath = dbpath
@@ -44,6 +47,8 @@ class DatabaseManager:
         return f"{scope}_{dbid}"
 
     def get(self, ctx, scope='guild'):
+        """ Returns a database handle matching the given Context and scope """
+
         dbid = _ctx_to_dbid(ctx, scope)
         dbid = self._get_dbname(dbid, scope)
 
@@ -53,7 +58,8 @@ class DatabaseManager:
                 os.mkdir(self._dbpath)
 
             # Create a new connection
-            self._db_handles[dbid] = sqlite3.connect(f"{self._dbpath}/{dbid}.db", check_same_thread=False)
+            self._db_handles[dbid] = sqlite3.connect(f"{self._dbpath}/{dbid}.db",
+                                                     check_same_thread=False)
             self._db_handles[dbid].row_factory = sqlite3.Row
 
             # Update database structure for internal usage
@@ -65,6 +71,8 @@ class DatabaseManager:
         return self._db_handles[dbid]
 
     def add_sql_path(self, path, scope='guild'):
+        """ Adds a new entry to the list of database schema search paths """
+
         self._sqlinfo.append({
             'path': path,
             'scope': scope,
@@ -102,7 +110,7 @@ class DatabaseManager:
             if not os.path.isfile(path):
                 break
 
-            with open(path) as file:
+            with open(path, encoding="utf-8") as file:
                 conn.executescript(file.read())
 
     def _upgrade_db_external(self, conn, scope):
@@ -125,7 +133,7 @@ class DatabaseManager:
                     if not os.path.isfile(path):
                         break
 
-                    with open(path) as file:
+                    with open(path, encoding="utf-8") as file:
                         conn.executescript(file.read())
             finally:
                 # Write back the current schema version and restore the old one
@@ -152,7 +160,9 @@ class DatabaseManager:
         return schemas
 
     def close(self):
-        for dbid in self._db_handles:
-            self._db_handles[dbid].close()
+        """ Closes all open handles """
+
+        for handle in self._db_handles.values():
+            handle.close()
 
         self._db_handles.clear()

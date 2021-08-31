@@ -1,4 +1,4 @@
-FROM python:3
+FROM docker.io/python:3
 
 RUN groupadd dbot && useradd --no-log-init -g dbot dbot
 RUN mkdir -p /dbot-db && chown -R dbot:dbot /dbot-db

@@ -23,13 +23,15 @@ def _insert_returns(body):
 
 
 class DBotAdmin(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
     @commands.is_owner()
     async def sql(self, ctx, *, query):
-        """Executes an SQL-query"""
+        """ Executes an SQL-query """
 
         # Set default scope
         if ctx.guild is not None:
@@ -76,7 +78,7 @@ class DBotAdmin(commands.Cog):
         cmd = cmd.strip("` ")
         try:
             parsed_cmd = ast.parse(cmd)
-        except Exception:
+        except SyntaxError:
             await ctx.send(f"Exception while parsing command:\n```{traceback.format_exc()}```")
             return
 
@@ -99,11 +101,11 @@ class DBotAdmin(commands.Cog):
         }
 
         # Compile our function for execution and load it
-        exec(compile(parsed_fn, filename="<ast>", mode="exec"), env)
+        exec(compile(parsed_fn, filename="<ast>", mode="exec"), env)  # pylint: disable=exec-used
 
         try:
-            output = await eval("_eval()", env)
-        except Exception:
+            output = await eval("_eval()", env)  # pylint: disable=eval-used
+        except Exception:  # pylint: disable=broad-except
             await ctx.send(f"Exception while running command:\n```{traceback.format_exc()}```")
             return
 
@@ -159,4 +161,5 @@ class DBotAdmin(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.add_cog(DBotAdmin(bot))

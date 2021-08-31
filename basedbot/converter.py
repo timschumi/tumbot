@@ -2,14 +2,16 @@ import typing
 import inspect
 
 import discord
-from discord.ext.commands import converter, ChannelNotFound, RoleNotFound, MemberNotFound, UserNotFound
+from discord.ext import commands
 
 
 class InvalidConversionException(Exception):
-    pass
+    """ Thrown when a value can't be converted using a converter """
 
 
 def converter_from_def(conv):
+    """ Builds a converter object from a type definition """
+
     # If this already is an instance of a converter, return it
     if isinstance(conv, Converter):
         return conv
@@ -28,10 +30,11 @@ def converter_from_def(conv):
                 return UnionConverter([converter_from_def(e) for e in types])
 
             types = [e for e in types if not isinstance(None, e)]
+
             if len(types) == 1:
                 return OptionalConverter(converter_from_def(types[0]))
-            else:
-                return OptionalConverter(UnionConverter([converter_from_def(e) for e in types]))
+
+            return OptionalConverter(UnionConverter([converter_from_def(e) for e in types]))
 
     # Convert from standard typing definitions
     if isinstance(conv, type):
@@ -50,26 +53,32 @@ def converter_from_def(conv):
 
 
 class Converter:
-    """The common interface for a converter"""
+    """ The common interface for a converter """
 
     async def store(self, ctx, value):
-        """Converts a value into the internal string representation"""
+        """ Converts a value into the internal string representation """
+
         raise NotImplementedError("store has not been implemented")
 
     async def load(self, ctx, value):
-        """Converts an internal string representation into the actual value"""
+        """ Converts an internal string representation into the actual value """
+
         raise NotImplementedError("load has not been implemented")
 
     def name(self):
-        """Returns a human-readable name for the given type"""
+        """ Returns a human-readable name for the given type """
+
         raise NotImplementedError("name has not been implemented")
 
     async def _tostr(self, ctx, value):
-        """Converts an actual object into a human-readable output"""
+        """ Converts an actual object into a human-readable output """
+
+        del ctx
         return str(value)
 
     async def show(self, ctx, value):
-        """Converts an object (actual object or internal string) into a human-readable output"""
+        """ Converts an object (actual object or internal string) into a human-readable output """
+
         if isinstance(value, str):
             value = await self.load(ctx, value)
 
@@ -77,12 +86,14 @@ class Converter:
 
 
 class OptionalConverter(Converter):
+    """ Converts a value to None or passes to the enclosed converter """
+
     def __init__(self, conv):
         self._conv = converter_from_def(conv)
 
     async def store(self, ctx, value):
         if value is None:
-            raise InvalidConversionException("Can't convert None to appropriate String representation")
+            raise InvalidConversionException("Can't convert None to String")
 
         return await self._conv.store(ctx, value)
 
@@ -103,6 +114,8 @@ class OptionalConverter(Converter):
 
 
 class UnionConverter(Converter):
+    """ Converts the value by trying all the enclosed converters in order """
+
     def __init__(self, *args):
         self._conv = [converter_from_def(conv) for conv in args]
 
@@ -130,6 +143,8 @@ class UnionConverter(Converter):
 
 
 class BoolConverter(Converter):
+    """ Converts boolean-like values and strings """
+
     async def store(self, ctx, value):
         if value in (True, 'yes', 'y', 'true', 'True', 't', '1', 'enable', 'on'):
             return "1"
@@ -153,7 +168,7 @@ class BoolConverter(Converter):
 
 
 class StringConverter(Converter):
-    """Converts internal string representations into themselves. Essentially a no-op."""
+    """ Converts internal string representations into themselves. Essentially a no-op. """
 
     async def store(self, ctx, value):
         return value
@@ -169,6 +184,8 @@ class StringConverter(Converter):
 
 
 class IntConverter(Converter):
+    """ Converts integers """
+
     async def store(self, ctx, value):
         if isinstance(value, int):
             return str(value)
@@ -181,8 +198,8 @@ class IntConverter(Converter):
     async def load(self, ctx, value):
         try:
             return int(value)
-        except ValueError:
-            raise InvalidConversionException(f"{value} can not be converted to a number")
+        except ValueError as e:
+            raise InvalidConversionException(e) from e
 
     def name(self):
         return "Int"
@@ -192,14 +209,16 @@ class IntConverter(Converter):
 
 
 class MemberConverter(Converter):
+    """ Converts guild members """
+
     async def store(self, ctx, value):
         if isinstance(value, discord.Member):
             return str(value.id)
 
         try:
-            value = await converter.MemberConverter().convert(ctx, value)
-        except MemberNotFound:
-            raise InvalidConversionException(f"Member '{value}' not found")
+            value = await commands.converter.MemberConverter().convert(ctx, value)
+        except commands.MemberNotFound as e:
+            raise InvalidConversionException(e) from e
 
         return str(value.id)
 
@@ -219,14 +238,16 @@ class MemberConverter(Converter):
 
 
 class UserConverter(Converter):
+    """ Converts users """
+
     async def store(self, ctx, value):
         if isinstance(value, discord.User):
             return str(value.id)
 
         try:
-            value = await converter.UserConverter().convert(ctx, value)
-        except UserNotFound:
-            raise InvalidConversionException(f"User '{value}' not found")
+            value = await commands.converter.UserConverter().convert(ctx, value)
+        except commands.UserNotFound as e:
+            raise InvalidConversionException(e) from e
 
         return str(value.id)
 
@@ -246,14 +267,16 @@ class UserConverter(Converter):
 
 
 class TextChannelConverter(Converter):
+    """ Converts text channels """
+
     async def store(self, ctx, value):
         if isinstance(value, discord.TextChannel):
             return str(value.id)
 
         try:
-            value = await converter.TextChannelConverter().convert(ctx, value)
-        except ChannelNotFound:
-            raise InvalidConversionException(f"TextChannel '{value}' not found")
+            value = await commands.converter.TextChannelConverter().convert(ctx, value)
+        except commands.ChannelNotFound as e:
+            raise InvalidConversionException(e) from e
 
         return str(value.id)
 
@@ -273,6 +296,8 @@ class TextChannelConverter(Converter):
 
 
 class RoleConverter(Converter):
+    """ Converts roles """
+
     async def store(self, ctx, value):
         if isinstance(value, discord.Role):
             return str(value.id)
@@ -281,9 +306,9 @@ class RoleConverter(Converter):
             return str(ctx.guild.id)
 
         try:
-            value = await converter.RoleConverter().convert(ctx, value)
-        except RoleNotFound:
-            raise InvalidConversionException(f"Role '{value}' not found")
+            value = await commands.converter.RoleConverter().convert(ctx, value)
+        except commands.RoleNotFound as e:
+            raise InvalidConversionException(e) from e
 
         return str(value.id)
 

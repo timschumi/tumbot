@@ -1,0 +1,5 @@
+[MESSAGES CONTROL]
+disable=missing-module-docstring,
+        invalid-name,
+        too-many-return-statements,
+        too-many-arguments,
