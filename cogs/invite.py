@@ -404,17 +404,14 @@ class InviteManager(commands.Cog):
 
             embed = discord.Embed(title=f"**{member}** ({member.id}) joined the server.", color=0x0065bd)
 
-            if invite.max_uses != 0:
-                embed.add_field(name="Invite", value=f"{invite.code} ({invite.uses}/{invite.max_uses})",
-                                inline=False)
-            else:
-                embed.add_field(name="Invite", value=invite.code, inline=False)
+            embed.add_field(name="Invite",
+                            value=invite.code + (f" ({invite.uses}/{invite.max_uses})" if invite.max_uses else ""),
+                            inline=False)
 
-            if 'inviter' in data:
-                embed.add_field(name="Creator", value=f"{data['inviter'].mention} ({data['inviter'].id})",
-                                inline=False)
-            else:
-                embed.add_field(name="Creator", value="Vanity URL", inline=False)
+            inviter = f"{data['inviter'].mention} ({data['inviter'].id})" if 'inviter' in data else "Vanity URL"
+            embed.add_field(name="Creator",
+                            value=inviter,
+                            inline=False)
 
             if 'approver' in data:
                 embed.add_field(name="Approver", value=f"{data['approver'].mention} ({data['approver'].id})",
