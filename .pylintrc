@@ -2,6 +2,7 @@
 disable=missing-module-docstring,
         invalid-name,
         too-few-public-methods,
+        too-many-instance-attributes,
         too-many-return-statements,
         too-many-arguments,
 
