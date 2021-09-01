@@ -340,7 +340,7 @@ class InviteManager(commands.Cog):
         if 'inviter' in data:
             text = f"(Creator: **{data['inviter']}** [{data['inviter'].id}])"
         else:
-            text = f"(Creator: **Vanity URL**)"
+            text = "(Creator: **Vanity URL**)"
 
         if 'reason' in data:
             text += f" (Reason: {data['reason']})"

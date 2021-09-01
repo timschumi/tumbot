@@ -383,9 +383,9 @@ class GuildNetworks(commands.Cog):
                 embed.add_field(name="Reason", value=reason, inline=False)
 
             if user_in_guild:
-                embed.add_field(name="Status", value=f"The member is on this server.", inline=False)
+                embed.add_field(name="Status", value="The member is on this server.", inline=False)
             else:
-                embed.add_field(name="Status", value=f"The member is not on this server.", inline=False)
+                embed.add_field(name="Status", value="The member is not on this server.", inline=False)
 
             await self._send_network_channel(g, embed=embed)
 
@@ -416,9 +416,9 @@ class GuildNetworks(commands.Cog):
                 embed.add_field(name="Reason", value=reason, inline=False)
 
             if user_in_guild:
-                embed.add_field(name="Status", value=f"The member is on this server.", inline=False)
+                embed.add_field(name="Status", value="The member is on this server.", inline=False)
             else:
-                embed.add_field(name="Status", value=f"The member is not on this server.", inline=False)
+                embed.add_field(name="Status", value="The member is not on this server.", inline=False)
 
             await self._send_network_channel(g, embed=embed)
 
