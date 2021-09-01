@@ -33,7 +33,7 @@ class Quotes(commands.Cog):
             return
 
         # Try to split quote
-        matches = [m for m in re.finditer(r' [-~] ', quote)]
+        matches = list(re.finditer(r' [-~] ', quote))
 
         if len(matches) < 1:
             quoteparts = [quote]
