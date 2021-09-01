@@ -5,7 +5,8 @@ from discord.ext import commands
 
 
 def _randomstring(file):
-    return random.choice(open(f"strings/{file}.txt", encoding="utf-8").read().splitlines())
+    with open(f"strings/{file}.txt", encoding="utf-8") as f:
+        return random.choice(f.read().splitlines())
 
 
 def _excellentstring():
