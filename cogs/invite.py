@@ -29,8 +29,8 @@ class InviteManager(commands.Cog):
 
     def __init__(self, bot):
         self._bot = bot
-        self._invs = dict()
-        self._vanity = dict()
+        self._invs = {}
+        self._vanity = {}
         self._var_channel = self._bot.conf.var('invite.channel')
         self._var_inv_channel = self._bot.conf.var('invite.inv_channel')
         self._var_inv_count = self._bot.conf.var('invite.inv_count')
