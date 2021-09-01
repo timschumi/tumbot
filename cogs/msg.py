@@ -1,5 +1,5 @@
-from discord.ext import commands
 import re
+from discord.ext import commands
 
 import basedbot
 
