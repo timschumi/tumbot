@@ -19,6 +19,11 @@ def _get_clean_name(ctx, userid):
     return user.display_name.replace('```', '').strip()
 
 
+def _get_current_date() -> [int, int]:
+    date = datetime.datetime.now()
+    return date.day, date.month
+
+
 class Birthdays(commands.Cog):
     DATEPATTERN: Pattern[str] = re.compile(r"(((0?[1-9])|([12][0-9]))\."  # 01.-29.
                                            r"((0?[1-9])|(1[0-2]))\.?)"  # all months have 1..29 days
@@ -89,10 +94,6 @@ class Birthdays(commands.Cog):
 
         await ctx.message.add_reaction('\U00002705')
 
-    def get_current_date(self) -> [int, int]:
-        date = datetime.datetime.now()
-        return date.day, date.month
-
     async def _clear_roles(self, guild):
         if not guild.me.guild_permissions.manage_roles:
             return
@@ -125,7 +126,7 @@ class Birthdays(commands.Cog):
 
     @tasks.loop(hours=24)
     async def congratulate(self):
-        day, month = self.get_current_date()
+        day, month = _get_current_date()
         for guild in self.bot.guilds:
             # Clear old birthday roles
             await self._clear_roles(guild)

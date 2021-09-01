@@ -4,25 +4,27 @@ import discord
 from discord.ext import commands
 
 
+def _randomstring(file):
+    return random.choice(open(f"strings/{file}.txt").read().splitlines())
+
+
+def _excellentstring():
+    return f"{_randomstring('exzellenz_trivial')} ist {random.choice(('trivial', 'sehr exzellent'))}."
+
+
 class Randomstuff(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    def randomstring(self, file):
-        return random.choice(open(f"strings/{file}.txt").read().splitlines())
-
     @commands.command(aliases=['exzellent', 'excellence'])
     async def exzellenz(self, ctx):
         """Shows you some excellent fact"""
-        await ctx.send(random.choice((self.randomstring("exzellenz_extra"), self.excellentstring())))
-
-    def excellentstring(self):
-        return f"{self.randomstring('exzellenz_trivial')} ist {random.choice(('trivial', 'sehr exzellent'))}."
+        await ctx.send(random.choice((_randomstring("exzellenz_extra"), _excellentstring())))
 
     @commands.command(aliases=["penguinfact"])
     async def pinguinfakt(self, ctx):
         """Displays cool penguin facts"""
-        await ctx.send(self.randomstring("pinguinfakten"))
+        await ctx.send(_randomstring("pinguinfakten"))
 
     @commands.command(aliases=['source', 'sauce'])
     async def repo(self, ctx):
