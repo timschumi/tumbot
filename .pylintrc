@@ -3,3 +3,6 @@ disable=missing-module-docstring,
         invalid-name,
         too-many-return-statements,
         too-many-arguments,
+
+[FORMAT]
+max-line-length=120

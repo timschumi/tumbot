@@ -11,8 +11,9 @@ class Physik(commands.Cog):
             return
 
         await member.send(
-            f'Hey {member.mention}, Willkommen auf dem Physik Server! Schau am besten mal im Channel <#640285216245809186> vorbei, '
-            f'dort wird das wichtigste zum Server erklärt. Viel Spaß und eine exzellente Zeit!')
+            f"Hey {member.mention}, Willkommen auf dem Physik Server! Schau am besten mal im Channel "
+            "<#640285216245809186> vorbei, dort wird das wichtigste zum Server erklärt. "
+            "Viel Spaß und eine exzellente Zeit!")
 
 
 def setup(bot):

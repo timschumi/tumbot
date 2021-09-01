@@ -68,8 +68,11 @@ class Logging(commands.Cog):
 
             await self.log_stuff(guild, message.clean_content, delete_after=delete_after)
         else:
-            await self.log_stuff(guild, f":recycle: Nachricht ({message.id}) von **{message.author}** ({message.author.id}) in Channel **{channel}** ({channel.id}) "
-                f"gelöscht mit dem Inhalt:\n{message.clean_content}", delete_after=delete_after)
+            await self.log_stuff(guild, f":recycle: Nachricht ({message.id}) von "
+                                        f"**{message.author}** ({message.author.id}) in Channel "
+                                        f"**{channel}** ({channel.id}) gelöscht mit dem Inhalt:\n"
+                                        f"{message.clean_content}",
+                                 delete_after=delete_after)
 
 
 def setup(bot):

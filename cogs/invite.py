@@ -187,7 +187,8 @@ class InviteManager(commands.Cog):
             return
 
         try:
-            await ctx.author.send(f"Your request has been submitted. You will get an invite link once it has been approved.")
+            await ctx.author.send("Your request has been submitted. "
+                                  "You will get an invite link once it has been approved.")
         except discord.errors.Forbidden:
             await ctx.send("Could send a private message. Do you have messages from server members enabled?")
             return False
@@ -201,7 +202,8 @@ class InviteManager(commands.Cog):
         if channel is None:
             return
 
-        message = await channel.send(f"**{ctx.author}** ({ctx.author.id}) requested an invite. Reason: \"{_reason_to_text(reason)}\"")
+        message = await channel.send(f"**{ctx.author}** ({ctx.author.id}) requested an invite. "
+                                     f"Reason: \"{_reason_to_text(reason)}\"")
 
         # Add yes/no reactions
         await message.add_reaction('\U00002705')
@@ -214,7 +216,8 @@ class InviteManager(commands.Cog):
 
     def _get_last_invite(self, member):
         with self._bot.db.get(member.guild.id) as db:
-            res = db.execute("SELECT code FROM invite_active WHERE user = ? OR allowed_by = ? ORDER BY rowid DESC LIMIT 1",
+            res = db.execute("SELECT code FROM invite_active "
+                             "WHERE user = ? OR allowed_by = ? ORDER BY rowid DESC LIMIT 1",
                              (member.id, member.id)).fetchall()
 
         if len(res) < 1:
@@ -268,7 +271,8 @@ class InviteManager(commands.Cog):
         """
         List open invites
 
-        Unless the user is allowed to manage invites through the bot, this will just list invites that the user created or approved.
+        Unless the user is allowed to manage invites through the bot,
+        this will just list invites that the user created or approved.
         """
         see_all = self._perm_manage.allowed(ctx.author)
 
@@ -399,17 +403,20 @@ class InviteManager(commands.Cog):
             embed = discord.Embed(title=f"**{member}** ({member.id}) joined the server.", color=0x0065bd)
 
             if invite.max_uses != 0:
-                embed.add_field(name="Invite", value=f"{invite.code} ({invite.uses}/{invite.max_uses})", inline=False)
+                embed.add_field(name="Invite", value=f"{invite.code} ({invite.uses}/{invite.max_uses})",
+                                inline=False)
             else:
                 embed.add_field(name="Invite", value=invite.code, inline=False)
 
             if 'inviter' in data:
-                embed.add_field(name="Creator", value=f"{data['inviter'].mention} ({data['inviter'].id})", inline=False)
+                embed.add_field(name="Creator", value=f"{data['inviter'].mention} ({data['inviter'].id})",
+                                inline=False)
             else:
                 embed.add_field(name="Creator", value="Vanity URL", inline=False)
 
             if 'approver' in data:
-                embed.add_field(name="Approver", value=f"{data['approver'].mention} ({data['approver'].id})", inline=False)
+                embed.add_field(name="Approver", value=f"{data['approver'].mention} ({data['approver'].id})",
+                                inline=False)
 
             if 'reason' in data:
                 embed.add_field(name="Reason", value=data['reason'], inline=False)

@@ -33,7 +33,8 @@ class Admin(commands.Cog):
         """Flattens all the previous texts in this channel into a wall of text"""
 
         async with ctx.channel.typing():
-            lines = [m.clean_content for m in await ctx.channel.history(limit=None, oldest_first=True).flatten() if m.id != ctx.message.id]
+            messages = await ctx.channel.history(limit=None, oldest_first=True).flatten()
+            lines = [m.clean_content for m in messages if m.id != ctx.message.id]
             await self.bot.send_paginated(ctx, lines, linefmt="{} ")
 
 
