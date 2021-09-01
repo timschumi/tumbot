@@ -70,6 +70,16 @@ class InviteManager(commands.Cog):
         if vanity_invite is not None:
             self._vanity[guild.id] = vanity_invite
 
+    def _get_log_channel(self, guild):
+        # Get stored channel
+        channel = self._var_channel.get(guild.id)
+
+        if channel is None:
+            return None
+
+        # Try to resolve
+        return guild.get_channel(int(channel))
+
     def _get_inv_channel(self, guild, default=None):
         # Get stored channel
         channel = self._var_inv_channel.get(guild.id)
@@ -193,12 +203,8 @@ class InviteManager(commands.Cog):
             await ctx.send("Could send a private message. Do you have messages from server members enabled?")
             return False
 
-        channel = self._var_channel.get(ctx.guild.id)
+        channel = self._get_log_channel(ctx.guild)
 
-        if channel is None:
-            return
-
-        channel = self._bot.get_channel(int(channel))
         if channel is None:
             return
 
@@ -368,12 +374,8 @@ class InviteManager(commands.Cog):
         old = self._invs[guild.id]
         self._invs[guild.id] = await guild.invites()
 
-        channel = self._var_channel.get(guild.id)
+        channel = self._get_log_channel(guild)
 
-        if channel is None:
-            return
-
-        channel = self._bot.get_channel(int(channel))
         if channel is None:
             return
 
