@@ -51,8 +51,8 @@ class GuildNetwork:
         self._name = data["name"]
 
         # Populate members
-        with self._db.get('', scope='global') as db:
-            result = db.execute("SELECT gid FROM network_member WHERE nid = ?", (self._nid,)).fetchall()
+        with self._db.get('', scope='global') as dbh:
+            result = dbh.execute("SELECT gid FROM network_member WHERE nid = ?", (self._nid,)).fetchall()
         self._members = {r[0]: self._fetch_member(r[0]) for r in result}
 
         self._owner = self.get_member(data["owner"])
