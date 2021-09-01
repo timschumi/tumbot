@@ -36,17 +36,17 @@ class ShutTheBoxGame:
         text += f"You have rolled the following dice: **{d1}** and **{d2}**\n\n"
 
         # Boxes
-        for i in range(len(self._boxes)):
+        for i, box in enumerate(self._boxes):
             if i == len(self._boxes) / 2:
                 text += "\n\n"
 
-            text += ":red_circle:\t" if self._boxes[i] else ":white_check_mark:\t"
+            text += ":red_circle:\t" if box else ":white_check_mark:\t"
 
         text += "\n\n"
 
         # Player points
-        for i in range(len(self._players)):
-            text += f"**{self._players[i]}**'s points: {self._points[i]}\n"
+        for i, pl in enumerate(self._players):
+            text += f"**{pl}**'s points: {self._points[i]}\n"
 
         await self._msg.edit(content=text)
 
@@ -143,8 +143,8 @@ class ShutTheBoxGame:
         else:
             text = f"**{self._players[1]}** wins by points!\n\n"
 
-        for i in range(len(self._players)):
-            text += f"**{self._players[i]}**'s points: {self._points[i]}\n"
+        for i, pl in enumerate(self._players):
+            text += f"**{pl}**'s points: {self._points[i]}\n"
 
         await self._msg.edit(content=text)
 
