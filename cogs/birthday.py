@@ -32,6 +32,8 @@ class Birthdays(commands.Cog):
                                            r"|"
                                            r"(31\.((0?[13578])|(10)|(12))\.?)")  # all months with 31 days
 
+    congratulate: tasks.Loop
+
     def __init__(self, bot):
         self.bot = bot
         self._var_channel = self.bot.conf.var('birthday.channel')
@@ -125,7 +127,7 @@ class Birthdays(commands.Cog):
         return guild.get_role(int(role))
 
     @tasks.loop(hours=24)
-    async def congratulate(self):
+    async def congratulate(self):  # pylint: disable=function-redefined
         day, month = _get_current_date()
         for guild in self.bot.guilds:
             # Clear old birthday roles

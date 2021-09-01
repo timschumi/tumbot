@@ -540,6 +540,8 @@ class InviteManager(commands.Cog):
 
 
 class ExpiredInvitesTracker(commands.Cog):
+    check_invites: tasks.Loop
+
     def __init__(self, bot):
         self._bot = bot
         self._exp_times = {}
@@ -603,7 +605,7 @@ class ExpiredInvitesTracker(commands.Cog):
             self.check_invites.cancel()
 
     @tasks.loop()
-    async def check_invites(self):
+    async def check_invites(self):  # pylint: disable=function-redefined
         # Stop if no invites are left
         if len(self._exp_times) == 0:
             self.check_invites.cancel()
