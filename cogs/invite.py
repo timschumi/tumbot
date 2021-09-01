@@ -437,6 +437,7 @@ class InviteManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):
+        del before
         await self.update_invites(after)
 
     async def _notify_invite_owner(self, invite, message):
