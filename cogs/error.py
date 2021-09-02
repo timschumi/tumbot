@@ -5,11 +5,15 @@ from discord.ext import commands
 
 
 class ErrorHandler(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error, force=False):
+        """ Common handlers for command errors """
+
         # Skippen, wenn wir einen lokalen Handler haben
         if hasattr(ctx.command, 'on_error') and not force:
             return
@@ -44,4 +48,5 @@ class ErrorHandler(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.add_cog(ErrorHandler(bot))

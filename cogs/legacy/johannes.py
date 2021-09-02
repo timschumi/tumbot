@@ -13,6 +13,7 @@ async def _check_cs_server(ctx):
 
 
 class Johannes(commands.Cog):
+    # pylint: disable=missing-class-docstring
 
     def __init__(self, bot):
         self.bot = bot
@@ -20,11 +21,14 @@ class Johannes(commands.Cog):
     @commands.command()
     @commands.check(_check_cs_server)
     async def johannes(self, ctx):
-        """Sends a cute animal"""
+        """ Sends a cute animal """
+
         await ctx.send("\U0001F427")
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """ Adds reactions to messages with certain words """
+
         if message.author.bot:
             return
 
@@ -44,4 +48,5 @@ class Johannes(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.add_cog(Johannes(bot))

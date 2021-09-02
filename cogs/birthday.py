@@ -25,6 +25,8 @@ def _get_current_date() -> [int, int]:
 
 
 class Birthdays(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     DATEPATTERN: Pattern[str] = re.compile(r"(((0?[1-9])|([12][0-9]))\."  # 01.-29.
                                            r"((0?[1-9])|(1[0-2]))\.?)"  # all months have 1..29 days
                                            r"|"
@@ -128,6 +130,8 @@ class Birthdays(commands.Cog):
 
     @tasks.loop(hours=24)
     async def congratulate(self):  # pylint: disable=function-redefined
+        """ Repeatedly checks for new birthdays and sends congratulation messages """
+
         day, month = _get_current_date()
         for guild in self.bot.guilds:
             # Clear old birthday roles
@@ -167,6 +171,8 @@ class Birthdays(commands.Cog):
 
     @congratulate.before_loop
     async def congratulate_align(self):
+        """ Aligns the congratulations to midnight """
+
         current = datetime.datetime.now()
         next_time = current + datetime.timedelta(days=1)  # Tomorrow
         next_time = datetime.datetime(next_time.year, next_time.month, next_time.day, 0, 0, 1, 0)  # Clip to 00:00:01
@@ -180,6 +186,8 @@ class Birthdays(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
+        """ Cleans up the birthdays of members that left the server """
+
         # Delete user from database
         with self.bot.db.get(member.guild.id) as db:
             db.execute("DELETE FROM birthdays WHERE userId = ?", (member.id,))
@@ -188,6 +196,7 @@ class Birthdays(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.conf.register('birthday.channel',
                       conv=Optional[discord.TextChannel],
                       description="The channel where birthday messages are sent to.")

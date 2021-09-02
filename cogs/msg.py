@@ -5,6 +5,8 @@ import basedbot
 
 
 class MessageStore(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -54,6 +56,8 @@ class MessageStore(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """ Checks messages for a shorthand and prints the matching value """
+
         if message.author.bot:
             return
 
@@ -74,6 +78,7 @@ class MessageStore(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.perm.register('msg.list',
                       base=True,
                       pretty_name="List shorthands (msg)")

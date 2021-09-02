@@ -11,7 +11,10 @@ COLOR_NETWORK_JOIN = 0x00d100
 COLOR_MESSAGE_WARN = 0xf0bb2b
 COLOR_MESSAGE_CRIT = 0xed3e32
 
+
 class GuildNetworkMember:
+    """ Represents a guild that is a member of a specific guild network """
+
     def __init__(self, bot, db, network, data):
         self._bot = bot
         self._db = db
@@ -24,18 +27,22 @@ class GuildNetworkMember:
 
     @property
     def network(self):
+        """ Returns the network that the guild is part of """
         return self._network
 
     @property
     def guild(self):
+        """ Returns the guild itself """
         return self._guild
 
     @property
     def admin(self):
+        """ Returns whether the guild administrates the guild network """
         return self._admin
 
     @admin.setter
     def admin(self, value):
+        """ Changes the member status to (non-)administrator """
         self._admin = value
 
         with self._db.get('', scope='global') as db:
@@ -44,6 +51,8 @@ class GuildNetworkMember:
 
 
 class GuildNetwork:
+    """ Represents a guild network """
+
     def __init__(self, bot, db, data):
         self._bot = bot
         self._db = db
@@ -59,18 +68,22 @@ class GuildNetwork:
 
     @property
     def id(self):
+        """ Returns the guild network ID """
         return self._nid
 
     @property
     def name(self):
+        """ Returns the guild network name """
         return self._name
 
     @property
     def owner(self):
+        """ Returns the owning guild of the guild network """
         return self._owner
 
     @owner.setter
     def owner(self, value):
+        """ Sets a new owning guild for the guild network """
         if not isinstance(value, GuildNetworkMember):
             raise ValueError("New owner is not of type GuildNetworkMember!")
 
@@ -85,10 +98,12 @@ class GuildNetwork:
 
     @property
     def members(self):
+        """ Returns all guild network members """
         return list(self._members.values())
 
     @property
     def admins(self):
+        """ Returns all guild network members that are administrators """
         return [e for e in self.members if e.admin]
 
     def _fetch_member(self, gid):
@@ -101,6 +116,8 @@ class GuildNetwork:
         return GuildNetworkMember(self._bot, self._db, self, result)
 
     def get_member(self, gid):
+        """ Retrieves a guild network member by the guild ID """
+
         if gid not in self._members:
             val = self._fetch_member(gid)
 
@@ -112,12 +129,16 @@ class GuildNetwork:
         return self._members[gid]
 
     def join(self, gid):
+        """ Adds a guild (by guild ID) to a guild network """
+
         with self._db.get('', scope='global') as db:
             db.execute("REPLACE INTO network_member (nid, gid, admin) VALUES (?, ?, 0)", (self._nid, gid))
 
         return self.get_member(gid)
 
     def leave(self, gid):
+        """ Removes a guild (by guild ID) from a guild network """
+
         with self._bot.db.get(gid) as db:
             db.execute("DELETE FROM network_invites WHERE network = ?", (self._nid,))
 
@@ -152,6 +173,8 @@ def _check_affect_member(func):
 
 
 class GuildNetworks(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self._bot = bot
         self._networks = {}
@@ -177,7 +200,7 @@ class GuildNetworks(commands.Cog):
         except sqlite3.IntegrityError:
             return None
 
-        return self.get_network(c.lastrowid)
+        return self._get_network(c.lastrowid)
 
     def _delete_network(self, nid):
         with self._bot.db.get('', scope='global') as db:
@@ -195,7 +218,7 @@ class GuildNetworks(commands.Cog):
 
         return GuildNetwork(self._bot, self._bot.db, result)
 
-    def get_network(self, nid):
+    def _get_network(self, nid):
         if nid not in self._networks:
             self._networks[nid] = self._fetch_network(nid)
 
@@ -228,7 +251,7 @@ class GuildNetworks(commands.Cog):
     async def network_invite(self, ctx, network: int, guild: int):
         """Invites a guild to a network"""
 
-        network = self.get_network(network)
+        network = self._get_network(network)
 
         if network is None:
             await ctx.send("Network not found!")
@@ -303,7 +326,7 @@ class GuildNetworks(commands.Cog):
     @basedbot.has_permissions("network.manage")
     async def network_leave(self, ctx, network: int):
         """Leaves a network"""
-        network = self.get_network(network)
+        network = self._get_network(network)
 
         if network is None:
             await ctx.send("Network could not be resolved.")
@@ -424,6 +447,8 @@ class GuildNetworks(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        """ Handles reactions to administrative messages """
+
         # Ignore private messages
         if payload.guild_id is None:
             return
@@ -468,7 +493,7 @@ class GuildNetworks(commands.Cog):
             return
 
         # Resolve network
-        network = self.get_network(entry["network"])
+        network = self._get_network(entry["network"])
 
         if network is None:
             await channel.send("Could not resolve the network.")
@@ -499,6 +524,7 @@ class GuildNetworks(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.conf.register('network.channel',
                       conv=Optional[discord.TextChannel],
                       description="The channel where guild network messages are logged.")

@@ -7,6 +7,8 @@ import basedbot
 
 
 class Quotes(commands.Cog):
+    """ Manages quotes """
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -109,6 +111,7 @@ class Quotes(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.conf.register('quotes.pretty',
                       default="0",
                       conv=bool,

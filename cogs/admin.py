@@ -4,6 +4,8 @@ from basedbot import ConfigAccessLevel
 
 
 class Admin(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self.bot = bot
         self._var_clear_max = self.bot.conf.var('admin.clear_max')
@@ -39,6 +41,7 @@ class Admin(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.conf.register('admin.clear_max',
                       default="0",
                       conv=int,

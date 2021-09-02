@@ -3,6 +3,7 @@ from discord.ext import commands
 
 
 class Userinfo(commands.Cog):
+    # pylint: disable=missing-class-docstring
 
     def __init__(self, bot):
         self.bot = bot
@@ -40,4 +41,5 @@ class Userinfo(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.add_cog(Userinfo(bot))

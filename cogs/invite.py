@@ -26,6 +26,7 @@ def _find_match(li, v):
 
 
 class InviteManager(commands.Cog):
+    # pylint: disable=missing-class-docstring
 
     def __init__(self, bot):
         self._bot = bot
@@ -41,13 +42,13 @@ class InviteManager(commands.Cog):
         self._perm_request = self._bot.perm.get('invite.request')
         self._perm_manage = self._bot.perm.get('invite.manage')
 
-        self._bot.loop.create_task(self.init_invites())
+        self._bot.loop.create_task(self._init_invites())
 
-    async def init_invites(self):
+    async def _init_invites(self):
         await self._bot.wait_until_ready()
 
         for g in self._bot.guilds:
-            await self.update_invites(g)
+            await self._update_invites(g)
 
     @classmethod
     async def _get_vanity_invite(cls, guild):
@@ -59,7 +60,7 @@ class InviteManager(commands.Cog):
         except discord.errors.NotFound:
             return None
 
-    async def update_invites(self, guild):
+    async def _update_invites(self, guild):
         # Don't do anything if we don't have necessary permissions
         if not guild.me.guild_permissions.manage_guild:
             return
@@ -315,7 +316,9 @@ class InviteManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        await self.update_invites(guild)
+        """ Initializes invites when the bot joins a new server """
+
+        await self._update_invites(guild)
 
     def _get_invite_data(self, invite):
         data = {
@@ -361,6 +364,8 @@ class InviteManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        """ Tracks down the used invite when a new guild member joins """
+
         guild = member.guild
 
         # Ignore bots
@@ -433,12 +438,16 @@ class InviteManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
-        await self.update_invites(invite.guild)
+        """ Refreshes invite cache when a new invite is created """
+
+        await self._update_invites(invite.guild)
 
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):
+        """ Refreshes invite cache when guild settings have been changed """
+
         del before
-        await self.update_invites(after)
+        await self._update_invites(after)
 
     async def _notify_invite_owner(self, invite, message):
         # Do we have that invite in the database?
@@ -458,7 +467,9 @@ class InviteManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
-        await self.update_invites(invite.guild)
+        """ Refreshes invite cache when an invite is deleted """
+
+        await self._update_invites(invite.guild)
 
         if self._var_notify_deleted.get(invite.guild.id) != "0":
             try:
@@ -472,6 +483,8 @@ class InviteManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        """ Reaction handler for invite requests """
+
         # Ignore private messages
         if payload.guild_id is None:
             return
@@ -540,6 +553,8 @@ class InviteManager(commands.Cog):
 
 
 class ExpiredInvitesTracker(commands.Cog):
+    """ Simulates invite deletion events when an invite expires """
+
     check_invites: tasks.Loop
 
     def __init__(self, bot):
@@ -573,6 +588,8 @@ class ExpiredInvitesTracker(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite, skip_start=False):
+        """ Adds invites to the tracking list when created """
+
         # Don't track if the invite doesn't expire
         if invite.max_age == 0:
             return
@@ -595,6 +612,8 @@ class ExpiredInvitesTracker(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
+        """ Removes invites from the tracking list when deleted """
+
         # Don't do anything if the invite wasn't tracked
         if invite not in self._exp_times:
             return
@@ -606,6 +625,8 @@ class ExpiredInvitesTracker(commands.Cog):
 
     @tasks.loop()
     async def check_invites(self):  # pylint: disable=function-redefined
+        """ Repeatedly waits for the next invite to expire and fires an event """
+
         # Stop if no invites are left
         if len(self._exp_times) == 0:
             self.check_invites.cancel()
@@ -623,6 +644,7 @@ class ExpiredInvitesTracker(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.conf.register('invite.channel',
                       conv=Optional[discord.TextChannel],
                       description="The channel where invite tracking is logged.")

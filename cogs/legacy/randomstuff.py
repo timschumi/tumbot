@@ -14,6 +14,8 @@ def _excellentstring():
 
 
 class Randomstuff(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -58,4 +60,5 @@ class Randomstuff(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.add_cog(Randomstuff(bot))

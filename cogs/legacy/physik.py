@@ -2,11 +2,15 @@ from discord.ext import commands
 
 
 class Physik(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        """ Shows a custom join message for physicists """
+
         if not member.guild.id == 640285216245809183:
             return
 
@@ -17,4 +21,5 @@ class Physik(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.add_cog(Physik(bot))

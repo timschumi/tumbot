@@ -18,6 +18,8 @@ NOMOVE_REACTION = '\U0000274E'
 
 
 class ShutTheBoxGame:
+    """ An instance of the "Shut the Box" game """
+
     def __init__(self, bot, players, message):
         self._bot = bot
         self._players = players
@@ -122,6 +124,8 @@ class ShutTheBoxGame:
                 return True
 
     async def run(self):
+        """ Starts the main game """
+
         # Reset reactions
         for r in BOX_REACTIONS + [NOMOVE_REACTION]:
             await self._msg.add_reaction(r)
@@ -150,6 +154,8 @@ class ShutTheBoxGame:
 
 
 class ShutTheBox(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self._bot = bot
         self._running_games = []
@@ -192,6 +198,7 @@ class ShutTheBox(commands.Cog):
 
     @challenge.error
     async def challenge_error(self, ctx, error):
+        """ Handles errors that can appear during a game """
         error = getattr(error, 'original', error)
 
         if isinstance(error, commands.MissingRequiredArgument):
@@ -207,4 +214,5 @@ class ShutTheBox(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.add_cog(ShutTheBox(bot))

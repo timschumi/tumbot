@@ -18,7 +18,7 @@ async def _decode_raw_reaction(bot, payload: discord.RawReactionActionEvent):
     return reaction, member
 
 
-def decode_reaction(func):
+def _decode_reaction(func):
     @functools.wraps(func)
     async def wrapper(self, payload: discord.RawReactionActionEvent):
         # Ignore private messages
@@ -41,6 +41,8 @@ async def _wait_for_user_reaction(bot, user, timeout=60):
 
 
 class ReactionRoles(commands.Cog):
+    # pylint: disable=missing-class-docstring
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -107,8 +109,10 @@ class ReactionRoles(commands.Cog):
         await reaction.remove(member)
 
     @commands.Cog.listener(name="on_raw_reaction_add")
-    @decode_reaction
+    @_decode_reaction
     async def on_reaction_add(self, reaction, member):
+        """ Listens for new reactions and distributes the matching roles """
+
         if reaction.me:
             return
 
@@ -134,6 +138,8 @@ class ReactionRoles(commands.Cog):
     @add.error
     @delete.error
     async def handle_error(self, ctx, error):
+        """ Prints a nice message when the user is too slow """
+
         original = getattr(error, 'original', error)
 
         if isinstance(original, asyncio.TimeoutError):
@@ -148,4 +154,5 @@ class ReactionRoles(commands.Cog):
 
 
 def setup(bot):
+    # pylint: disable=missing-function-docstring
     bot.add_cog(ReactionRoles(bot))
