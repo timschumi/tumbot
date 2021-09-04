@@ -482,20 +482,10 @@ class InviteManager(commands.Cog):
             db.execute("DELETE FROM invite_active WHERE code = ?", (invite.code,))
 
     @commands.Cog.listener()
+    @basedbot.raw_reaction_filter(guild_only=True, not_self=True, emoji_names=('\U00002705', '\U0000274E'),
+                                  client_func=lambda self, payload: self._bot)
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         """ Reaction handler for invite requests """
-
-        # Ignore private messages
-        if payload.guild_id is None:
-            return
-
-        # Ignore own reactions
-        if payload.user_id == self._bot.user.id:
-            return
-
-        # Check if its a yes/no reaction
-        if payload.emoji.name != '\U00002705' and payload.emoji.name != '\U0000274E':
-            return
 
         guild = self._bot.get_guild(payload.guild_id)
         channel = self._bot.get_channel(payload.channel_id)
