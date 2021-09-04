@@ -1,5 +1,6 @@
 [MESSAGES CONTROL]
-disable=missing-module-docstring,
+disable=duplicate-code,
+        missing-module-docstring,
         invalid-name,
         too-few-public-methods,
         too-many-instance-attributes,
