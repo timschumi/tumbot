@@ -47,7 +47,7 @@ jobs:
           push: true
           pull: true
           tags: |
-            ${{ env.DOCKER_REPO }}:latest
-            ${{ env.DOCKER_REPO }}:${{ env.TAG_NAME }}
+            docker.io/${{ env.DOCKER_REPO }}:latest
+            docker.io/${{ env.DOCKER_REPO }}:${{ env.TAG_NAME }}
             ghcr.io/${{ env.GHCR_REPO }}:latest
             ghcr.io/${{ env.GHCR_REPO }}:${{ env.TAG_NAME }}
