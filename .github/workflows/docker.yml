@@ -8,7 +8,6 @@ on:
       - 'master'
 
 env:
-  TAG_NAME: commit-${{ github.sha }}
   GHCR_REPO: ${{ github.repository }}
   DOCKER_REPO: ${{ github.repository }}
 
@@ -48,6 +47,4 @@ jobs:
           pull: true
           tags: |
             docker.io/${{ env.DOCKER_REPO }}:latest
-            docker.io/${{ env.DOCKER_REPO }}:${{ env.TAG_NAME }}
             ghcr.io/${{ env.GHCR_REPO }}:latest
-            ghcr.io/${{ env.GHCR_REPO }}:${{ env.TAG_NAME }}
