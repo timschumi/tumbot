@@ -46,7 +46,7 @@ class ReactionRoles(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(aliases=["rr"], invoke_without_command=True)
+    @commands.group(invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
     async def reactionroles(self, ctx):
         """Manages reactionroles"""
