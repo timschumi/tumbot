@@ -179,6 +179,23 @@ class DBotPerm(commands.Cog):
         for perm in self.bot.perm.registered_permissions:
             perm.default(role.guild, role.id)
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        """ Performs a sanity check of the database entries when the bot is ready """
+
+        for perm in self.bot.perm.registered_permissions:
+            for guild in self.bot.guilds:
+                for entry in perm.definitions(guild):
+                    # ID is a valid member?
+                    if guild.get_member(entry):
+                        continue
+
+                    # ID is a valid role?
+                    if guild.get_role(entry):
+                        continue
+
+                    perm.default(guild, entry)
+
 
 def setup(bot):
     # pylint: disable=missing-function-docstring
