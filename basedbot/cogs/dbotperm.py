@@ -8,7 +8,7 @@ from discord.ext import commands
 def _check_perm_exists(func):
     @functools.wraps(func)
     async def wrapper(self, ctx, name, *args):
-        if name not in self.bot.perm.registered_permissions:
+        if name not in self.bot.perm.registered_permission_names:
             await ctx.send(f"Permission **{name}** does not exist.")
             return
 
@@ -111,8 +111,7 @@ class DBotPerm(commands.Cog):
 
         entries = []
 
-        for permname in sorted(self.bot.perm.registered_permissions):
-            perm = self.bot.perm.get(permname)
+        for perm in sorted(self.bot.perm.registered_permissions, key=lambda p: p.name):
             entries.append({'name': perm.name, 'description': perm.pretty_name})
 
         if len(entries) == 0:
@@ -165,6 +164,16 @@ class DBotPerm(commands.Cog):
         perm.default(ctx.guild, target.id)
 
         await ctx.message.add_reaction('\U00002705')
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member: discord.Member):
+        for perm in self.bot.perm.registered_permissions:
+            perm.default(member.guild, member.id)
+
+    @commands.Cog.listener()
+    async def on_guild_role_delete(self, role: discord.Role):
+        for perm in self.bot.perm.registered_permissions:
+            perm.default(role.guild, role.id)
 
 
 def setup(bot):

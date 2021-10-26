@@ -1,12 +1,13 @@
 name: Docker Image Build
 
 on:
+  schedule:
+    - cron: "0 0 * * 0"
   push:
     branches:
       - 'master'
 
 env:
-  TAG_NAME: commit-${{ github.sha }}
   GHCR_REPO: ${{ github.repository }}
   DOCKER_REPO: ${{ github.repository }}
 
@@ -43,8 +44,9 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          pull: true
           tags: |
-            ${{ env.DOCKER_REPO }}:latest
-            ${{ env.DOCKER_REPO }}:${{ env.TAG_NAME }}
+            docker.io/${{ env.DOCKER_REPO }}:latest
             ghcr.io/${{ env.GHCR_REPO }}:latest
-            ghcr.io/${{ env.GHCR_REPO }}:${{ env.TAG_NAME }}
+          cache-from: type=gha, scope=${{ github.workflow }}
+          cache-to: type=gha, scope=${{ github.workflow }}

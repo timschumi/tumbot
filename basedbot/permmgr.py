@@ -127,6 +127,12 @@ class PermissionManager:
     def registered_permissions(self):
         """ Returns the list of registered permissions """
 
+        return self._perms.values()
+
+    @property
+    def registered_permission_names(self):
+        """ Returns the list of names of all registered permissions """
+
         return self._perms.keys()
 
     def get(self, name):

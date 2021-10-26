@@ -56,12 +56,13 @@ class DBotAdmin(commands.Cog):
             dbid = matches.group(3)
 
         query = matches.group(1)
-        try:
-            with self.bot.db.get(dbid, scope) as db:
-                result = [dict(row) for row in db.execute(query).fetchall()]
-        except sqlite3.OperationalError as e:
-            await ctx.send(f"```{e}```")
-            return
+        async with ctx.typing():
+            try:
+                with self.bot.db.get(dbid, scope) as db:
+                    result = [dict(row) for row in db.execute(query).fetchall()]
+            except sqlite3.OperationalError as e:
+                await ctx.send(f"```{e}```")
+                return
 
         if len(result) < 1:
             await ctx.message.add_reaction('\U00002705')
@@ -103,11 +104,12 @@ class DBotAdmin(commands.Cog):
         # Compile our function for execution and load it
         exec(compile(parsed_fn, filename="<ast>", mode="exec"), env)  # pylint: disable=exec-used
 
-        try:
-            output = await eval("_eval()", env)  # pylint: disable=eval-used
-        except Exception:  # pylint: disable=broad-except
-            await ctx.send(f"Exception while running command:\n```{traceback.format_exc()}```")
-            return
+        async with ctx.typing():
+            try:
+                output = await eval("_eval()", env)  # pylint: disable=eval-used
+            except Exception:  # pylint: disable=broad-except
+                await ctx.send(f"Exception while running command:\n```{traceback.format_exc()}```")
+                return
 
         # Nothing returned? If so, show that the command actually ran.
         if output is None:
