@@ -37,6 +37,7 @@ class InviteManager(commands.Cog):
         self._var_inv_count = self._bot.conf.var('invite.inv_count')
         self._var_inv_age = self._bot.conf.var('invite.inv_age')
         self._var_notify_deleted = self._bot.conf.var('invite.notify_deleted')
+        self._var_delete_unmanaged_on_leave = self._bot.conf.var('invite.delete_unmanaged_on_leave')
         self._perm_create = self._bot.perm.get('invite.create')
         self._perm_create_custom = self._bot.perm.get('invite.create_custom')
         self._perm_request = self._bot.perm.get('invite.request')
@@ -541,6 +542,38 @@ class InviteManager(commands.Cog):
         await message.clear_reaction('\U0000274E')
         await message.edit(content=f"{message.content} (Approved by: **{member}**)")
 
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        """ Cleans up the invites of members that left the server """
+
+        # Don't do anything if we don't have necessary permissions
+        if not member.guild.me.guild_permissions.manage_guild:
+            return
+
+        # Drop all active requests from the database
+        with self._bot.db.get(member.guild.id) as db:
+            db.execute("DELETE FROM invite_requests WHERE user = ?", (member.id,))
+
+        # Fetch all invites from the database
+        with self._bot.db.get(member.guild.id) as db:
+            result = db.execute("SELECT code FROM invite_active WHERE user = ?", (member.id,)).fetchall()
+
+        invites = []
+
+        # Resolve all invites from the database
+        for row in result:
+            try:
+                invites += [await self._bot.fetch_invite(row[0])]
+            except discord.errors.NotFound:
+                pass
+
+        # Add all invites directly created by the user
+        if self._var_delete_unmanaged_on_leave.get(member.guild.id) != "0":
+            invites += [inv for inv in await member.guild.invites() if inv.inviter == member]
+
+        for inv in invites:
+            await inv.delete(reason=f"Closed automatically since {member} [{member.id}] left.")
+
 
 class ExpiredInvitesTracker(commands.Cog):
     """ Simulates invite deletion events when an invite expires """
@@ -653,6 +686,10 @@ def setup(bot):
                       default="0",
                       conv=bool,
                       description="If true, messages the invite owner if an invite gets deleted.")
+    bot.conf.register('invite.delete_unmanaged_on_leave',
+                      default="0",
+                      conv=bool,
+                      description="If true, deletes invites not created by the bot when a user leaves.")
     bot.perm.register('invite.create',
                       base="create_instant_invite",
                       pretty_name="Create invites")
