@@ -165,6 +165,16 @@ class DBotPerm(commands.Cog):
 
         await ctx.message.add_reaction('\U00002705')
 
+    @commands.Cog.listener()
+    async def on_member_remove(self, member: discord.Member):
+        for perm in self.bot.perm.registered_permissions:
+            perm.default(member.guild, member.id)
+
+    @commands.Cog.listener()
+    async def on_guild_role_delete(self, role: discord.Role):
+        for perm in self.bot.perm.registered_permissions:
+            perm.default(role.guild, role.id)
+
 
 def setup(bot):
     # pylint: disable=missing-function-docstring
