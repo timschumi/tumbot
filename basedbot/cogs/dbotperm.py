@@ -167,13 +167,34 @@ class DBotPerm(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
+        """ Removes dead permission entries when a user leaves """
+
         for perm in self.bot.perm.registered_permissions:
             perm.default(member.guild, member.id)
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role):
+        """ Removes dead permission entries when a role is deleted """
+
         for perm in self.bot.perm.registered_permissions:
             perm.default(role.guild, role.id)
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        """ Performs a sanity check of the database entries when the bot is ready """
+
+        for perm in self.bot.perm.registered_permissions:
+            for guild in self.bot.guilds:
+                for entry in perm.definitions(guild):
+                    # ID is a valid member?
+                    if guild.get_member(entry):
+                        continue
+
+                    # ID is a valid role?
+                    if guild.get_role(entry):
+                        continue
+
+                    perm.default(guild, entry)
 
 
 def setup(bot):
