@@ -152,6 +152,23 @@ class ReactionRoles(commands.Cog):
         if errhandler is not None:
             await errhandler.on_command_error(ctx, error, force=True)
 
+    @commands.Cog.listener()
+    async def on_raw_message_delete(self, payload):
+        """ Remove reaction roles on messages that no longer exist """
+
+        if not payload.guild_id:
+            return
+
+        with self.bot.db.get(payload.guild_id) as db:
+            db.execute("DELETE FROM reactionroles WHERE message = ?", (payload.message_id,))
+
+    @commands.Cog.listener()
+    async def on_guild_role_delete(self, role: discord.Role):
+        """ Remove reaction roles on roles that no longer exist """
+
+        with self.bot.db.get(role.guild.id) as db:
+            db.execute("DELETE FROM reactionroles WHERE role = ?", (role.id,))
+
 
 def setup(bot):
     # pylint: disable=missing-function-docstring
