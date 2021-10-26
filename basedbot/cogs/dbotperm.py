@@ -8,7 +8,7 @@ from discord.ext import commands
 def _check_perm_exists(func):
     @functools.wraps(func)
     async def wrapper(self, ctx, name, *args):
-        if name not in self.bot.perm.registered_permissions:
+        if name not in self.bot.perm.registered_permission_names:
             await ctx.send(f"Permission **{name}** does not exist.")
             return
 
@@ -111,8 +111,7 @@ class DBotPerm(commands.Cog):
 
         entries = []
 
-        for permname in sorted(self.bot.perm.registered_permissions):
-            perm = self.bot.perm.get(permname)
+        for perm in sorted(self.bot.perm.registered_permissions, key=lambda p: p.name):
             entries.append({'name': perm.name, 'description': perm.pretty_name})
 
         if len(entries) == 0:
