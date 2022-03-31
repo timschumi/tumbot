@@ -46,12 +46,14 @@ class Birthdays(commands.Cog):
         self.congratulate.cancel()
 
     @commands.group(aliases=['birth', 'birthday', 'birthdate', 'geburtstag'], invoke_without_command=True)
+    @commands.guild_only()
     async def birthdays(self, ctx):
         """Manages birthdays"""
 
         await ctx.send_help(ctx.command)
 
     @birthdays.command()
+    @commands.guild_only()
     @basedbot.has_permissions("birthday.list")
     async def list(self, ctx, query=""):
         """Lists all birthdays
@@ -84,6 +86,7 @@ class Birthdays(commands.Cog):
         await self.bot.send_paginated(ctx, lines, textfmt="```{}```")
 
     @birthdays.command()
+    @commands.guild_only()
     async def add(self, ctx, birthdate):
         """Adds a birthday (DD.MM.) for the calling user"""
 
