@@ -50,6 +50,8 @@ class Johannes(commands.Cog):
             await message.add_reaction('\U0001F427')
         if "lmu" in lower:
             await message.add_reaction(":lmuo:668091545878003712")
+        if "rabbit" in lower or "wabbit" in lower or "bunny" in lower or "bunno" in lower:
+            await message.add_reaction('\U0001F407')
 
 
 def setup(bot):
