@@ -1,4 +1,6 @@
 import re
+from urllib.parse import urlparse, quote
+
 from discord.ext import commands
 
 import basedbot
@@ -74,7 +76,22 @@ class MessageStore(commands.Cog):
         if len(result) == 0:
             return
 
-        await message.channel.send(result[0][1])
+        text = result[0][1]
+
+        def isUrl(url):
+            try:
+                result = urlparse(url)
+                return all([result.scheme, result.netloc])
+            except:
+                return False
+
+        rest = message.clean_content[search.end():].strip()
+        if isUrl(text) and len(rest) > 0:
+            rest = re.sub(r'\s+', '_', rest)
+            rest = quote(rest, safe='/')
+            text = f"https://api.memegen.link/images/custom/_/{rest}.gif?background={text}"
+
+        await message.channel.send(text)
 
 
 def setup(bot):
