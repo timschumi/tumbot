@@ -1,7 +1,6 @@
 import re
 from urllib.parse import urlparse, quote
 from discord.ext import commands
-from discord.utils import escape_mentions
 
 import basedbot
 
@@ -134,11 +133,11 @@ class MessageStore(commands.Cog):
             await ctx.send("Shorthand text must be a valid URL to enable meme generation.")
             return
 
-        safe_caption = escape_mentions(caption)
-        safe_caption = _memegen_escape_text(safe_caption)
+        safe_caption = _memegen_escape_text(caption)
         safe_caption = quote(safe_caption, safe='')
+        quoted_url = quote(shorthand_url, safe='')
 
-        text = f"https://api.memegen.link/images/custom/_/{safe_caption}.gif?background={shorthand_url}"
+        text = f"https://api.memegen.link/images/custom/_/{safe_caption}.gif?background={quoted_url}"
 
         await ctx.send(text)
 
