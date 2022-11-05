@@ -10,7 +10,7 @@ def _is_url(text):
     try:
         result = urlparse(text)
         return all([result.scheme, result.netloc, result.path])
-    except:
+    except ValueError:
         return False
 
 def _memegen_escape_text(text):
@@ -75,7 +75,8 @@ class MessageStore(commands.Cog):
             if len(current_msg) > 0:
                 # only allow memegen if the current message is still an URL
                 keep_memegen = current_msg[0][2] and _is_url(content)
-                db.execute("UPDATE msg SET content = ?, allow_memegen = ? WHERE name = ?", (content, keep_memegen, name.lower()))
+                db.execute("UPDATE msg SET content = ?, allow_memegen = ? WHERE name = ?",
+                           (content, keep_memegen, name.lower()))
             else:
                 db.execute("INSERT INTO msg (name, content) VALUES (?, ?)", (name.lower(), content))
 
@@ -100,7 +101,7 @@ class MessageStore(commands.Cog):
 
         shorthand_text = result[0][1]
         if not _is_url(shorthand_text):
-            await ctx.send("Shorthand text must be a valid URL to enable meme generation.")
+            await ctx.send("Shorthand text must be a valid URL to manage meme generation.")
             return
 
         with self.bot.db.get(ctx.guild.id) as db:
@@ -111,7 +112,9 @@ class MessageStore(commands.Cog):
 
     @msg.command()
     @basedbot.has_permissions("msg.caption")
-    async def caption(self, ctx, shorthand, *, caption: commands.clean_content(fix_channel_mentions=True, use_nicknames=True)):
+    async def caption(self, ctx, shorthand, *, caption: commands.clean_content(
+        fix_channel_mentions=True, use_nicknames=True
+    )):
         """Caption a meme"""
 
         with self.bot.db.get(ctx.guild.id) as db:
