@@ -111,21 +111,16 @@ class MessageStore(commands.Cog):
 
     @msg.command()
     @basedbot.has_permissions("msg.caption")
-    async def caption(self, ctx, shorthand, *, caption: commands.clean_content(
-        fix_channel_mentions=True, use_nicknames=True
-    )):
+    async def caption(self, ctx, shorthand, *, caption):
         """Caption a meme"""
 
         with self.bot.db.get(ctx.guild.id) as db:
-            result = db.execute("SELECT name, content, allow_memegen FROM msg WHERE name = ? OR name = ?",
+            result = db.execute("""SELECT name, content, allow_memegen FROM msg
+                                   WHERE allow_memegen AND (name = ? OR name = ?)""",
                                 (shorthand.lower(), "-" + shorthand.lower())).fetchall()
 
         if len(result) <= 0:
-            await ctx.send("Shorthand not found.")
-            return
-
-        if not result[0][2]:
-            await ctx.send("Meme generation has not been enabled for this shorthand.")
+            await ctx.send("Shorthand not found or captioning has not been enabled for the chosen shorthand.")
             return
 
         shorthand_url = result[0][1]
@@ -133,7 +128,10 @@ class MessageStore(commands.Cog):
             await ctx.send("Shorthand text must be a valid URL to enable meme generation.")
             return
 
-        safe_caption = _memegen_escape_text(caption)
+        safe_caption = await commands.clean_content(
+            fix_channel_mentions=True, use_nicknames=True
+        ).convert(ctx, caption)
+        safe_caption = _memegen_escape_text(safe_caption)
         safe_caption = quote(safe_caption, safe='')
         quoted_url = quote(shorthand_url, safe='')
 
@@ -172,6 +170,7 @@ class MessageStore(commands.Cog):
             return
 
         await message.channel.send(result[0][1])
+
 
 def setup(bot):
     # pylint: disable=missing-function-docstring
