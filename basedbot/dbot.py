@@ -1,3 +1,4 @@
+import asyncio
 import os
 from pathlib import Path
 
@@ -115,3 +116,19 @@ class DBot(discord.ext.commands.Bot):
             return '!'
 
         return self._var_prefix.get(message.guild.id)
+
+    async def wait_until_ready(self) -> None:
+        """ Waits until the client's internal cache is all ready. """
+
+        await super().wait_until_ready()
+
+        # Wait until the bot has received member data from all guilds.
+        while True:
+            for g in self.guilds:
+                if not g.me:
+                    break
+            else:
+                break
+
+            print(f"Found guild {g} with uninitialized bot data, waiting...")
+            await asyncio.sleep(1)
