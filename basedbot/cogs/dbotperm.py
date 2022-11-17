@@ -96,6 +96,8 @@ class DBotPerm(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+        self.bot.loop.create_task(self._cleanup_invalid_entries())
+
     @commands.group(aliases=["pm", "permission", "permissions"], invoke_without_command=True)
     @commands.has_permissions(administrator=True)
     async def perm(self, ctx):
@@ -179,9 +181,10 @@ class DBotPerm(commands.Cog):
         for perm in self.bot.perm.registered_permissions:
             perm.default(role.guild, role.id)
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    async def _cleanup_invalid_entries(self):
         """ Performs a sanity check of the database entries when the bot is ready """
+
+        await self.bot.wait_until_ready()
 
         for perm in self.bot.perm.registered_permissions:
             for guild in self.bot.guilds:
