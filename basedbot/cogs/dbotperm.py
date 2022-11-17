@@ -197,6 +197,7 @@ class DBotPerm(commands.Cog):
                     if guild.get_role(entry):
                         continue
 
+                    print(f"ID {entry} not found as member or role in guild {guild}, reset.")
                     perm.default(guild, entry)
 
 
