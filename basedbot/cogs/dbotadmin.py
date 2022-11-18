@@ -130,7 +130,7 @@ class DBotAdmin(commands.Cog):
             await ctx.send(f"Cog `{cog}` could not be found.")
             return
 
-        self.bot.load_extension(name)
+        await self.bot.load_extension(name)
         await ctx.message.add_reaction('\U00002705')
 
     @commands.command()
@@ -144,7 +144,7 @@ class DBotAdmin(commands.Cog):
             await ctx.send(f"Cog `{cog}` could not be found.")
             return
 
-        self.bot.unload_extension(name)
+        await self.bot.unload_extension(name)
         await ctx.message.add_reaction('\U00002705')
 
     @commands.command()
@@ -158,10 +158,10 @@ class DBotAdmin(commands.Cog):
             await ctx.send(f"Cog `{cog}` could not be found.")
             return
 
-        self.bot.reload_extension(name)
+        await self.bot.reload_extension(name)
         await ctx.message.add_reaction('\U00002705')
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.add_cog(DBotAdmin(bot))
+    await bot.add_cog(DBotAdmin(bot))

@@ -149,6 +149,6 @@ class DBotConf(commands.Cog):
         await ctx.message.add_reaction('\U00002705')
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.add_cog(DBotConf(bot))
+    await bot.add_cog(DBotConf(bot))
