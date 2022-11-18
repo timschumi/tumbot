@@ -96,6 +96,9 @@ class DBotPerm(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        # pylint: disable=missing-function-docstring
         self.bot.loop.create_task(self._cleanup_invalid_entries())
 
     @commands.group(aliases=["pm", "permission", "permissions"], invoke_without_command=True)
@@ -201,6 +204,6 @@ class DBotPerm(commands.Cog):
                     perm.default(guild, entry)
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.add_cog(DBotPerm(bot))
+    await bot.add_cog(DBotPerm(bot))

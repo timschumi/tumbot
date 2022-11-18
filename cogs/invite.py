@@ -43,6 +43,9 @@ class InviteManager(commands.Cog):
         self._perm_request = self._bot.perm.get('invite.request')
         self._perm_manage = self._bot.perm.get('invite.manage')
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        # pylint: disable=missing-function-docstring
         self._bot.loop.create_task(self._init_invites())
 
     async def _init_invites(self):
@@ -584,6 +587,9 @@ class ExpiredInvitesTracker(commands.Cog):
         self._bot = bot
         self._exp_times = {}
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        # pylint: disable=missing-function-docstring
         self._bot.loop.create_task(self._init_invites())
 
     @classmethod
@@ -666,7 +672,7 @@ class ExpiredInvitesTracker(commands.Cog):
         self._bot.dispatch('invite_delete', invite)
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
     bot.conf.register('invite.channel',
                       conv=Optional[discord.TextChannel],
@@ -703,5 +709,5 @@ def setup(bot):
                       base="manage_guild",
                       pretty_name="Manage invites")
 
-    bot.add_cog(InviteManager(bot))
-    bot.add_cog(ExpiredInvitesTracker(bot))
+    await bot.add_cog(InviteManager(bot))
+    await bot.add_cog(ExpiredInvitesTracker(bot))

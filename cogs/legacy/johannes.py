@@ -52,6 +52,6 @@ class Johannes(commands.Cog):
             await message.add_reaction(":lmuo:668091545878003712")
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.add_cog(Johannes(bot))
+    await bot.add_cog(Johannes(bot))

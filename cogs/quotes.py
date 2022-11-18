@@ -110,7 +110,7 @@ class Quotes(commands.Cog):
         await ctx.message.add_reaction('\U00002705')
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
     bot.conf.register('quotes.pretty',
                       default="0",
@@ -125,4 +125,4 @@ def setup(bot):
     bot.perm.register('quotes.list',
                       base="administrator",
                       pretty_name="List quotes")
-    bot.add_cog(Quotes(bot))
+    await bot.add_cog(Quotes(bot))

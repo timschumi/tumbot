@@ -35,16 +35,16 @@ class Admin(commands.Cog):
         """Flattens all the previous texts in this channel into a wall of text"""
 
         async with ctx.channel.typing():
-            messages = await ctx.channel.history(limit=None, oldest_first=True).flatten()
+            messages = [message async for message in ctx.channel.history(limit=None, oldest_first=True)]
             lines = [m.clean_content for m in messages if m.id != ctx.message.id]
             await self.bot.send_paginated(ctx, lines, linefmt="{} ")
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
     bot.conf.register('admin.clear_max',
                       default="0",
                       conv=int,
                       access=ConfigAccessLevel.OWNER,
                       description="How many messages the clear command can remove (0 = infinite).")
-    bot.add_cog(Admin(bot))
+    await bot.add_cog(Admin(bot))

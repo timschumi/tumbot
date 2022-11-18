@@ -198,7 +198,7 @@ class Birthdays(commands.Cog):
         return
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
     bot.conf.register('birthday.channel',
                       conv=Optional[discord.TextChannel],
@@ -209,4 +209,4 @@ def setup(bot):
     bot.perm.register('birthday.list',
                       base=True,
                       pretty_name="List birthdays")
-    bot.add_cog(Birthdays(bot))
+    await bot.add_cog(Birthdays(bot))

@@ -59,6 +59,6 @@ class Randomstuff(commands.Cog):
         await ctx.send(embed=metafrageembed)
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.add_cog(Randomstuff(bot))
+    await bot.add_cog(Randomstuff(bot))

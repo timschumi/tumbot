@@ -170,6 +170,6 @@ class ReactionRoles(commands.Cog):
             db.execute("DELETE FROM reactionroles WHERE role = ?", (role.id,))
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.add_cog(ReactionRoles(bot))
+    await bot.add_cog(ReactionRoles(bot))

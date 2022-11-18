@@ -172,7 +172,7 @@ class MessageStore(commands.Cog):
         await message.channel.send(result[0][1])
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
     bot.perm.register('msg.list',
                       base=True,
@@ -186,4 +186,4 @@ def setup(bot):
     bot.perm.register('msg.delete',
                       base="administrator",
                       pretty_name="Delete shorthands (msg)")
-    bot.add_cog(MessageStore(bot))
+    await bot.add_cog(MessageStore(bot))

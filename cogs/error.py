@@ -47,6 +47,6 @@ class ErrorHandler(commands.Cog):
         await ctx.message.add_reaction('\U0001F525')
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.add_cog(ErrorHandler(bot))
+    await bot.add_cog(ErrorHandler(bot))

@@ -183,6 +183,9 @@ class GuildNetworks(commands.Cog):
 
         self._perm_manage = self._bot.perm.get('network.manage')
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        # pylint: disable=missing-function-docstring
         self._bot.loop.create_task(self._init_networks())
 
     async def _init_networks(self):
@@ -513,7 +516,7 @@ class GuildNetworks(commands.Cog):
             await nw_channel.send(embed=embed)
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
     bot.conf.register('network.channel',
                       conv=Optional[discord.TextChannel],
@@ -530,4 +533,4 @@ def setup(bot):
     bot.perm.register('network.manage',
                       base="administrator",
                       pretty_name="Basic network management (joining/leaving)")
-    bot.add_cog(GuildNetworks(bot))
+    await bot.add_cog(GuildNetworks(bot))

@@ -24,6 +24,6 @@ class Physik(commands.Cog):
             pass
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.add_cog(Physik(bot))
+    await bot.add_cog(Physik(bot))

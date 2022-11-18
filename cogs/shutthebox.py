@@ -213,6 +213,6 @@ class ShutTheBox(commands.Cog):
         await self._bot.get_cog('ErrorHandler').on_command_error(ctx, error, force=True)
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.add_cog(ShutTheBox(bot))
+    await bot.add_cog(ShutTheBox(bot))

@@ -83,7 +83,7 @@ class Logging(commands.Cog):
                                   delete_after=delete_after)
 
 
-def setup(bot):
+async def setup(bot):
     # pylint: disable=missing-function-docstring
     bot.conf.register('logging.channel',
                       conv=Optional[discord.TextChannel],
@@ -95,4 +95,4 @@ def setup(bot):
     bot.conf.register('logging.clear_deleted_messages',
                       conv=Optional[int],
                       description="The number of seconds until deleted messages are removed from the log.")
-    bot.add_cog(Logging(bot))
+    await bot.add_cog(Logging(bot))
