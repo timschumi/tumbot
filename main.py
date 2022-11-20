@@ -23,6 +23,7 @@ async def main():
             logging.exception("Exception while loading cog '%s'", cog)
 
     async with bot:
-        await bot.start(os.environ['DBOT_TOKEN'])
+        await bot.start(os.environ["DBOT_TOKEN"])
+
 
 asyncio.run(main())

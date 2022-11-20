@@ -31,15 +31,15 @@ class DBotAdmin(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def sql(self, ctx, *, query):
-        """ Executes an SQL-query """
+        """Executes an SQL-query"""
 
         # Set default scope
         if ctx.guild is not None:
-            scope = 'guild'
+            scope = "guild"
         else:
-            scope = 'user'
+            scope = "user"
 
-        matches = re.match(r'`(.*)`(?: (\w+)(?:/(\d+))?)?', query)
+        matches = re.match(r"`(.*)`(?: (\w+)(?:/(\d+))?)?", query)
         if not matches:
             await ctx.send("Couldn't filter out the query that should be executed.")
             return
@@ -48,7 +48,7 @@ class DBotAdmin(commands.Cog):
             scope = matches.group(2)
 
         if matches.group(3) is None:
-            if scope == 'guild':
+            if scope == "guild":
                 dbid = ctx.guild.id
             else:
                 dbid = ctx.author.id
@@ -65,7 +65,7 @@ class DBotAdmin(commands.Cog):
                 return
 
         if len(result) < 1:
-            await ctx.message.add_reaction('\U00002705')
+            await ctx.message.add_reaction("\U00002705")
             return
 
         await self.bot.send_table(ctx, result[0].keys(), result)
@@ -80,7 +80,9 @@ class DBotAdmin(commands.Cog):
         try:
             parsed_cmd = ast.parse(cmd)
         except SyntaxError:
-            await ctx.send(f"Exception while parsing command:\n```{traceback.format_exc()}```")
+            await ctx.send(
+                f"Exception while parsing command:\n```{traceback.format_exc()}```"
+            )
             return
 
         # Create a fake function stub and parse it
@@ -98,22 +100,26 @@ class DBotAdmin(commands.Cog):
 
         # Define our execution environment
         env = {
-            'ctx': ctx,
+            "ctx": ctx,
         }
 
         # Compile our function for execution and load it
-        exec(compile(parsed_fn, filename="<ast>", mode="exec"), env)  # pylint: disable=exec-used
+        exec(
+            compile(parsed_fn, filename="<ast>", mode="exec"), env
+        )  # pylint: disable=exec-used
 
         async with ctx.typing():
             try:
                 output = await eval("_eval()", env)  # pylint: disable=eval-used
             except Exception:  # pylint: disable=broad-except
-                await ctx.send(f"Exception while running command:\n```{traceback.format_exc()}```")
+                await ctx.send(
+                    f"Exception while running command:\n```{traceback.format_exc()}```"
+                )
                 return
 
         # Nothing returned? If so, show that the command actually ran.
         if output is None:
-            await ctx.message.add_reaction('\U00002705')
+            await ctx.message.add_reaction("\U00002705")
             return
 
         await ctx.send(f"```{output}```")
@@ -131,7 +137,7 @@ class DBotAdmin(commands.Cog):
             return
 
         await self.bot.load_extension(name)
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @commands.command()
     @commands.is_owner()
@@ -145,7 +151,7 @@ class DBotAdmin(commands.Cog):
             return
 
         await self.bot.unload_extension(name)
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @commands.command()
     @commands.is_owner()
@@ -159,7 +165,7 @@ class DBotAdmin(commands.Cog):
             return
 
         await self.bot.reload_extension(name)
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
 
 async def setup(bot):
