@@ -1,6 +1,6 @@
 [MESSAGES CONTROL]
 disable=missing-module-docstring,
         invalid-name,
-        no-self-use,
+        line-too-long,
         too-many-return-statements,
         too-many-arguments,

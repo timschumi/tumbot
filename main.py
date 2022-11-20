@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import asyncio
-import discord
 import logging
 import os
 
+import discord
 from discord import Intents
 from discord.ext.commands.errors import ExtensionError
 from basedbot import DBot
