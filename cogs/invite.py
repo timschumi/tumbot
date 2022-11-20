@@ -613,7 +613,8 @@ class ExpiredInvitesTracker(commands.Cog):
             for i in await g.invites():
                 await self.on_invite_create(i, skip_start=True)
 
-        self.check_invites.start()
+        if not self.check_invites.is_running():
+            self.check_invites.start()
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite, skip_start=False):
