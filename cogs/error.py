@@ -1,5 +1,5 @@
+import logging
 import sys
-import traceback
 
 from discord.ext import commands
 
@@ -41,9 +41,7 @@ class ErrorHandler(commands.Cog):
             await ctx.send(error)
             return
 
-        # Standard handler: Einfach den Traceback ausgeben
-        print(f'ERRORHANDLER! Fehler beim Ausführen des Befehls `{ctx.command}`:', file=sys.stderr)
-        traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        logging.error("Error while running command '%s'", ctx.command, exc_info=error)
         await ctx.message.add_reaction('\U0001F525')
 
 
