@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import asyncio
+import discord
+import logging
 import os
 
 from discord import Intents
@@ -12,11 +14,13 @@ async def main():
     # pylint: disable=missing-function-docstring
     bot = DBot(intents=Intents.default())
 
+    discord.utils.setup_logging()
+
     for cog in bot.find_all_cogs():
         try:
             await bot.load_extension(cog)
-        except ExtensionError as e:
-            print(e)
+        except ExtensionError:
+            logging.exception("Exception while loading cog '%s'", cog)
 
     async with bot:
         await bot.start(os.environ['DBOT_TOKEN'])

@@ -1,4 +1,5 @@
 import functools
+import logging
 import typing
 
 import discord
@@ -200,7 +201,7 @@ class DBotPerm(commands.Cog):
                     if guild.get_role(entry):
                         continue
 
-                    print(f"ID {entry} not found as member or role in guild {guild}, reset.")
+                    logging.info("ID %s not found as member or role in guild %s, reset.", entry, guild)
                     perm.default(guild, entry)
 
 

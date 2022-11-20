@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from pathlib import Path
 
@@ -130,5 +131,5 @@ class DBot(discord.ext.commands.Bot):
             else:
                 break
 
-            print(f"Found guild {g} with uninitialized bot data, waiting...")
+            logging.info("Found guild %s with uninitialized bot data, waiting...", g)
             await asyncio.sleep(1)
