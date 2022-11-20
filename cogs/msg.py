@@ -12,6 +12,7 @@ def _is_url(text):
     except ValueError:
         return False
 
+
 def _memegen_escape_text(text):
     # according to https://memegen.link/#special-characters
     escapes = [
@@ -27,7 +28,7 @@ def _memegen_escape_text(text):
         ("\\", "~b"),
         ("<", "~l"),
         (">", "~g"),
-        ("\"", "''"),
+        ('"', "''"),
     ]
 
     for char, escape in escapes:
@@ -48,7 +49,9 @@ class MessageStore(commands.Cog):
         """Allows for saving larger chunks of text using a shorthand"""
 
         with self.bot.db.get(ctx.guild.id) as db:
-            result = db.execute("SELECT name FROM msg WHERE name NOT LIKE '-%' ORDER BY name ASC").fetchall()
+            result = db.execute(
+                "SELECT name FROM msg WHERE name NOT LIKE '-%' ORDER BY name ASC"
+            ).fetchall()
 
         if len(result) <= 0:
             await ctx.send("No shorthands available.")
@@ -70,16 +73,23 @@ class MessageStore(commands.Cog):
 
         with self.bot.db.get(ctx.guild.id) as db:
             current_msg = db.execute(
-                "SELECT name, content, allow_memegen FROM msg WHERE name = ?", (name.lower(),)).fetchall()
+                "SELECT name, content, allow_memegen FROM msg WHERE name = ?",
+                (name.lower(),),
+            ).fetchall()
             if len(current_msg) > 0:
                 # only allow memegen if the current message is still an URL
                 keep_memegen = current_msg[0][2] and _is_url(content)
-                db.execute("UPDATE msg SET content = ?, allow_memegen = ? WHERE name = ?",
-                           (content, keep_memegen, name.lower()))
+                db.execute(
+                    "UPDATE msg SET content = ?, allow_memegen = ? WHERE name = ?",
+                    (content, keep_memegen, name.lower()),
+                )
             else:
-                db.execute("INSERT INTO msg (name, content) VALUES (?, ?)", (name.lower(), content))
+                db.execute(
+                    "INSERT INTO msg (name, content) VALUES (?, ?)",
+                    (name.lower(), content),
+                )
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @msg.command()
     @basedbot.has_permissions("msg.set")
@@ -91,8 +101,10 @@ class MessageStore(commands.Cog):
             return
 
         with self.bot.db.get(ctx.guild.id) as db:
-            result = db.execute("SELECT name, content FROM msg WHERE name = ? OR name = ?",
-                                (shorthand.lower(), "-" + shorthand.lower())).fetchall()
+            result = db.execute(
+                "SELECT name, content FROM msg WHERE name = ? OR name = ?",
+                (shorthand.lower(), "-" + shorthand.lower()),
+            ).fetchall()
 
         if len(result) <= 0:
             await ctx.send("Shorthand not found.")
@@ -100,14 +112,18 @@ class MessageStore(commands.Cog):
 
         shorthand_text = result[0][1]
         if not _is_url(shorthand_text):
-            await ctx.send("Shorthand text must be a valid URL to manage meme generation.")
+            await ctx.send(
+                "Shorthand text must be a valid URL to manage meme generation."
+            )
             return
 
         with self.bot.db.get(ctx.guild.id) as db:
-            result = db.execute("UPDATE msg SET allow_memegen = ? WHERE name = ? OR name = ?", (
-                action == "enable", shorthand.lower(), "-" + shorthand.lower()))
+            result = db.execute(
+                "UPDATE msg SET allow_memegen = ? WHERE name = ? OR name = ?",
+                (action == "enable", shorthand.lower(), "-" + shorthand.lower()),
+            )
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @msg.command()
     @basedbot.has_permissions("msg.caption")
@@ -115,25 +131,31 @@ class MessageStore(commands.Cog):
         """Caption a meme"""
 
         with self.bot.db.get(ctx.guild.id) as db:
-            result = db.execute("""SELECT name, content, allow_memegen FROM msg
+            result = db.execute(
+                """SELECT name, content, allow_memegen FROM msg
                                    WHERE allow_memegen AND (name = ? OR name = ?)""",
-                                (shorthand.lower(), "-" + shorthand.lower())).fetchall()
+                (shorthand.lower(), "-" + shorthand.lower()),
+            ).fetchall()
 
         if len(result) <= 0:
-            await ctx.send("Shorthand not found or captioning has not been enabled for the chosen shorthand.")
+            await ctx.send(
+                "Shorthand not found or captioning has not been enabled for the chosen shorthand."
+            )
             return
 
         shorthand_url = result[0][1]
         if not _is_url(shorthand_url):
-            await ctx.send("Shorthand text must be a valid URL to enable meme generation.")
+            await ctx.send(
+                "Shorthand text must be a valid URL to enable meme generation."
+            )
             return
 
         safe_caption = await commands.clean_content(
             fix_channel_mentions=True, use_nicknames=True
         ).convert(ctx, caption)
         safe_caption = _memegen_escape_text(safe_caption)
-        safe_caption = quote(safe_caption, safe='')
-        quoted_url = quote(shorthand_url, safe='')
+        safe_caption = quote(safe_caption, safe="")
+        quoted_url = quote(shorthand_url, safe="")
 
         text = f"https://api.memegen.link/images/custom/_/{safe_caption}.gif?background={quoted_url}"
 
@@ -145,26 +167,31 @@ class MessageStore(commands.Cog):
         """Removes a shorthand"""
 
         with self.bot.db.get(ctx.guild.id) as db:
-            db.execute("DELETE FROM msg WHERE name = ? OR name = ?", (name.lower(), "-" + name.lower()))
+            db.execute(
+                "DELETE FROM msg WHERE name = ? OR name = ?",
+                (name.lower(), "-" + name.lower()),
+            )
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        """ Checks messages for a shorthand and prints the matching value """
+        """Checks messages for a shorthand and prints the matching value"""
 
         if message.author.bot:
             return
 
-        search = re.search(r'\$(\w+)', message.clean_content)
+        search = re.search(r"\$(\w+)", message.clean_content)
         if search is None:
             return
 
         key = search.group(1)
 
         with self.bot.db.get(message.guild.id) as db:
-            result = db.execute("SELECT name, content FROM msg WHERE name = ? OR name = ?",
-                                (key.lower(), "-" + key.lower())).fetchall()
+            result = db.execute(
+                "SELECT name, content FROM msg WHERE name = ? OR name = ?",
+                (key.lower(), "-" + key.lower()),
+            ).fetchall()
 
         if len(result) == 0:
             return
@@ -174,16 +201,12 @@ class MessageStore(commands.Cog):
 
 async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.perm.register('msg.list',
-                      base=True,
-                      pretty_name="List shorthands (msg)")
-    bot.perm.register('msg.caption',
-                      base=True,
-                      pretty_name="Caption images (msg)")
-    bot.perm.register('msg.set',
-                      base="administrator",
-                      pretty_name="Create/Update shorthands (msg)")
-    bot.perm.register('msg.delete',
-                      base="administrator",
-                      pretty_name="Delete shorthands (msg)")
+    bot.perm.register("msg.list", base=True, pretty_name="List shorthands (msg)")
+    bot.perm.register("msg.caption", base=True, pretty_name="Caption images (msg)")
+    bot.perm.register(
+        "msg.set", base="administrator", pretty_name="Create/Update shorthands (msg)"
+    )
+    bot.perm.register(
+        "msg.delete", base="administrator", pretty_name="Delete shorthands (msg)"
+    )
     await bot.add_cog(MessageStore(bot))

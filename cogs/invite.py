@@ -32,16 +32,18 @@ class InviteManager(commands.Cog):
         self._bot = bot
         self._invs = {}
         self._vanity = {}
-        self._var_channel = self._bot.conf.var('invite.channel')
-        self._var_inv_channel = self._bot.conf.var('invite.inv_channel')
-        self._var_inv_count = self._bot.conf.var('invite.inv_count')
-        self._var_inv_age = self._bot.conf.var('invite.inv_age')
-        self._var_notify_deleted = self._bot.conf.var('invite.notify_deleted')
-        self._var_delete_unmanaged_on_leave = self._bot.conf.var('invite.delete_unmanaged_on_leave')
-        self._perm_create = self._bot.perm.get('invite.create')
-        self._perm_create_custom = self._bot.perm.get('invite.create_custom')
-        self._perm_request = self._bot.perm.get('invite.request')
-        self._perm_manage = self._bot.perm.get('invite.manage')
+        self._var_channel = self._bot.conf.var("invite.channel")
+        self._var_inv_channel = self._bot.conf.var("invite.inv_channel")
+        self._var_inv_count = self._bot.conf.var("invite.inv_count")
+        self._var_inv_age = self._bot.conf.var("invite.inv_age")
+        self._var_notify_deleted = self._bot.conf.var("invite.notify_deleted")
+        self._var_delete_unmanaged_on_leave = self._bot.conf.var(
+            "invite.delete_unmanaged_on_leave"
+        )
+        self._perm_create = self._bot.perm.get("invite.create")
+        self._perm_create_custom = self._bot.perm.get("invite.create_custom")
+        self._perm_request = self._bot.perm.get("invite.request")
+        self._perm_manage = self._bot.perm.get("invite.manage")
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -98,7 +100,9 @@ class InviteManager(commands.Cog):
 
         return channel
 
-    async def _create_invite(self, messageable, member, channel, reason=None, allowed_by=None, options=None):
+    async def _create_invite(
+        self, messageable, member, channel, reason=None, allowed_by=None, options=None
+    ):
         # Set allowed_by if not set
         if allowed_by is None:
             allowed_by = member
@@ -111,21 +115,29 @@ class InviteManager(commands.Cog):
         if options is not None:
             full_opt.update(options)
 
-        invite = await channel.create_invite(reason=f"{member} ({member.id}): {_reason_to_text(reason)}",
-                                             max_age=full_opt["max_age"], max_uses=full_opt["max_uses"])
+        invite = await channel.create_invite(
+            reason=f"{member} ({member.id}): {_reason_to_text(reason)}",
+            max_age=full_opt["max_age"],
+            max_uses=full_opt["max_uses"],
+        )
 
         try:
-            await member.send(f"Invite: <{invite.url}>, reason: {_reason_to_text(reason)}")
+            await member.send(
+                f"Invite: <{invite.url}>, reason: {_reason_to_text(reason)}"
+            )
         except discord.errors.Forbidden:
             await messageable.send(
-                "Could not message you the invite link. Do you have messages from server members enabled?")
+                "Could not message you the invite link. Do you have messages from server members enabled?"
+            )
             await invite.delete(reason="Could not message the invite link.")
             return False
 
         # Store invite in database
         with self._bot.db.get(member.guild.id) as db:
-            db.execute("INSERT INTO invite_active (code, user, reason, allowed_by) VALUES (?, ?, ?, ?)",
-                       (invite.code, member.id, reason, allowed_by.id))
+            db.execute(
+                "INSERT INTO invite_active (code, user, reason, allowed_by) VALUES (?, ?, ?, ?)",
+                (invite.code, member.id, reason, allowed_by.id),
+            )
 
         return True
 
@@ -151,7 +163,7 @@ class InviteManager(commands.Cog):
         options = {}
 
         if reason is not None:
-            matches = re.match(r'^(.*?)(?: *)(?:`(.*)`)?$', reason)
+            matches = re.match(r"^(.*?)(?: *)(?:`(.*)`)?$", reason)
             if not matches:
                 await ctx.send("Could not parse the reason/options.")
                 return
@@ -164,7 +176,9 @@ class InviteManager(commands.Cog):
 
             if raw_options is not None:
                 if not self._perm_create_custom.allowed(ctx.author):
-                    await ctx.send("You are not allowed to create invites with custom options.")
+                    await ctx.send(
+                        "You are not allowed to create invites with custom options."
+                    )
                     return
 
                 try:
@@ -175,10 +189,12 @@ class InviteManager(commands.Cog):
 
         channel = self._get_inv_channel(ctx.guild, default=ctx.channel)
 
-        if not await self._create_invite(ctx, ctx.author, channel, reason=reason, options=options):
+        if not await self._create_invite(
+            ctx, ctx.author, channel, reason=reason, options=options
+        ):
             return
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     def _invite_requests_enabled(self, guild):
         # invite.channel set?
@@ -202,10 +218,14 @@ class InviteManager(commands.Cog):
             return
 
         try:
-            await ctx.author.send("Your request has been submitted. "
-                                  "You will get an invite link once it has been approved.")
+            await ctx.author.send(
+                "Your request has been submitted. "
+                "You will get an invite link once it has been approved."
+            )
         except discord.errors.Forbidden:
-            await ctx.send("Could send a private message. Do you have messages from server members enabled?")
+            await ctx.send(
+                "Could send a private message. Do you have messages from server members enabled?"
+            )
             return False
 
         channel = self._get_log_channel(ctx.guild)
@@ -213,23 +233,29 @@ class InviteManager(commands.Cog):
         if channel is None:
             return
 
-        message = await channel.send(f"**{ctx.author}** ({ctx.author.id}) requested an invite. "
-                                     f"Reason: \"{_reason_to_text(reason)}\"")
+        message = await channel.send(
+            f"**{ctx.author}** ({ctx.author.id}) requested an invite. "
+            f'Reason: "{_reason_to_text(reason)}"'
+        )
 
         # Add yes/no reactions
-        await message.add_reaction('\U00002705')
-        await message.add_reaction('\U0000274E')
+        await message.add_reaction("\U00002705")
+        await message.add_reaction("\U0000274E")
 
         # Store request in database
         with self._bot.db.get(ctx.guild.id) as db:
-            db.execute("INSERT INTO invite_requests (message, user, reason) VALUES (?, ?, ?)",
-                       (message.id, ctx.author.id, reason))
+            db.execute(
+                "INSERT INTO invite_requests (message, user, reason) VALUES (?, ?, ?)",
+                (message.id, ctx.author.id, reason),
+            )
 
     def _get_last_invite(self, member):
         with self._bot.db.get(member.guild.id) as db:
-            res = db.execute("SELECT code FROM invite_active "
-                             "WHERE user = ? OR allowed_by = ? ORDER BY rowid DESC LIMIT 1",
-                             (member.id, member.id)).fetchall()
+            res = db.execute(
+                "SELECT code FROM invite_active "
+                "WHERE user = ? OR allowed_by = ? ORDER BY rowid DESC LIMIT 1",
+                (member.id, member.id),
+            ).fetchall()
 
         if len(res) < 1:
             return None
@@ -265,7 +291,7 @@ class InviteManager(commands.Cog):
             res = db.execute(query, args).fetchall()
 
         if len(res) < 1:
-            await ctx.message.add_reaction('\U0001F6AB')
+            await ctx.message.add_reaction("\U0001F6AB")
             return
 
         try:
@@ -275,7 +301,7 @@ class InviteManager(commands.Cog):
             return
 
         await invite.delete(reason=f"Closed manually by {ctx.author} [{ctx.author.id}]")
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @invite.command(name="list")
     async def invite_list(self, ctx):
@@ -305,14 +331,14 @@ class InviteManager(commands.Cog):
 
         for e in result:
             entry = {
-                'ID': e['rowid'],
-                'User': str(ctx.guild.get_member(e['user'])),
-                'Reason': _reason_to_text(e['reason']),
-                'Approver': "<redacted>",
+                "ID": e["rowid"],
+                "User": str(ctx.guild.get_member(e["user"])),
+                "Reason": _reason_to_text(e["reason"]),
+                "Approver": "<redacted>",
             }
 
-            if see_all or ctx.author.id == e['allowed_by']:
-                entry['Approver'] = str(ctx.guild.get_member(e['allowed_by']))
+            if see_all or ctx.author.id == e["allowed_by"]:
+                entry["Approver"] = str(ctx.guild.get_member(e["allowed_by"]))
 
             entries.append(entry)
 
@@ -320,55 +346,57 @@ class InviteManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        """ Initializes invites when the bot joins a new server """
+        """Initializes invites when the bot joins a new server"""
 
         await self._update_invites(guild)
 
     def _get_invite_data(self, invite):
         data = {
-            'invite': invite,
+            "invite": invite,
         }
 
         if invite.inviter is not None:
-            data['inviter'] = invite.inviter
+            data["inviter"] = invite.inviter
 
         # Do we have that invite in the database?
         with self._bot.db.get(invite.guild.id) as db:
-            result = db.execute("SELECT * FROM invite_active WHERE code = ?", (invite.code,)).fetchall()
+            result = db.execute(
+                "SELECT * FROM invite_active WHERE code = ?", (invite.code,)
+            ).fetchall()
         invite_data = result[0] if len(result) > 0 else None
 
         if invite_data:
-            data['inviter'] = invite.guild.get_member(invite_data["user"])
+            data["inviter"] = invite.guild.get_member(invite_data["user"])
 
         if invite_data and invite_data["reason"]:
-            data['reason'] = invite_data["reason"]
+            data["reason"] = invite_data["reason"]
 
         if invite_data and invite_data["allowed_by"] != invite_data["user"]:
-            data['approver'] = invite.guild.get_member(invite_data["allowed_by"])
+            data["approver"] = invite.guild.get_member(invite_data["allowed_by"])
 
         return data
 
     @classmethod
     def _invite_data_to_text(cls, data):
-        if 'inviter' in data:
+        if "inviter" in data:
             text = f"(Creator: **{data['inviter']}** [{data['inviter'].id}])"
         else:
             text = "(Creator: **Vanity URL**)"
 
-        if 'reason' in data:
+        if "reason" in data:
             text += f" (Reason: {data['reason']})"
 
-        if 'approver' in data:
+        if "approver" in data:
             text += f" (Approver: **{data['approver']}** [{data['approver'].id}])"
 
-        if data['invite'].max_uses != 0:
+        if data["invite"].max_uses != 0:
             text += f" (Uses: {data['invite'].uses}/{data['invite'].max_uses})"
 
         return text
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        """ Tracks down the used invite when a new guild member joins """
+        """Tracks down the used invite when a new guild member joins"""
 
         guild = member.guild
 
@@ -388,7 +416,12 @@ class InviteManager(commands.Cog):
         if channel is None:
             return
 
-        invs = [e for e in old if e not in self._invs[guild.id] or _find_match(self._invs[guild.id], e).uses != e.uses]
+        invs = [
+            e
+            for e in old
+            if e not in self._invs[guild.id]
+            or _find_match(self._invs[guild.id], e).uses != e.uses
+        ]
 
         if guild.id in self._vanity:
             old_vanity = self._vanity[guild.id]
@@ -400,7 +433,9 @@ class InviteManager(commands.Cog):
                 invs.append(old_vanity)
 
         if len(invs) == 0:
-            await channel.send(f"I don't know how **{member}** ({member.id}) joined the server.")
+            await channel.send(
+                f"I don't know how **{member}** ({member.id}) joined the server."
+            )
             return
 
         if len(invs) == 1:
@@ -411,23 +446,33 @@ class InviteManager(commands.Cog):
 
             data = self._get_invite_data(invite)
 
-            embed = discord.Embed(title=f"**{member}** ({member.id}) joined the server.", color=0x0065bd)
+            embed = discord.Embed(
+                title=f"**{member}** ({member.id}) joined the server.", color=0x0065BD
+            )
 
-            embed.add_field(name="Invite",
-                            value=invite.code + (f" ({invite.uses}/{invite.max_uses})" if invite.max_uses else ""),
-                            inline=False)
+            embed.add_field(
+                name="Invite",
+                value=invite.code
+                + (f" ({invite.uses}/{invite.max_uses})" if invite.max_uses else ""),
+                inline=False,
+            )
 
-            inviter = f"{data['inviter'].mention} ({data['inviter'].id})" if 'inviter' in data else "Vanity URL"
-            embed.add_field(name="Creator",
-                            value=inviter,
-                            inline=False)
+            inviter = (
+                f"{data['inviter'].mention} ({data['inviter'].id})"
+                if "inviter" in data
+                else "Vanity URL"
+            )
+            embed.add_field(name="Creator", value=inviter, inline=False)
 
-            if 'approver' in data:
-                embed.add_field(name="Approver", value=f"{data['approver'].mention} ({data['approver'].id})",
-                                inline=False)
+            if "approver" in data:
+                embed.add_field(
+                    name="Approver",
+                    value=f"{data['approver'].mention} ({data['approver'].id})",
+                    inline=False,
+                )
 
-            if 'reason' in data:
-                embed.add_field(name="Reason", value=data['reason'], inline=False)
+            if "reason" in data:
+                embed.add_field(name="Reason", value=data["reason"], inline=False)
 
             await channel.send(embed=embed)
             return
@@ -442,13 +487,13 @@ class InviteManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
-        """ Refreshes invite cache when a new invite is created """
+        """Refreshes invite cache when a new invite is created"""
 
         await self._update_invites(invite.guild)
 
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):
-        """ Refreshes invite cache when guild settings have been changed """
+        """Refreshes invite cache when guild settings have been changed"""
 
         del before
         await self._update_invites(after)
@@ -456,7 +501,9 @@ class InviteManager(commands.Cog):
     async def _notify_invite_owner(self, invite, message):
         # Do we have that invite in the database?
         with self._bot.db.get(invite.guild.id) as db:
-            result = db.execute("SELECT user FROM invite_active WHERE code = ?", (invite.code,)).fetchall()
+            result = db.execute(
+                "SELECT user FROM invite_active WHERE code = ?", (invite.code,)
+            ).fetchall()
 
         if len(result) == 0:
             return
@@ -471,13 +518,15 @@ class InviteManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
-        """ Refreshes invite cache when an invite is deleted """
+        """Refreshes invite cache when an invite is deleted"""
 
         await self._update_invites(invite.guild)
 
         if self._var_notify_deleted.get(invite.guild.id) != "0":
             try:
-                await self._notify_invite_owner(invite, f"Invite **{invite.code}** has been deleted.")
+                await self._notify_invite_owner(
+                    invite, f"Invite **{invite.code}** has been deleted."
+                )
             except discord.errors.Forbidden:
                 # If we can't send messages to the user, just ignore
                 pass
@@ -486,10 +535,14 @@ class InviteManager(commands.Cog):
             db.execute("DELETE FROM invite_active WHERE code = ?", (invite.code,))
 
     @commands.Cog.listener()
-    @basedbot.raw_reaction_filter(guild_only=True, not_self=True, emoji_names=('\U00002705', '\U0000274E'),
-                                  client_func=lambda self, payload: self._bot)
+    @basedbot.raw_reaction_filter(
+        guild_only=True,
+        not_self=True,
+        emoji_names=("\U00002705", "\U0000274E"),
+        client_func=lambda self, payload: self._bot,
+    )
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        """ Reaction handler for invite requests """
+        """Reaction handler for invite requests"""
 
         guild = self._bot.get_guild(payload.guild_id)
         channel = self._bot.get_channel(payload.channel_id)
@@ -502,8 +555,10 @@ class InviteManager(commands.Cog):
 
         # Check if there is a pending request in the database
         with self._bot.db.get(guild.id) as db:
-            result = db.execute("SELECT rowid, user, reason FROM invite_requests WHERE message = ?",
-                                (message.id,)).fetchall()
+            result = db.execute(
+                "SELECT rowid, user, reason FROM invite_requests WHERE message = ?",
+                (message.id,),
+            ).fetchall()
 
         if len(result) == 0:
             return
@@ -521,9 +576,9 @@ class InviteManager(commands.Cog):
         await message.remove_reaction(payload.emoji, member)
 
         # Invite denied?
-        if payload.emoji.name == '\U0000274E':
+        if payload.emoji.name == "\U0000274E":
             # Mark as "denied"
-            await message.clear_reaction('\U00002705')
+            await message.clear_reaction("\U00002705")
             await message.edit(content=f"{message.content} (Denied by: **{member}**)")
 
             try:
@@ -538,16 +593,18 @@ class InviteManager(commands.Cog):
             await channel.send("Could not resolve channel for invite.")
             return
 
-        if not await self._create_invite(channel, inv_user, inv_channel, reason=entry["reason"], allowed_by=member):
+        if not await self._create_invite(
+            channel, inv_user, inv_channel, reason=entry["reason"], allowed_by=member
+        ):
             return
 
         # Mark as "approved"
-        await message.clear_reaction('\U0000274E')
+        await message.clear_reaction("\U0000274E")
         await message.edit(content=f"{message.content} (Approved by: **{member}**)")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        """ Cleans up the invites of members that left the server """
+        """Cleans up the invites of members that left the server"""
 
         # Don't do anything if we don't have necessary permissions
         if not member.guild.me.guild_permissions.manage_guild:
@@ -559,7 +616,9 @@ class InviteManager(commands.Cog):
 
         # Fetch all invites from the database
         with self._bot.db.get(member.guild.id) as db:
-            result = db.execute("SELECT code FROM invite_active WHERE user = ?", (member.id,)).fetchall()
+            result = db.execute(
+                "SELECT code FROM invite_active WHERE user = ?", (member.id,)
+            ).fetchall()
 
         invites = []
 
@@ -572,14 +631,18 @@ class InviteManager(commands.Cog):
 
         # Add all invites directly created by the user
         if self._var_delete_unmanaged_on_leave.get(member.guild.id) != "0":
-            invites += [inv for inv in await member.guild.invites() if inv.inviter == member]
+            invites += [
+                inv for inv in await member.guild.invites() if inv.inviter == member
+            ]
 
         for inv in invites:
-            await inv.delete(reason=f"Closed automatically since {member} [{member.id}] left.")
+            await inv.delete(
+                reason=f"Closed automatically since {member} [{member.id}] left."
+            )
 
 
 class ExpiredInvitesTracker(commands.Cog):
-    """ Simulates invite deletion events when an invite expires """
+    """Simulates invite deletion events when an invite expires"""
 
     check_invites: tasks.Loop
 
@@ -618,7 +681,7 @@ class ExpiredInvitesTracker(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite, skip_start=False):
-        """ Adds invites to the tracking list when created """
+        """Adds invites to the tracking list when created"""
 
         # Don't track if the invite doesn't expire
         if invite.max_age == 0:
@@ -627,7 +690,10 @@ class ExpiredInvitesTracker(commands.Cog):
         next_invite = self._get_next_invite()
         self._exp_times[invite] = self._calc_exp_time(invite)
 
-        if skip_start or (next_invite is not None and self._exp_times[next_invite] < self._exp_times[invite]):
+        if skip_start or (
+            next_invite is not None
+            and self._exp_times[next_invite] < self._exp_times[invite]
+        ):
             return
 
         # Avoid cancelling if we are already cancelling
@@ -642,7 +708,7 @@ class ExpiredInvitesTracker(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
-        """ Removes invites from the tracking list when deleted """
+        """Removes invites from the tracking list when deleted"""
 
         # Don't do anything if the invite wasn't tracked
         if invite not in self._exp_times:
@@ -655,7 +721,7 @@ class ExpiredInvitesTracker(commands.Cog):
 
     @tasks.loop()
     async def check_invites(self):  # pylint: disable=function-redefined
-        """ Repeatedly waits for the next invite to expire and fires an event """
+        """Repeatedly waits for the next invite to expire and fires an event"""
 
         # Stop if no invites are left
         if len(self._exp_times) == 0:
@@ -667,48 +733,62 @@ class ExpiredInvitesTracker(commands.Cog):
         exp_time = self._exp_times[invite]
 
         # Sleep until then
-        await asyncio.sleep(exp_time - time.mktime(datetime.datetime.utcnow().timetuple()))
+        await asyncio.sleep(
+            exp_time - time.mktime(datetime.datetime.utcnow().timetuple())
+        )
 
         # Send out the event
-        self._bot.dispatch('invite_delete', invite)
+        self._bot.dispatch("invite_delete", invite)
 
 
 async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.conf.register('invite.channel',
-                      conv=Optional[discord.TextChannel],
-                      description="The channel where invite tracking is logged.")
-    bot.conf.register('invite.inv_channel',
-                      conv=Optional[discord.TextChannel],
-                      description="The channel where invites will point to (None = current).")
-    bot.conf.register('invite.inv_count',
-                      default="1",
-                      conv=int,
-                      description="The amount of people that can be invited (0 = infinite).")
-    bot.conf.register('invite.inv_age',
-                      default="0",
-                      conv=int,
-                      description="The lifetime of an invite in seconds (0 = infinite).")
-    bot.conf.register('invite.notify_deleted',
-                      default="0",
-                      conv=bool,
-                      description="If true, messages the invite owner if an invite gets deleted.")
-    bot.conf.register('invite.delete_unmanaged_on_leave',
-                      default="0",
-                      conv=bool,
-                      description="If true, deletes invites not created by the bot when a user leaves.")
-    bot.perm.register('invite.create',
-                      base="create_instant_invite",
-                      pretty_name="Create invites")
-    bot.perm.register('invite.create_custom',
-                      base="create_instant_invite",
-                      pretty_name="Create invites with custom settings")
-    bot.perm.register('invite.request',
-                      base=False,
-                      pretty_name="Request invites")
-    bot.perm.register('invite.manage',
-                      base="manage_guild",
-                      pretty_name="Manage invites")
+    bot.conf.register(
+        "invite.channel",
+        conv=Optional[discord.TextChannel],
+        description="The channel where invite tracking is logged.",
+    )
+    bot.conf.register(
+        "invite.inv_channel",
+        conv=Optional[discord.TextChannel],
+        description="The channel where invites will point to (None = current).",
+    )
+    bot.conf.register(
+        "invite.inv_count",
+        default="1",
+        conv=int,
+        description="The amount of people that can be invited (0 = infinite).",
+    )
+    bot.conf.register(
+        "invite.inv_age",
+        default="0",
+        conv=int,
+        description="The lifetime of an invite in seconds (0 = infinite).",
+    )
+    bot.conf.register(
+        "invite.notify_deleted",
+        default="0",
+        conv=bool,
+        description="If true, messages the invite owner if an invite gets deleted.",
+    )
+    bot.conf.register(
+        "invite.delete_unmanaged_on_leave",
+        default="0",
+        conv=bool,
+        description="If true, deletes invites not created by the bot when a user leaves.",
+    )
+    bot.perm.register(
+        "invite.create", base="create_instant_invite", pretty_name="Create invites"
+    )
+    bot.perm.register(
+        "invite.create_custom",
+        base="create_instant_invite",
+        pretty_name="Create invites with custom settings",
+    )
+    bot.perm.register("invite.request", base=False, pretty_name="Request invites")
+    bot.perm.register(
+        "invite.manage", base="manage_guild", pretty_name="Manage invites"
+    )
 
     await bot.add_cog(InviteManager(bot))
     await bot.add_cog(ExpiredInvitesTracker(bot))

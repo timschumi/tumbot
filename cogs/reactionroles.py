@@ -13,7 +13,9 @@ async def _decode_raw_reaction(bot, payload: discord.RawReactionActionEvent):
     member = guild.get_member(payload.user_id)
 
     # Construct reaction
-    reaction = discord.Reaction(message=message, data={'me': member == guild.me}, emoji=payload.emoji)
+    reaction = discord.Reaction(
+        message=message, data={"me": member == guild.me}, emoji=payload.emoji
+    )
 
     return reaction, member
 
@@ -36,7 +38,9 @@ def _decode_reaction(func):
 
 
 async def _wait_for_user_reaction(bot, user, timeout=60):
-    payload = await bot.wait_for('raw_reaction_add', check=lambda p: p.user_id == user.id, timeout=timeout)
+    payload = await bot.wait_for(
+        "raw_reaction_add", check=lambda p: p.user_id == user.id, timeout=timeout
+    )
     return await _decode_raw_reaction(bot, payload)
 
 
@@ -59,16 +63,25 @@ class ReactionRoles(commands.Cog):
         """Creates a new reactionrole"""
 
         if ctx.author.top_role <= role and ctx.author != ctx.guild.owner:
-            await ctx.send("Target role is higher than current highest role.", delete_after=60)
+            await ctx.send(
+                "Target role is higher than current highest role.", delete_after=60
+            )
             return
 
         if ctx.guild.me.top_role <= role:
-            await ctx.send("Target role is higher than the bots current highest role.", delete_after=60)
+            await ctx.send(
+                "Target role is higher than the bots current highest role.",
+                delete_after=60,
+            )
             return
-        info_message = await ctx.send("React to a message with an emoji to finish the setup.")
+        info_message = await ctx.send(
+            "React to a message with an emoji to finish the setup."
+        )
 
         try:
-            reaction, member = await _wait_for_user_reaction(self.bot, ctx.author, timeout=60)
+            reaction, member = await _wait_for_user_reaction(
+                self.bot, ctx.author, timeout=60
+            )
         finally:
             await info_message.delete()
 
@@ -76,13 +89,19 @@ class ReactionRoles(commands.Cog):
         guild = message.guild
 
         with self.bot.db.get(guild.id) as db:
-            result = db.execute("SELECT * FROM reactionroles WHERE message == ? AND emoji == ? AND role = ?",
-                             (message.id, str(reaction.emoji), role.id)).fetchall()
+            result = db.execute(
+                "SELECT * FROM reactionroles WHERE message == ? AND emoji == ? AND role = ?",
+                (message.id, str(reaction.emoji), role.id),
+            ).fetchall()
             if len(result) > 0:
-                await ctx.send("Hey you already added that emoji to that message and that Role!")
+                await ctx.send(
+                    "Hey you already added that emoji to that message and that Role!"
+                )
                 return
-            db.execute("INSERT INTO reactionroles(message, emoji, role) VALUES(?, ?, ?)",
-                       (message.id, str(reaction.emoji), role.id))
+            db.execute(
+                "INSERT INTO reactionroles(message, emoji, role) VALUES(?, ?, ?)",
+                (message.id, str(reaction.emoji), role.id),
+            )
 
         await message.add_reaction(reaction.emoji)
         await reaction.remove(member)
@@ -92,10 +111,14 @@ class ReactionRoles(commands.Cog):
     async def delete(self, ctx):
         """Deletes a reactionrole"""
 
-        info_message = await ctx.send("React to a message with an emoji to delete a reactionrole.")
+        info_message = await ctx.send(
+            "React to a message with an emoji to delete a reactionrole."
+        )
 
         try:
-            reaction, member = await _wait_for_user_reaction(self.bot, ctx.author, timeout=60)
+            reaction, member = await _wait_for_user_reaction(
+                self.bot, ctx.author, timeout=60
+            )
         finally:
             await info_message.delete()
 
@@ -103,7 +126,10 @@ class ReactionRoles(commands.Cog):
         guild = message.guild
 
         with self.bot.db.get(guild.id) as db:
-            db.execute("DELETE FROM reactionroles WHERE message = ? AND emoji = ?", (message.id, str(reaction.emoji)))
+            db.execute(
+                "DELETE FROM reactionroles WHERE message = ? AND emoji = ?",
+                (message.id, str(reaction.emoji)),
+            )
 
         await reaction.remove(guild.me)
         await reaction.remove(member)
@@ -111,7 +137,7 @@ class ReactionRoles(commands.Cog):
     @commands.Cog.listener(name="on_raw_reaction_add")
     @_decode_reaction
     async def on_reaction_add(self, reaction, member):
-        """ Listens for new reactions and distributes the matching roles """
+        """Listens for new reactions and distributes the matching roles"""
 
         if reaction.me:
             return
@@ -120,8 +146,10 @@ class ReactionRoles(commands.Cog):
         guild = message.guild
 
         with self.bot.db.get(guild.id) as db:
-            result = db.execute("SELECT DISTINCT role FROM reactionroles WHERE message = ? AND emoji = ?",
-                                (message.id, str(reaction.emoji))).fetchall()
+            result = db.execute(
+                "SELECT DISTINCT role FROM reactionroles WHERE message = ? AND emoji = ?",
+                (message.id, str(reaction.emoji)),
+            ).fetchall()
 
         if len(result) == 0:
             return
@@ -138,33 +166,35 @@ class ReactionRoles(commands.Cog):
     @add.error
     @delete.error
     async def handle_error(self, ctx, error):
-        """ Prints a nice message when the user is too slow """
+        """Prints a nice message when the user is too slow"""
 
-        original = getattr(error, 'original', error)
+        original = getattr(error, "original", error)
 
         if isinstance(original, asyncio.TimeoutError):
             await ctx.send("Operation timed out. Try clicking a bit faster next time!")
             return
 
         # Defer to common error handler
-        errhandler = self.bot.get_cog('ErrorHandler')
+        errhandler = self.bot.get_cog("ErrorHandler")
 
         if errhandler is not None:
             await errhandler.on_command_error(ctx, error, force=True)
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
-        """ Remove reaction roles on messages that no longer exist """
+        """Remove reaction roles on messages that no longer exist"""
 
         if not payload.guild_id:
             return
 
         with self.bot.db.get(payload.guild_id) as db:
-            db.execute("DELETE FROM reactionroles WHERE message = ?", (payload.message_id,))
+            db.execute(
+                "DELETE FROM reactionroles WHERE message = ?", (payload.message_id,)
+            )
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role):
-        """ Remove reaction roles on roles that no longer exist """
+        """Remove reaction roles on roles that no longer exist"""
 
         with self.bot.db.get(role.guild.id) as db:
             db.execute("DELETE FROM reactionroles WHERE role = ?", (role.id,))

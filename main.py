@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import asyncio
-import discord
 import logging
 import os
 
+import discord
 from discord import Intents
 from discord.ext.commands.errors import ExtensionError
 from basedbot import DBot
@@ -14,11 +14,11 @@ async def main():
     # pylint: disable=missing-function-docstring
     bot = DBot(intents=Intents.all())
 
-    bot.add_cog_path('cogs')
-    bot.add_cog_path('cogs/legacy')
+    bot.add_cog_path("cogs")
+    bot.add_cog_path("cogs/legacy")
 
-    bot.db.add_sql_path('sql/guild', scope='guild')
-    bot.db.add_sql_path('sql/global', scope='global')
+    bot.db.add_sql_path("sql/guild", scope="guild")
+    bot.db.add_sql_path("sql/global", scope="global")
 
     discord.utils.setup_logging()
 
@@ -29,6 +29,7 @@ async def main():
             logging.exception("Exception while loading cog '%s'", cog)
 
     async with bot:
-        await bot.start(os.environ['DBOT_TOKEN'])
+        await bot.start(os.environ["DBOT_TOKEN"])
+
 
 asyncio.run(main())

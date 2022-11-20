@@ -10,7 +10,7 @@ class Physik(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        """ Shows a custom join message for physicists """
+        """Shows a custom join message for physicists"""
 
         if not member.guild.id == 640285216245809183:
             return
@@ -19,7 +19,8 @@ class Physik(commands.Cog):
             await member.send(
                 f"Hey {member.mention}, Willkommen auf dem Physik Server! Schau am besten mal im Channel "
                 "<#640285216245809186> vorbei, dort wird das wichtigste zum Server erklärt. "
-                "Viel Spaß und eine exzellente Zeit!")
+                "Viel Spaß und eine exzellente Zeit!"
+            )
         except discord.errors.Forbidden:
             pass
 

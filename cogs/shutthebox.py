@@ -4,21 +4,21 @@ import discord
 from discord.ext import commands
 
 BOX_REACTIONS = [
-    '1\N{COMBINING ENCLOSING KEYCAP}',
-    '2\N{COMBINING ENCLOSING KEYCAP}',
-    '3\N{COMBINING ENCLOSING KEYCAP}',
-    '4\N{COMBINING ENCLOSING KEYCAP}',
-    '5\N{COMBINING ENCLOSING KEYCAP}',
-    '6\N{COMBINING ENCLOSING KEYCAP}',
-    '7\N{COMBINING ENCLOSING KEYCAP}',
-    '8\N{COMBINING ENCLOSING KEYCAP}',
+    "1\N{COMBINING ENCLOSING KEYCAP}",
+    "2\N{COMBINING ENCLOSING KEYCAP}",
+    "3\N{COMBINING ENCLOSING KEYCAP}",
+    "4\N{COMBINING ENCLOSING KEYCAP}",
+    "5\N{COMBINING ENCLOSING KEYCAP}",
+    "6\N{COMBINING ENCLOSING KEYCAP}",
+    "7\N{COMBINING ENCLOSING KEYCAP}",
+    "8\N{COMBINING ENCLOSING KEYCAP}",
 ]
 
-NOMOVE_REACTION = '\U0000274E'
+NOMOVE_REACTION = "\U0000274E"
 
 
 class ShutTheBoxGame:
-    """ An instance of the "Shut the Box" game """
+    """An instance of the "Shut the Box" game"""
 
     def __init__(self, bot, players, message):
         self._bot = bot
@@ -60,9 +60,11 @@ class ShutTheBoxGame:
         return [BOX_REACTIONS[i] for i in open_boxes] + [NOMOVE_REACTION]
 
     async def _ask_for_box(self, player, reactions):
-        p = await self._bot.wait_for('raw_reaction_add',
-                                     check=lambda p: p.user_id == player.id and p.emoji.name in reactions,
-                                     timeout=60)
+        p = await self._bot.wait_for(
+            "raw_reaction_add",
+            check=lambda p: p.user_id == player.id and p.emoji.name in reactions,
+            timeout=60,
+        )
 
         await self._msg.remove_reaction(p.emoji.name, player)
 
@@ -81,16 +83,22 @@ class ShutTheBoxGame:
 
             # Player aborted the move?
             if reaction == NOMOVE_REACTION:
-                self._points[i] += sum([i + 1 for i in range(len(self._boxes)) if not self._boxes[i]])
+                self._points[i] += sum(
+                    [i + 1 for i in range(len(self._boxes)) if not self._boxes[i]]
+                )
                 return False
 
             box1 = open_boxes[reactions.index(reaction)]
 
-            reaction = await self._ask_for_box(self._players[i], filter(lambda x: x != reaction, reactions))
+            reaction = await self._ask_for_box(
+                self._players[i], filter(lambda x: x != reaction, reactions)
+            )
 
             # Player aborted the move?
             if reaction == NOMOVE_REACTION:
-                self._points[i] += sum([i + 1 for i in range(len(self._boxes)) if not self._boxes[i]])
+                self._points[i] += sum(
+                    [i + 1 for i in range(len(self._boxes)) if not self._boxes[i]]
+                )
                 return False
 
             box2 = open_boxes[reactions.index(reaction)]
@@ -115,7 +123,9 @@ class ShutTheBoxGame:
             if False in self._boxes:
                 return
 
-            await self._msg.edit(content=f"**{self._players[i]}** closed all boxes and wins!")
+            await self._msg.edit(
+                content=f"**{self._players[i]}** closed all boxes and wins!"
+            )
             return True
 
     async def _play_round(self):
@@ -124,7 +134,7 @@ class ShutTheBoxGame:
                 return True
 
     async def run(self):
-        """ Starts the main game """
+        """Starts the main game"""
 
         # Reset reactions
         for r in BOX_REACTIONS + [NOMOVE_REACTION]:
@@ -178,13 +188,17 @@ class ShutTheBox(commands.Cog):
             await ctx.send(f"A game for {p2.mention} is already active!")
             return
 
-        message = await ctx.send(f"{p2.mention}, you have been challenged to a round of 'Shut the Box'! "
-                                 "React with \U00002705 to accept the challenge.")
-        await message.add_reaction('\U00002705')
+        message = await ctx.send(
+            f"{p2.mention}, you have been challenged to a round of 'Shut the Box'! "
+            "React with \U00002705 to accept the challenge."
+        )
+        await message.add_reaction("\U00002705")
 
-        await self._bot.wait_for('raw_reaction_add',
-                                 check=lambda p: p.user_id == p2.id and p.emoji.name == '\U00002705',
-                                 timeout=60)
+        await self._bot.wait_for(
+            "raw_reaction_add",
+            check=lambda p: p.user_id == p2.id and p.emoji.name == "\U00002705",
+            timeout=60,
+        )
 
         await message.clear_reactions()
 
@@ -198,19 +212,21 @@ class ShutTheBox(commands.Cog):
 
     @challenge.error
     async def challenge_error(self, ctx, error):
-        """ Handles errors that can appear during a game """
-        error = getattr(error, 'original', error)
+        """Handles errors that can appear during a game"""
+        error = getattr(error, "original", error)
 
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("You can't play without any opponents :(")
             return
 
         if isinstance(error, asyncio.TimeoutError):
-            await ctx.send("Game timed out after 60s! Try typing a little faster next time!")
+            await ctx.send(
+                "Game timed out after 60s! Try typing a little faster next time!"
+            )
             self._running_games.remove(ctx.author.id)
             return
 
-        await self._bot.get_cog('ErrorHandler').on_command_error(ctx, error, force=True)
+        await self._bot.get_cog("ErrorHandler").on_command_error(ctx, error, force=True)
 
 
 async def setup(bot):

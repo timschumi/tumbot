@@ -6,11 +6,11 @@ from discord.ext.commands import Context
 
 
 class NoValidContextException(Exception):
-    """ Thrown when a Context does not apply for a specific scope """
+    """Thrown when a Context does not apply for a specific scope"""
 
 
 def _ctx_to_dbid(ctx, scope):
-    """ Fetches the correct database ID for a given scope from a Context """
+    """Fetches the correct database ID for a given scope from a Context"""
     # Global doesn't have a dbid, so just return 'global'
     if scope == "global":
         return "global"
@@ -32,7 +32,7 @@ def _ctx_to_dbid(ctx, scope):
 
 
 class DatabaseManager:
-    """ Manages database handles and schemas for a set of IDs and scopes """
+    """Manages database handles and schemas for a set of IDs and scopes"""
 
     def __init__(self, dbpath):
         self._db_handles = {}
@@ -46,8 +46,8 @@ class DatabaseManager:
 
         return f"{scope}_{dbid}"
 
-    def get(self, ctx, scope='guild'):
-        """ Returns a database handle matching the given Context and scope """
+    def get(self, ctx, scope="guild"):
+        """Returns a database handle matching the given Context and scope"""
 
         dbid = _ctx_to_dbid(ctx, scope)
         dbid = self._get_dbname(dbid, scope)
@@ -58,8 +58,9 @@ class DatabaseManager:
                 os.mkdir(self._dbpath)
 
             # Create a new connection
-            self._db_handles[dbid] = sqlite3.connect(f"{self._dbpath}/{dbid}.db",
-                                                     check_same_thread=False)
+            self._db_handles[dbid] = sqlite3.connect(
+                f"{self._dbpath}/{dbid}.db", check_same_thread=False
+            )
             self._db_handles[dbid].row_factory = sqlite3.Row
 
             # Update database structure for internal usage
@@ -70,13 +71,15 @@ class DatabaseManager:
 
         return self._db_handles[dbid]
 
-    def add_sql_path(self, path, scope='guild'):
-        """ Adds a new entry to the list of database schema search paths """
+    def add_sql_path(self, path, scope="guild"):
+        """Adds a new entry to the list of database schema search paths"""
 
-        self._sqlinfo.append({
-            'path': path,
-            'scope': scope,
-        })
+        self._sqlinfo.append(
+            {
+                "path": path,
+                "scope": scope,
+            }
+        )
 
     @classmethod
     def _get_user_version(cls, conn):
@@ -90,16 +93,22 @@ class DatabaseManager:
     @classmethod
     def _init_schema_version(cls, conn, schema):
         with conn as c:
-            c.execute("INSERT OR IGNORE INTO version (name, version) VALUES (?, 0)", (schema,))
+            c.execute(
+                "INSERT OR IGNORE INTO version (name, version) VALUES (?, 0)", (schema,)
+            )
 
     @classmethod
     def _get_schema_version(cls, conn, schema):
-        return conn.execute("SELECT version FROM version WHERE name = ?", (schema,)).fetchone()[0]
+        return conn.execute(
+            "SELECT version FROM version WHERE name = ?", (schema,)
+        ).fetchone()[0]
 
     @classmethod
     def _set_schema_version(cls, conn, schema, version):
         with conn as c:
-            return c.execute("UPDATE version SET version = ? WHERE name = ?", (version, schema))
+            return c.execute(
+                "UPDATE version SET version = ? WHERE name = ?", (version, schema)
+            )
 
     @classmethod
     def _upgrade_db_internal(cls, conn):
@@ -145,22 +154,24 @@ class DatabaseManager:
 
         for sqlinfo in self._sqlinfo:
             # Skip if not the correct scope
-            if sqlinfo['scope'] != scope:
+            if sqlinfo["scope"] != scope:
                 continue
 
-            for filepath in Path(sqlinfo['path']).glob('*_*.sql'):
-                name = re.match(r'(\S+)_\d+', filepath.stem).group(1)
+            for filepath in Path(sqlinfo["path"]).glob("*_*.sql"):
+                name = re.match(r"(\S+)_\d+", filepath.stem).group(1)
 
                 if name in schemas and schemas[name] is not sqlinfo:
-                    raise ValueError(f"Duplicate schema `{name}` found at `{sqlinfo['path']}`,"
-                                     f" but already present at `{schemas[name]}`")
+                    raise ValueError(
+                        f"Duplicate schema `{name}` found at `{sqlinfo['path']}`,"
+                        f" but already present at `{schemas[name]}`"
+                    )
 
                 schemas[name] = sqlinfo
 
         return schemas
 
     def close(self):
-        """ Closes all open handles """
+        """Closes all open handles"""
 
         for handle in self._db_handles.values():
             handle.close()

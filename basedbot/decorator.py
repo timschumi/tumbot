@@ -2,11 +2,13 @@ import functools
 import discord
 
 __all__ = [
-    'raw_reaction_filter',
+    "raw_reaction_filter",
 ]
 
 
-def raw_reaction_filter(guild_only=False, not_self=None, emoji_names=None, client_func=None):
+def raw_reaction_filter(
+    guild_only=False, not_self=None, emoji_names=None, client_func=None
+):
     """Filters events that are received by raw_reaction handlers
 
     Parameters
@@ -26,7 +28,9 @@ def raw_reaction_filter(guild_only=False, not_self=None, emoji_names=None, clien
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             # Use the first RawReactionActionEvent argument as payload
-            payload = next(filter(lambda e: isinstance(e, discord.RawReactionActionEvent), args))
+            payload = next(
+                filter(lambda e: isinstance(e, discord.RawReactionActionEvent), args)
+            )
 
             if guild_only and payload.guild_id is None:
                 return

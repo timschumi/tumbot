@@ -80,7 +80,7 @@ class DBotConf(commands.Cog):
     @commands.group(invoke_without_command=True)
     @commands.has_permissions(administrator=True)
     async def conf(self, ctx):
-        """ Bot configuration variable management """
+        """Bot configuration variable management"""
 
         await ctx.send_help(ctx.command)
         return
@@ -88,7 +88,7 @@ class DBotConf(commands.Cog):
     @conf.command(name="list")
     @commands.has_permissions(administrator=True)
     async def conf_list(self, ctx):
-        """ Lists all available configuration variables """
+        """Lists all available configuration variables"""
 
         entries = []
 
@@ -99,10 +99,7 @@ class DBotConf(commands.Cog):
             if not _has_access_to_var(ctx.author, var):
                 continue
 
-            entry = {
-                'name': var.name,
-                'value': await _var_value_to_string(ctx, var)
-            }
+            entry = {"name": var.name, "value": await _var_value_to_string(ctx, var)}
 
             entries.append(entry)
 
@@ -116,7 +113,7 @@ class DBotConf(commands.Cog):
     @commands.has_permissions(administrator=True)
     @_check_var_exists
     async def conf_get(self, ctx, name):
-        """ Retrieves a single configuration variable """
+        """Retrieves a single configuration variable"""
 
         var = self.bot.conf.var(name)
         await ctx.send(f"```{await _var_to_string(ctx, var)}```")
@@ -125,7 +122,7 @@ class DBotConf(commands.Cog):
     @commands.has_permissions(administrator=True)
     @_check_var_access
     async def conf_set(self, ctx, name, value):
-        """ Sets the value of a specific configuration variable """
+        """Sets the value of a specific configuration variable"""
 
         var = self.bot.conf.var(name)
 
@@ -135,18 +132,18 @@ class DBotConf(commands.Cog):
             await ctx.send(f"```{e}```")
             return
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @conf.command(name="unset")
     @commands.has_permissions(administrator=True)
     @_check_var_access
     async def conf_unset(self, ctx, name):
-        """ Resets a configuration variable to its default """
+        """Resets a configuration variable to its default"""
 
         var = self.bot.conf.var(name)
         var.unset(ctx.guild.id)
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
 
 async def setup(bot):

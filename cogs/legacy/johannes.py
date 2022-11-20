@@ -3,11 +3,11 @@ from discord.ext import commands
 
 def _is_cs_server(guild_id):
     return guild_id in [
-            628452781199589377,
-            752114765148455012,
-            753556257377353738,
-            885210119497973802,
-            ]
+        628452781199589377,
+        752114765148455012,
+        753556257377353738,
+        885210119497973802,
+    ]
 
 
 async def _check_cs_server(ctx):
@@ -26,13 +26,13 @@ class Johannes(commands.Cog):
     @commands.command()
     @commands.check(_check_cs_server)
     async def johannes(self, ctx):
-        """ Sends a cute animal """
+        """Sends a cute animal"""
 
         await ctx.send("\U0001F427")
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        """ Adds reactions to messages with certain words """
+        """Adds reactions to messages with certain words"""
 
         if message.author.bot:
             return
@@ -47,7 +47,7 @@ class Johannes(commands.Cog):
 
         # Reactions
         if "johannes" in lower or "stöhr" in lower:
-            await message.add_reaction('\U0001F427')
+            await message.add_reaction("\U0001F427")
         if "lmu" in lower:
             await message.add_reaction(":lmuo:668091545878003712")
 

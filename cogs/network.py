@@ -7,51 +7,53 @@ from discord.ext import commands
 
 import basedbot
 
-COLOR_NETWORK_JOIN = 0x00d100
-COLOR_MESSAGE_WARN = 0xf0bb2b
-COLOR_MESSAGE_CRIT = 0xed3e32
+COLOR_NETWORK_JOIN = 0x00D100
+COLOR_MESSAGE_WARN = 0xF0BB2B
+COLOR_MESSAGE_CRIT = 0xED3E32
 
 
 class GuildNetworkMember:
-    """ Represents a guild that is a member of a specific guild network """
+    """Represents a guild that is a member of a specific guild network"""
 
     def __init__(self, bot, db, network, data):
         self._bot = bot
         self._db = db
         self._network = network
         self._guild = self._bot.get_guild(data["gid"])
-        self._admin = (data["admin"] > 0)
+        self._admin = data["admin"] > 0
 
     def __str__(self):
         return str(self._guild)
 
     @property
     def network(self):
-        """ Returns the network that the guild is part of """
+        """Returns the network that the guild is part of"""
         return self._network
 
     @property
     def guild(self):
-        """ Returns the guild itself """
+        """Returns the guild itself"""
         return self._guild
 
     @property
     def admin(self):
-        """ Returns whether the guild administrates the guild network """
+        """Returns whether the guild administrates the guild network"""
         return self._admin
 
     @admin.setter
     def admin(self, value):
-        """ Changes the member status to (non-)administrator """
+        """Changes the member status to (non-)administrator"""
         self._admin = value
 
-        with self._db.get('', scope='global') as db:
-            db.execute("UPDATE network_member SET admin = ? WHERE nid = ? AND gid = ?",
-                       (1 if value else 0, self.network.id, self.guild.id))
+        with self._db.get("", scope="global") as db:
+            db.execute(
+                "UPDATE network_member SET admin = ? WHERE nid = ? AND gid = ?",
+                (1 if value else 0, self.network.id, self.guild.id),
+            )
 
 
 class GuildNetwork:
-    """ Represents a guild network """
+    """Represents a guild network"""
 
     def __init__(self, bot, db, data):
         self._bot = bot
@@ -60,30 +62,32 @@ class GuildNetwork:
         self._name = data["name"]
 
         # Populate members
-        with self._db.get('', scope='global') as dbh:
-            result = dbh.execute("SELECT gid FROM network_member WHERE nid = ?", (self._nid,)).fetchall()
+        with self._db.get("", scope="global") as dbh:
+            result = dbh.execute(
+                "SELECT gid FROM network_member WHERE nid = ?", (self._nid,)
+            ).fetchall()
         self._members = {r[0]: self._fetch_member(r[0]) for r in result}
 
         self._owner = self.get_member(data["owner"])
 
     @property
     def id(self):
-        """ Returns the guild network ID """
+        """Returns the guild network ID"""
         return self._nid
 
     @property
     def name(self):
-        """ Returns the guild network name """
+        """Returns the guild network name"""
         return self._name
 
     @property
     def owner(self):
-        """ Returns the owning guild of the guild network """
+        """Returns the owning guild of the guild network"""
         return self._owner
 
     @owner.setter
     def owner(self, value):
-        """ Sets a new owning guild for the guild network """
+        """Sets a new owning guild for the guild network"""
         if not isinstance(value, GuildNetworkMember):
             raise ValueError("New owner is not of type GuildNetworkMember!")
 
@@ -93,22 +97,28 @@ class GuildNetwork:
         value.admin = True
         self._owner = value
 
-        with self._db.get('', scope='global') as db:
-            db.execute("UPDATE network SET owner = ? WHERE rowid = ?", (value.guild.id, self.id))
+        with self._db.get("", scope="global") as db:
+            db.execute(
+                "UPDATE network SET owner = ? WHERE rowid = ?",
+                (value.guild.id, self.id),
+            )
 
     @property
     def members(self):
-        """ Returns all guild network members """
+        """Returns all guild network members"""
         return list(self._members.values())
 
     @property
     def admins(self):
-        """ Returns all guild network members that are administrators """
+        """Returns all guild network members that are administrators"""
         return [e for e in self.members if e.admin]
 
     def _fetch_member(self, gid):
-        with self._db.get('', scope='global') as db:
-            result = db.execute("SELECT * FROM network_member WHERE nid = ? AND gid = ?", (self._nid, gid)).fetchone()
+        with self._db.get("", scope="global") as db:
+            result = db.execute(
+                "SELECT * FROM network_member WHERE nid = ? AND gid = ?",
+                (self._nid, gid),
+            ).fetchone()
 
         if result is None:
             return None
@@ -116,7 +126,7 @@ class GuildNetwork:
         return GuildNetworkMember(self._bot, self._db, self, result)
 
     def get_member(self, gid):
-        """ Retrieves a guild network member by the guild ID """
+        """Retrieves a guild network member by the guild ID"""
 
         if gid not in self._members:
             val = self._fetch_member(gid)
@@ -129,21 +139,26 @@ class GuildNetwork:
         return self._members[gid]
 
     def join(self, gid):
-        """ Adds a guild (by guild ID) to a guild network """
+        """Adds a guild (by guild ID) to a guild network"""
 
-        with self._db.get('', scope='global') as db:
-            db.execute("REPLACE INTO network_member (nid, gid, admin) VALUES (?, ?, 0)", (self._nid, gid))
+        with self._db.get("", scope="global") as db:
+            db.execute(
+                "REPLACE INTO network_member (nid, gid, admin) VALUES (?, ?, 0)",
+                (self._nid, gid),
+            )
 
         return self.get_member(gid)
 
     def leave(self, gid):
-        """ Removes a guild (by guild ID) from a guild network """
+        """Removes a guild (by guild ID) from a guild network"""
 
         with self._bot.db.get(gid) as db:
             db.execute("DELETE FROM network_invites WHERE network = ?", (self._nid,))
 
-        with self._db.get('', scope='global') as db:
-            db.execute("DELETE FROM network_member WHERE nid = ? AND gid = ?", (self._nid, gid))
+        with self._db.get("", scope="global") as db:
+            db.execute(
+                "DELETE FROM network_member WHERE nid = ? AND gid = ?", (self._nid, gid)
+            )
 
         if gid in self._members:
             del self._members[gid]
@@ -179,9 +194,9 @@ class GuildNetworks(commands.Cog):
         self._bot = bot
         self._networks = {}
 
-        self._var_channel = self._bot.conf.var('network.channel')
+        self._var_channel = self._bot.conf.var("network.channel")
 
-        self._perm_manage = self._bot.perm.get('network.manage')
+        self._perm_manage = self._bot.perm.get("network.manage")
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -191,30 +206,37 @@ class GuildNetworks(commands.Cog):
     async def _init_networks(self):
         await self._bot.wait_until_ready()
 
-        with self._bot.db.get('', scope='global') as db:
+        with self._bot.db.get("", scope="global") as db:
             result = db.execute("SELECT rowid FROM network").fetchall()
         self._networks = {r[0]: self._fetch_network(r[0]) for r in result}
 
     def _create_network(self, name, gid):
         try:
-            with self._bot.db.get('', scope='global') as db:
-                c = db.execute("INSERT INTO network (name, owner) VALUES (?, ?)", (name, gid))
-                db.execute("REPLACE INTO network_member (nid, gid, admin) VALUES (?, ?, 1)", (c.lastrowid, gid))
+            with self._bot.db.get("", scope="global") as db:
+                c = db.execute(
+                    "INSERT INTO network (name, owner) VALUES (?, ?)", (name, gid)
+                )
+                db.execute(
+                    "REPLACE INTO network_member (nid, gid, admin) VALUES (?, ?, 1)",
+                    (c.lastrowid, gid),
+                )
         except sqlite3.IntegrityError:
             return None
 
         return self._get_network(c.lastrowid)
 
     def _delete_network(self, nid):
-        with self._bot.db.get('', scope='global') as db:
+        with self._bot.db.get("", scope="global") as db:
             db.execute("DELETE FROM network WHERE rowid = ?", (nid,))
 
         if nid in self._networks:
             del self._networks[nid]
 
     def _fetch_network(self, nid):
-        with self._bot.db.get('', scope='global') as db:
-            result = db.execute("SELECT rowid, * FROM network WHERE rowid = ?", (nid,)).fetchone()
+        with self._bot.db.get("", scope="global") as db:
+            result = db.execute(
+                "SELECT rowid, * FROM network WHERE rowid = ?", (nid,)
+            ).fetchone()
 
         if result is None:
             return None
@@ -246,7 +268,7 @@ class GuildNetworks(commands.Cog):
             await ctx.send("Failed to create network.")
             return
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
         return
 
     @network.command(name="invite")
@@ -286,18 +308,22 @@ class GuildNetworks(commands.Cog):
             await ctx.send("The guild does not have a channel for network messages.")
             return
 
-        message = await channel.send(f"Your guild has been invited to the following network: **{network.name}**. Ack?")
+        message = await channel.send(
+            f"Your guild has been invited to the following network: **{network.name}**. Ack?"
+        )
 
         # Add yes/no reactions
-        await message.add_reaction('\U00002705')
-        await message.add_reaction('\U0000274E')
+        await message.add_reaction("\U00002705")
+        await message.add_reaction("\U0000274E")
 
         # Store invite in database
         with self._bot.db.get(guild.id) as db:
-            db.execute("INSERT INTO network_invites (network, message, inviter) VALUES (?, ?, ?)",
-                       (network.id, message.id, ctx.guild.id))
+            db.execute(
+                "INSERT INTO network_invites (network, message, inviter) VALUES (?, ?, ?)",
+                (network.id, message.id, ctx.guild.id),
+            )
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @network.command(name="list")
     @basedbot.has_permissions("network.list")
@@ -311,12 +337,14 @@ class GuildNetworks(commands.Cog):
             if member is None:
                 continue
 
-            entries.append({
-                "id": n.id,
-                "name": n.name,
-                "members": len(n.members) if member.admin else '?',
-                "owner": str(n.owner)
-            })
+            entries.append(
+                {
+                    "id": n.id,
+                    "name": n.name,
+                    "members": len(n.members) if member.admin else "?",
+                    "owner": str(n.owner),
+                }
+            )
 
         if len(entries) == 0:
             await ctx.send("No networks found!")
@@ -344,7 +372,7 @@ class GuildNetworks(commands.Cog):
         if len(network.members) == 0:
             self._delete_network(network.id)
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     def _get_neighbor_guilds(self, guild, pred=None):
         guilds = []
@@ -389,29 +417,45 @@ class GuildNetworks(commands.Cog):
     async def network_ban(self, ctx, member: discord.Member, *, reason=None):
         """Ban user and announce it to other guilds in the network"""
 
-        await member.ban(reason=f"{ctx.author} ({ctx.author.id}): {reason if reason else 'No reason given.'}")
-        await ctx.message.add_reaction('\U00002705')
+        await member.ban(
+            reason=f"{ctx.author} ({ctx.author.id}): {reason if reason else 'No reason given.'}"
+        )
+        await ctx.message.add_reaction("\U00002705")
 
-        guilds = self._get_neighbor_guilds(ctx.guild, pred=lambda nwm: self._get_network_channel(nwm.guild) is not None)
+        guilds = self._get_neighbor_guilds(
+            ctx.guild, pred=lambda nwm: self._get_network_channel(nwm.guild) is not None
+        )
 
         for g in guilds:
             user_in_guild = member in g.members
 
-            embed = discord.Embed(title=f"{member} ({member.id}) has been banned from '{ctx.guild}'",
-                                  color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN))
+            embed = discord.Embed(
+                title=f"{member} ({member.id}) has been banned from '{ctx.guild}'",
+                color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN),
+            )
 
             embed.set_thumbnail(url=ctx.guild.icon_url)
 
             if g == ctx.guild:
-                embed.add_field(name="Banned by", value=f"{ctx.author.mention} ({ctx.author.id})", inline=False)
+                embed.add_field(
+                    name="Banned by",
+                    value=f"{ctx.author.mention} ({ctx.author.id})",
+                    inline=False,
+                )
 
             if reason:
                 embed.add_field(name="Reason", value=reason, inline=False)
 
             if user_in_guild:
-                embed.add_field(name="Status", value="The member is on this server.", inline=False)
+                embed.add_field(
+                    name="Status", value="The member is on this server.", inline=False
+                )
             else:
-                embed.add_field(name="Status", value="The member is not on this server.", inline=False)
+                embed.add_field(
+                    name="Status",
+                    value="The member is not on this server.",
+                    inline=False,
+                )
 
             await self._send_network_channel(g, embed=embed)
 
@@ -422,37 +466,57 @@ class GuildNetworks(commands.Cog):
     async def network_kick(self, ctx, member: discord.Member, *, reason=None):
         """Kick user and announce it to other guilds in the network"""
 
-        await member.kick(reason=f"{ctx.author} ({ctx.author.id}): {reason if reason else 'No reason given.'}")
-        await ctx.message.add_reaction('\U00002705')
+        await member.kick(
+            reason=f"{ctx.author} ({ctx.author.id}): {reason if reason else 'No reason given.'}"
+        )
+        await ctx.message.add_reaction("\U00002705")
 
-        guilds = self._get_neighbor_guilds(ctx.guild, pred=lambda nwm: self._get_network_channel(nwm.guild) is not None)
+        guilds = self._get_neighbor_guilds(
+            ctx.guild, pred=lambda nwm: self._get_network_channel(nwm.guild) is not None
+        )
 
         for g in guilds:
             user_in_guild = member in g.members
 
-            embed = discord.Embed(title=f"{member} ({member.id}) has been kicked from '{ctx.guild}'",
-                                  color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN))
+            embed = discord.Embed(
+                title=f"{member} ({member.id}) has been kicked from '{ctx.guild}'",
+                color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN),
+            )
 
             embed.set_thumbnail(url=ctx.guild.icon_url)
 
             if g == ctx.guild:
-                embed.add_field(name="Kicked by", value=f"{ctx.author.mention} ({ctx.author.id})", inline=False)
+                embed.add_field(
+                    name="Kicked by",
+                    value=f"{ctx.author.mention} ({ctx.author.id})",
+                    inline=False,
+                )
 
             if reason:
                 embed.add_field(name="Reason", value=reason, inline=False)
 
             if user_in_guild:
-                embed.add_field(name="Status", value="The member is on this server.", inline=False)
+                embed.add_field(
+                    name="Status", value="The member is on this server.", inline=False
+                )
             else:
-                embed.add_field(name="Status", value="The member is not on this server.", inline=False)
+                embed.add_field(
+                    name="Status",
+                    value="The member is not on this server.",
+                    inline=False,
+                )
 
             await self._send_network_channel(g, embed=embed)
 
     @commands.Cog.listener()
-    @basedbot.raw_reaction_filter(guild_only=True, not_self=True, emoji_names=('\U00002705', '\U0000274E'),
-                                  client_func=lambda self, payload: self._bot)
+    @basedbot.raw_reaction_filter(
+        guild_only=True,
+        not_self=True,
+        emoji_names=("\U00002705", "\U0000274E"),
+        client_func=lambda self, payload: self._bot,
+    )
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        """ Handles reactions to administrative messages """
+        """Handles reactions to administrative messages"""
 
         guild = self._bot.get_guild(payload.guild_id)
         channel = self._bot.get_channel(payload.channel_id)
@@ -464,8 +528,9 @@ class GuildNetworks(commands.Cog):
 
         # Check if there is a pending invite in the database
         with self._bot.db.get(guild.id) as db:
-            result = db.execute("SELECT * FROM network_invites WHERE message = ?",
-                                (message.id,)).fetchall()
+            result = db.execute(
+                "SELECT * FROM network_invites WHERE message = ?", (message.id,)
+            ).fetchall()
 
         if len(result) == 0:
             return
@@ -474,15 +539,17 @@ class GuildNetworks(commands.Cog):
 
         # Remove from pending invites
         with self._bot.db.get(guild.id) as db:
-            db.execute("DELETE FROM network_invites WHERE message = ?", (entry["message"],))
+            db.execute(
+                "DELETE FROM network_invites WHERE message = ?", (entry["message"],)
+            )
 
         # Remove user reaction
         await message.remove_reaction(payload.emoji, member)
 
         # Invite denied?
-        if payload.emoji.name == '\U0000274E':
+        if payload.emoji.name == "\U0000274E":
             # Mark as "denied"
-            await message.clear_reaction('\U00002705')
+            await message.clear_reaction("\U00002705")
             return
 
         # Resolve network
@@ -493,17 +560,24 @@ class GuildNetworks(commands.Cog):
             return
 
         # Mark as "approved"
-        await message.clear_reaction('\U0000274E')
+        await message.clear_reaction("\U0000274E")
 
         network.join(guild.id)
 
         inviter = self._bot.get_guild(entry["inviter"])
 
         # Construct the Embed
-        embed = discord.Embed(title=f"**{guild}** ({guild.id}) joined the network.", color=COLOR_NETWORK_JOIN)
-        embed.add_field(name="Network", value=f"{network.name} ({network.id})", inline=False)
+        embed = discord.Embed(
+            title=f"**{guild}** ({guild.id}) joined the network.",
+            color=COLOR_NETWORK_JOIN,
+        )
+        embed.add_field(
+            name="Network", value=f"{network.name} ({network.id})", inline=False
+        )
         if inviter is not None:
-            embed.add_field(name="Invited by", value=f"{inviter} ({inviter.id})", inline=False)
+            embed.add_field(
+                name="Invited by", value=f"{inviter} ({inviter.id})", inline=False
+            )
 
         for nw_member in network.members:
             g = nw_member.guild
@@ -518,19 +592,25 @@ class GuildNetworks(commands.Cog):
 
 async def setup(bot):
     # pylint: disable=missing-function-docstring
-    bot.conf.register('network.channel',
-                      conv=Optional[discord.TextChannel],
-                      description="The channel where guild network messages are logged.")
-    bot.perm.register('network.invite',
-                      base="administrator",
-                      pretty_name="Invite guilds to a network")
-    bot.perm.register('network.list',
-                      base="administrator",
-                      pretty_name="List networks that the guild is a member of")
-    bot.perm.register('network.create',
-                      base="administrator",
-                      pretty_name="Create guild networks")
-    bot.perm.register('network.manage',
-                      base="administrator",
-                      pretty_name="Basic network management (joining/leaving)")
+    bot.conf.register(
+        "network.channel",
+        conv=Optional[discord.TextChannel],
+        description="The channel where guild network messages are logged.",
+    )
+    bot.perm.register(
+        "network.invite", base="administrator", pretty_name="Invite guilds to a network"
+    )
+    bot.perm.register(
+        "network.list",
+        base="administrator",
+        pretty_name="List networks that the guild is a member of",
+    )
+    bot.perm.register(
+        "network.create", base="administrator", pretty_name="Create guild networks"
+    )
+    bot.perm.register(
+        "network.manage",
+        base="administrator",
+        pretty_name="Basic network management (joining/leaving)",
+    )
     await bot.add_cog(GuildNetworks(bot))

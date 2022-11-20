@@ -36,7 +36,7 @@ def _id_to_string(guild, discord_id):
 
 
 def _state_to_string(state):
-    return 'Granted' if state else 'Denied'
+    return "Granted" if state else "Denied"
 
 
 def _sorted_defs(perm, guild):
@@ -67,7 +67,9 @@ def _perm_to_string(perm, guild):
     defs = _sorted_defs(perm, guild)
 
     for discord_id, state in defs.items():
-        string += f"\n - {_state_to_string(state)} for {_id_to_string(guild, discord_id)}"
+        string += (
+            f"\n - {_state_to_string(state)} for {_id_to_string(guild, discord_id)}"
+        )
 
     if isinstance(perm.base, str):
         string += f"\n - Fallback permission: '{perm.base}'"
@@ -81,11 +83,11 @@ def _perm_to_string(perm, guild):
 
 class RoleConverterExt(commands.RoleConverter):
     # pylint: disable=too-few-public-methods
-    """ Extends the RoleConverter to handle the 'everyone' role """
+    """Extends the RoleConverter to handle the 'everyone' role"""
 
     async def convert(self, ctx, argument):
         # pylint: disable=missing-function-docstring
-        if argument == 'everyone':
+        if argument == "everyone":
             return ctx.guild.get_role(ctx.guild.id)
 
         return await super().convert(ctx, argument)
@@ -102,10 +104,12 @@ class DBotPerm(commands.Cog):
         # pylint: disable=missing-function-docstring
         self.bot.loop.create_task(self._cleanup_invalid_entries())
 
-    @commands.group(aliases=["pm", "permission", "permissions"], invoke_without_command=True)
+    @commands.group(
+        aliases=["pm", "permission", "permissions"], invoke_without_command=True
+    )
     @commands.has_permissions(administrator=True)
     async def perm(self, ctx):
-        """ Bot permission management """
+        """Bot permission management"""
 
         await ctx.send_help(ctx.command)
         return
@@ -113,12 +117,12 @@ class DBotPerm(commands.Cog):
     @perm.command(name="list")
     @commands.has_permissions(administrator=True)
     async def perm_list(self, ctx):
-        """ Lists all available permissions """
+        """Lists all available permissions"""
 
         entries = []
 
         for perm in sorted(self.bot.perm.registered_permissions, key=lambda p: p.name):
-            entries.append({'name': perm.name, 'description': perm.pretty_name})
+            entries.append({"name": perm.name, "description": perm.pretty_name})
 
         if len(entries) == 0:
             await ctx.send("There aren't any registered permissions.")
@@ -130,7 +134,7 @@ class DBotPerm(commands.Cog):
     @commands.has_permissions(administrator=True)
     @_check_perm_exists
     async def perm_get(self, ctx, name):
-        """ Retrieves information about a permission """
+        """Retrieves information about a permission"""
 
         perm = self.bot.perm.get(name)
         await ctx.send(f"```{_perm_to_string(perm, ctx.guild)}```")
@@ -138,55 +142,58 @@ class DBotPerm(commands.Cog):
     @perm.command(name="grant", aliases=["allow"])
     @commands.has_permissions(administrator=True)
     @_check_perm_exists
-    async def perm_grant(self, ctx, permission,
-                         target: typing.Union[RoleConverterExt, discord.Member]):
-        """ Grants a permission to a user or role """
+    async def perm_grant(
+        self, ctx, permission, target: typing.Union[RoleConverterExt, discord.Member]
+    ):
+        """Grants a permission to a user or role"""
 
         perm = self.bot.perm.get(permission)
         perm.grant(ctx.guild, target.id)
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @perm.command(name="deny", aliases=["disallow"])
     @commands.has_permissions(administrator=True)
     @_check_perm_exists
-    async def perm_deny(self, ctx, permission,
-                        target: typing.Union[RoleConverterExt, discord.Member]):
-        """ Denies a permission to a user or role """
+    async def perm_deny(
+        self, ctx, permission, target: typing.Union[RoleConverterExt, discord.Member]
+    ):
+        """Denies a permission to a user or role"""
 
         perm = self.bot.perm.get(permission)
         perm.deny(ctx.guild, target.id)
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @perm.command(name="default", aliases=["reset"])
     @commands.has_permissions(administrator=True)
     @_check_perm_exists
-    async def perm_default(self, ctx, permission,
-                           target: typing.Union[RoleConverterExt, discord.Member]):
-        """ Resets a permission to default for a user or role """
+    async def perm_default(
+        self, ctx, permission, target: typing.Union[RoleConverterExt, discord.Member]
+    ):
+        """Resets a permission to default for a user or role"""
 
         perm = self.bot.perm.get(permission)
         perm.default(ctx.guild, target.id)
 
-        await ctx.message.add_reaction('\U00002705')
+        await ctx.message.add_reaction("\U00002705")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
-        """ Removes dead permission entries when a user leaves """
+        """Removes dead permission entries when a user leaves"""
 
         for perm in self.bot.perm.registered_permissions:
             perm.default(member.guild, member.id)
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role):
-        """ Removes dead permission entries when a role is deleted """
+        """Removes dead permission entries when a role is deleted"""
 
         for perm in self.bot.perm.registered_permissions:
             perm.default(role.guild, role.id)
 
     async def _cleanup_invalid_entries(self):
-        """ Performs a sanity check of the database entries when the bot is ready """
+        """Performs a sanity check of the database entries when the bot is ready"""
 
         await self.bot.wait_until_ready()
 
@@ -201,7 +208,11 @@ class DBotPerm(commands.Cog):
                     if guild.get_role(entry):
                         continue
 
-                    logging.info("ID %s not found as member or role in guild %s, reset.", entry, guild)
+                    logging.info(
+                        "ID %s not found as member or role in guild %s, reset.",
+                        entry,
+                        guild,
+                    )
                     perm.default(guild, entry)
 
 

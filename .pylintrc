@@ -2,7 +2,7 @@
 disable=duplicate-code,
         missing-module-docstring,
         invalid-name,
-        no-self-use,
+        line-too-long,
         too-few-public-methods,
         too-many-instance-attributes,
         too-many-return-statements,
