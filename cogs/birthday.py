@@ -155,7 +155,7 @@ class Birthdays(commands.Cog):
         """Repeatedly checks for new birthdays and sends congratulation messages"""
 
         day, month = _get_current_date()
-        for guild in self.bot.guilds:
+        for guild in set(self.bot.guilds):
             # Clear old birthday roles
             await self._clear_roles(guild)
 
