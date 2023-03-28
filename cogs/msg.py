@@ -1,5 +1,8 @@
+import io
 import re
+from urllib import request
 from urllib.parse import urlparse, quote
+import discord
 from discord.ext import commands
 
 import basedbot
@@ -157,9 +160,21 @@ class MessageStore(commands.Cog):
         safe_caption = quote(safe_caption, safe="")
         quoted_url = quote(shorthand_url, safe="")
 
-        text = f"https://api.memegen.link/images/custom/_/{safe_caption}.gif?background={quoted_url}"
+        file_url = f"https://api.memegen.link/images/custom/_/{safe_caption}.gif?background={quoted_url}"
 
-        await ctx.send(text)
+        async with ctx.typing():
+            # Prevent 403 Forbidden errors
+            req = request.Request(file_url,
+                                  headers={
+                                      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0"
+                                  })
+
+            # Download a maximum size of 32 MB as it's an in-memory buffer
+            with request.urlopen(req, timeout=30) as r:
+                b = r.read(32 * 1024 * 1024)
+                file = discord.File(io.BytesIO(b), filename="meme.gif")
+
+                await ctx.send(file=file)
 
     @msg.command()
     @basedbot.has_permissions("msg.delete")
