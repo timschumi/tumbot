@@ -167,19 +167,24 @@ class MessageStore(commands.Cog):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0"
         }
 
-        async with ctx.typing(), \
-                ClientSession(timeout=ClientTimeout(30), raise_for_status=True, headers=headers) as session, \
-                session.get(file_url) as resp:
-            # Restrict buffer size to 32MB
-            file_data = b''
-            async for chunk in resp.content.iter_chunked(512 * 1024):
-                file_data += chunk
-                if len(file_data) > 32 * 1024 * 1024:
-                    raise ValueError('File too large')
+        try:
+            max_filesize = ctx.guild.filesize_limit if ctx.guild else 8 * 1024 * 1024
+            async with ctx.typing(), \
+                    ClientSession(timeout=ClientTimeout(30), raise_for_status=True, headers=headers) as session, \
+                    session.get(file_url) as resp:
 
-            file = discord.File(io.BytesIO(file_data), filename="meme.gif")
+                file_data = b''
+                async for chunk in resp.content.iter_chunked(512 * 1024):
+                    file_data += chunk
+                    if len(file_data) > max_filesize:
+                        # Just send the URL if the file is too large
+                        raise ValueError('File too large for this guild')
 
-            await ctx.send(file=file)
+                file = discord.File(io.BytesIO(file_data), filename="meme.gif")
+
+                await ctx.send(file=file)
+        except:
+            await ctx.send(file_url)
 
     @msg.command()
     @basedbot.has_permissions("msg.delete")
