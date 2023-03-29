@@ -2,6 +2,7 @@ import io
 import re
 from urllib import request
 from urllib.parse import urlparse, quote
+from aiohttp import ClientTimeout, ClientSession
 import discord
 from discord.ext import commands
 
@@ -162,19 +163,23 @@ class MessageStore(commands.Cog):
 
         file_url = f"https://api.memegen.link/images/custom/_/{safe_caption}.gif?background={quoted_url}"
 
-        async with ctx.typing():
-            # Prevent 403 Forbidden errors
-            req = request.Request(file_url,
-                                  headers={
-                                      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0"
-                                  })
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0"
+        }
 
-            # Download a maximum size of 32 MB as it's an in-memory buffer
-            with request.urlopen(req, timeout=30) as r:
-                b = r.read(32 * 1024 * 1024)
-                file = discord.File(io.BytesIO(b), filename="meme.gif")
+        async with ctx.typing(), \
+                ClientSession(timeout=ClientTimeout(30), raise_for_status=True, headers=headers) as session, \
+                session.get(file_url) as resp:
+            # Restrict buffer size to 32MB
+            file_data = b''
+            async for chunk in resp.content.iter_chunked(512 * 1024):
+                file_data += chunk
+                if len(file_data) > 32 * 1024 * 1024:
+                    raise ValueError('File too large')
 
-                await ctx.send(file=file)
+            file = discord.File(io.BytesIO(file_data), filename="meme.gif")
+
+            await ctx.send(file=file)
 
     @msg.command()
     @basedbot.has_permissions("msg.delete")
