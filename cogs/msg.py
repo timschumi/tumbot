@@ -1,5 +1,9 @@
+import io
 import re
+from urllib import request
 from urllib.parse import urlparse, quote
+from aiohttp import ClientTimeout, ClientSession
+import discord
 from discord.ext import commands
 
 import basedbot
@@ -157,9 +161,30 @@ class MessageStore(commands.Cog):
         safe_caption = quote(safe_caption, safe="")
         quoted_url = quote(shorthand_url, safe="")
 
-        text = f"https://api.memegen.link/images/custom/_/{safe_caption}.gif?background={quoted_url}"
+        file_url = f"https://api.memegen.link/images/custom/_/{safe_caption}.gif?background={quoted_url}"
 
-        await ctx.send(text)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0"
+        }
+
+        try:
+            max_filesize = ctx.guild.filesize_limit if ctx.guild else 8 * 1024 * 1024
+            async with ctx.typing(), \
+                    ClientSession(timeout=ClientTimeout(30), raise_for_status=True, headers=headers) as session, \
+                    session.get(file_url) as resp:
+
+                file_data = b''
+                async for chunk in resp.content.iter_chunked(512 * 1024):
+                    file_data += chunk
+                    if len(file_data) > max_filesize:
+                        # Just send the URL if the file is too large
+                        raise ValueError('File too large for this guild')
+
+                file = discord.File(io.BytesIO(file_data), filename="meme.gif")
+
+                await ctx.send(file=file)
+        except:
+            await ctx.send(file_url)
 
     @msg.command()
     @basedbot.has_permissions("msg.delete")
