@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 import discord.ext.commands
+import statsd
 
 from .dbmgr import DatabaseManager
 from .confmgr import ConfigManager
@@ -21,6 +22,10 @@ class DBot(discord.ext.commands.Bot):
         self.db = DatabaseManager(os.environ.get("DBOT_DBPATH", "db"))
         self.conf = ConfigManager(self.db)
         self.perm = PermissionManager(self.db)
+        if "STATSD_HOST" in os.environ:
+            self.statsd = statsd.StatsClient(
+                os.environ.get("STATSD_HOST"), os.environ.get("STATSD_PORT")
+            )
         self._cogpaths = ["basedbot/cogs"]
         self.conf.register(
             "prefix",
