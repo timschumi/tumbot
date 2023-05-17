@@ -20,7 +20,7 @@ class DBotStats(commands.Cog):
         # pylint: disable=missing-function-docstring
         self._bot.statsd.incr("commands")
 
-        translated_command_name = ctx.command.qualified_name.replace(" ", ".")
+        translated_command_name = ctx.command.qualified_name.replace(" ", "_")
         self._bot.statsd.incr(f"command.{translated_command_name}")
         self._running_commands[ctx.message.id] = {
             "name": translated_command_name,
