@@ -116,6 +116,19 @@ class Birthdays(commands.Cog):
 
         await ctx.message.add_reaction("\U00002705")
 
+    @birthdays.command()
+    @commands.guild_only()
+    async def remove(self, ctx):
+        """Removes the birthday of the calling user"""
+
+        with self.bot.db.get(ctx.guild.id) as db:
+            db.execute(
+                "DELETE FROM birthdays WHERE userId = ?",
+                (ctx.author.id,),
+            )
+
+        await ctx.message.add_reaction("\U00002705")
+
     async def _clear_roles(self, guild):
         if not guild.me.guild_permissions.manage_roles:
             return
