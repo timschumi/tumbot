@@ -434,7 +434,7 @@ class GuildNetworks(commands.Cog):
                 color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN),
             )
 
-            embed.set_thumbnail(url=ctx.guild.icon_url)
+            embed.set_thumbnail(url=ctx.guild.icon.url)
 
             if g == ctx.guild:
                 embed.add_field(
@@ -483,7 +483,7 @@ class GuildNetworks(commands.Cog):
                 color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN),
             )
 
-            embed.set_thumbnail(url=ctx.guild.icon_url)
+            embed.set_thumbnail(url=ctx.guild.icon.url)
 
             if g == ctx.guild:
                 embed.add_field(
