@@ -21,6 +21,7 @@ class GuildNetworkMember:
         self._network = network
         self._guild = self._bot.get_guild(data["gid"])
         self._admin = data["admin"] > 0
+        self._propagate_ban = data["propagate_ban"] > 0
 
     def __str__(self):
         return str(self._guild)
@@ -48,6 +49,20 @@ class GuildNetworkMember:
         with self._db.get("", scope="global") as db:
             db.execute(
                 "UPDATE network_member SET admin = ? WHERE nid = ? AND gid = ?",
+                (1 if value else 0, self.network.id, self.guild.id),
+            )
+
+    @property
+    def propagate_ban(self):
+        return self._propagate_ban
+
+    @propagate_ban.setter
+    def propagate_ban(self, value):
+        self._propagate_ban = True if value else False
+
+        with self._db.get("", scope="global") as db:
+            db.execute(
+                "UPDATE network_member SET propagate_ban = ? WHERE nid = ? AND gid = ?",
                 (1 if value else 0, self.network.id, self.guild.id),
             )
 
@@ -395,6 +410,25 @@ class GuildNetworks(commands.Cog):
 
         await ctx.message.add_reaction("\U00002705")
 
+    @network.command(name="propagate_ban")
+    @basedbot.has_permissions("network.manage")
+    async def network_propagate_ban(self, ctx, network: int, value: bool):
+        """Set whether bans from other networks should be propagated into this server"""
+        network = self._get_network(network)
+
+        if network is None:
+            await ctx.send("Network could not be resolved.")
+            return
+
+        network_member = network.get_member(ctx.guild.id)
+        if network_member is None:
+            await ctx.send("Network member could not be resolved.")
+            return
+
+        network_member.propagate_ban = value
+
+        await ctx.message.add_reaction("\U00002705")
+
     def _get_neighbor_members(self, guild, pred=None):
         members = []
 
@@ -477,17 +511,60 @@ class GuildNetworks(commands.Cog):
                 embed.add_field(name="Reason", value=reason, inline=False)
 
             if user_in_guild:
-                embed.add_field(
-                    name="Status", value="The user is on this server.", inline=False
+                if not network_member.propagate_ban:
+                    embed.add_field(
+                        name="Status", value="The user is on this server.", inline=False
+                    )
+                    await self._send_network_channel(g, embed=embed)
+                    continue
+
+                if not self._get_network_channel(g).permissions_for(g.me).ban_members:
+                    embed.add_field(
+                        name="Status",
+                        value="The user is on this server (Failed to ban: No permission).",
+                        inline=False,
+                    )
+                    await self._send_network_channel(g, embed=embed)
+                    continue
+
+                member_on_target = network_member.guild.get_member(user.id)
+
+                if member_on_target is None:
+                    embed.add_field(
+                        name="Status",
+                        value="The user is on this server (Failed to ban: User not found).",
+                        inline=False,
+                    )
+                    await self._send_network_channel(g, embed=embed)
+                    continue
+
+                if member_on_target.top_role >= g.me.top_role:
+                    embed.add_field(
+                        name="Status",
+                        value="The user is on this server (Failed to ban: Role too high).",
+                        inline=False,
+                    )
+                    await self._send_network_channel(g, embed=embed)
+                    continue
+
+                await member_on_target.ban(
+                    reason=f"{ctx.guild} ({ctx.guild.id}): {reason if reason else 'No reason given.'}",
                 )
+                embed.add_field(
+                    name="Status",
+                    value="The user was on this server.",
+                    inline=False,
+                )
+                await self._send_network_channel(g, embed=embed)
+                continue
             else:
                 embed.add_field(
                     name="Status",
                     value="The user is not on this server.",
                     inline=False,
                 )
-
-            await self._send_network_channel(g, embed=embed)
+                await self._send_network_channel(g, embed=embed)
+                continue
 
     @network.command(name="kick")
     @commands.has_permissions(kick_members=True)
