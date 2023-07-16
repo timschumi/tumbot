@@ -40,6 +40,9 @@ class Logging(commands.Cog):
     async def on_member_ban(self, _, member):
         """Logs banned guild members"""
 
+        if member is None:
+            return
+
         await self._log_stuff(
             member.guild, f":no_entry_sign: **{member}** ({member.id}) wurde gebannt."
         )

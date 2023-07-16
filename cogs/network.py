@@ -187,6 +187,27 @@ def _check_affect_member(func):
     return wrapper
 
 
+def _check_affect_user(func):
+    @functools.wraps(func)
+    async def wrapper(self, ctx, user, *args, **kwargs):
+        member = ctx.guild.get_member(user.id)
+
+        if member is not None:
+            if ctx.author.top_role <= member.top_role and ctx.author != ctx.guild.owner:
+                await ctx.send(
+                    "You don't have a high enough role to modify this member."
+                )
+                return
+
+            if ctx.guild.me.top_role <= member.top_role:
+                await ctx.send("I don't have a high enough role to modify this member.")
+                return
+
+        await func(self, ctx, user, *args, **kwargs)
+
+    return wrapper
+
+
 class GuildNetworks(commands.Cog):
     # pylint: disable=missing-class-docstring
 
@@ -413,12 +434,13 @@ class GuildNetworks(commands.Cog):
     @network.command(name="ban")
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
-    @_check_affect_member
-    async def network_ban(self, ctx, member: discord.Member, *, reason=None):
+    @_check_affect_user
+    async def network_ban(self, ctx, user: discord.User, *, reason=None):
         """Ban user and announce it to other guilds in the network"""
 
-        await member.ban(
-            reason=f"{ctx.author} ({ctx.author.id}): {reason if reason else 'No reason given.'}"
+        await ctx.guild.ban(
+            user,
+            reason=f"{ctx.author} ({ctx.author.id}): {reason if reason else 'No reason given.'}",
         )
         await ctx.message.add_reaction("\U00002705")
 
@@ -427,10 +449,10 @@ class GuildNetworks(commands.Cog):
         )
 
         for g in guilds:
-            user_in_guild = member in g.members
+            user_in_guild = user in g.members
 
             embed = discord.Embed(
-                title=f"{member} ({member.id}) has been banned from '{ctx.guild}'",
+                title=f"{user} ({user.id}) has been banned from '{ctx.guild}'",
                 color=(COLOR_MESSAGE_CRIT if user_in_guild else COLOR_MESSAGE_WARN),
             )
 
@@ -448,12 +470,12 @@ class GuildNetworks(commands.Cog):
 
             if user_in_guild:
                 embed.add_field(
-                    name="Status", value="The member is on this server.", inline=False
+                    name="Status", value="The user is on this server.", inline=False
                 )
             else:
                 embed.add_field(
                     name="Status",
-                    value="The member is not on this server.",
+                    value="The user is not on this server.",
                     inline=False,
                 )
 
