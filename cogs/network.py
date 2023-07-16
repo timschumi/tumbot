@@ -566,12 +566,15 @@ class GuildNetworks(commands.Cog):
             )
 
         # Remove user reaction
-        await message.remove_reaction(payload.emoji, member)
+        try:
+            await message.remove_reaction(payload.emoji, member)
+        except discord.errors.Forbidden:
+            pass
 
         # Invite denied?
         if payload.emoji.name == "\U0000274E":
             # Mark as "denied"
-            await message.clear_reaction("\U00002705")
+            await message.remove_reaction("\U00002705", self._bot.user)
             return
 
         # Resolve network
@@ -582,7 +585,7 @@ class GuildNetworks(commands.Cog):
             return
 
         # Mark as "approved"
-        await message.clear_reaction("\U0000274E")
+        await message.remove_reaction("\U0000274E", self._bot.user)
 
         network.join(guild.id)
 
