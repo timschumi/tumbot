@@ -395,24 +395,24 @@ class GuildNetworks(commands.Cog):
 
         await ctx.message.add_reaction("\U00002705")
 
-    def _get_neighbor_guilds(self, guild, pred=None):
-        guilds = []
+    def _get_neighbor_members(self, guild, pred=None):
+        members = []
 
-        for n in self._networks.values():
+        for network in self._networks.values():
             # Skip networks that the guild is not a member of
-            if n.get_member(guild.id) is None:
+            if network.get_member(guild.id) is None:
                 continue
 
-            for g in n.members:
-                if g.guild in guilds:
+            for member in network.members:
+                if member in members:
                     continue
 
-                if pred is not None and not pred(g):
+                if pred is not None and not pred(member):
                     continue
 
-                guilds.append(g.guild)
+                members.append(member)
 
-        return guilds
+        return members
 
     def _get_network_channel(self, guild):
         channel = self._var_channel.get(guild.id)
@@ -444,11 +444,19 @@ class GuildNetworks(commands.Cog):
         )
         await ctx.message.add_reaction("\U00002705")
 
-        guilds = self._get_neighbor_guilds(
+        network_members = self._get_neighbor_members(
             ctx.guild, pred=lambda nwm: self._get_network_channel(nwm.guild) is not None
         )
 
-        for g in guilds:
+        processed_guilds = []
+
+        for network_member in network_members:
+            g = network_member.guild
+
+            if g in processed_guilds:
+                continue
+            processed_guilds.append(g)
+
             user_in_guild = user in g.members
 
             embed = discord.Embed(
@@ -493,11 +501,19 @@ class GuildNetworks(commands.Cog):
         )
         await ctx.message.add_reaction("\U00002705")
 
-        guilds = self._get_neighbor_guilds(
+        network_members = self._get_neighbor_members(
             ctx.guild, pred=lambda nwm: self._get_network_channel(nwm.guild) is not None
         )
 
-        for g in guilds:
+        processed_guilds = []
+
+        for network_member in network_members:
+            g = network_member.guild
+
+            if g in processed_guilds:
+                continue
+            processed_guilds.append(g)
+
             user_in_guild = member in g.members
 
             embed = discord.Embed(
