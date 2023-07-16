@@ -23,47 +23,52 @@ class Userinfo(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=["userinfos", "whois"])
-    async def userinfo(self, ctx, member: discord.Member):
+    async def userinfo(self, ctx, user: discord.User):
         """Displays the most relevant stats of a user"""
 
-        roles = list(reversed(member.roles))
+        member = None if ctx.guild is None else ctx.guild.get_member(user.id)
 
         userinfoembed = discord.Embed(
-            colour=member.color, timestamp=ctx.message.created_at
+            colour=user.color, timestamp=ctx.message.created_at
         )
 
-        userinfoembed.set_author(name=f"Informationen über: {member}")
-        userinfoembed.set_thumbnail(url=member.avatar.url)
+        userinfoembed.set_author(name=f"Informationen über: {user}")
+        userinfoembed.set_thumbnail(url=user.avatar.url)
         userinfoembed.set_footer(
             text=f"Abgefragt von {ctx.author}", icon_url=ctx.author.avatar.url
         )
 
-        userinfoembed.add_field(name="ID:", value=str(member.id))
-        userinfoembed.add_field(name="Name:", value=str(member.display_name))
+        userinfoembed.add_field(name="ID:", value=str(user.id))
+        userinfoembed.add_field(name="Name:", value=str(user.display_name))
 
-        userinfoembed.add_field(name="Status:", value=str(member.status))
+        if member is not None:
+            userinfoembed.add_field(name="Status:", value=str(member.status))
 
-        if member.activity is not None:
+        if member is not None and member.activity is not None:
             userinfoembed.add_field(name="Aktivität:", value=str(member.activity.name))
 
         userinfoembed.add_field(
             name="Account erstellt:",
-            value=member.created_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"),
-        )
-        userinfoembed.add_field(
-            name="Beigetreten:",
-            value=member.joined_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"),
+            value=user.created_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"),
         )
 
-        userinfoembed.add_field(
-            name=f"Rollen ({len(roles)})",
-            value=_join("\n", [role.mention for role in roles], 1024),
-        )
-        userinfoembed.add_field(
-            name="Höchste Rolle:", value=str(member.top_role.mention)
-        )
+        if member is not None:
+            userinfoembed.add_field(
+                name="Beigetreten:",
+                value=member.joined_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"),
+            )
 
-        userinfoembed.add_field(name="Bot?", value=str(member.bot))
+        if member is not None:
+            roles = list(reversed(member.roles))
+            userinfoembed.add_field(
+                name=f"Rollen ({len(roles)})",
+                value=_join("\n", [role.mention for role in roles], 1024),
+            )
+            userinfoembed.add_field(
+                name="Höchste Rolle:", value=str(member.top_role.mention)
+            )
+
+        userinfoembed.add_field(name="Bot?", value=str(user.bot))
 
         await ctx.send(embed=userinfoembed)
 
