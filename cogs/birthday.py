@@ -109,6 +109,14 @@ class Birthdays(commands.Cog):
         day, month = birthdate.strip(".").split(".")
 
         with self.bot.db.get(ctx.guild.id) as db:
+            roles = db.execute(
+                "SELECT role FROM birthdays WHERE userId = ?",
+                (ctx.author.id,)
+            ).fetchall()
+            if len(roles) >= 1:
+                role = ctx.guild.get_role(roles[0][0])
+                if role is not None:
+                    await self._clear_role(ctx.author, role)
             db.execute(
                 "INSERT OR REPLACE INTO birthdays (userId, day, month) VALUES (?, ?, ?)",
                 (ctx.author.id, day, month),
@@ -122,12 +130,30 @@ class Birthdays(commands.Cog):
         """Removes the birthday of the calling user"""
 
         with self.bot.db.get(ctx.guild.id) as db:
+            role_id = db.execute(
+                "SELECT role FROM birthdays WHERE userId = ?",
+                (ctx.author.id,)
+            ).fetchone()[0]
+            role = ctx.guild.get_role(role_id)
+            if role is not None:
+                await self._clear_role(ctx.author, role)
             db.execute(
                 "DELETE FROM birthdays WHERE userId = ?",
                 (ctx.author.id,),
             )
 
         await ctx.message.add_reaction("\U00002705")
+
+    async def _clear_role(self, member, role):
+        if role >= member.guild.me.top_role:
+            return
+
+        await member.remove_roles(role)
+
+        with self.bot.db.get(member.guild.id) as db:
+            db.execute(
+                "UPDATE birthdays SET role = NULL WHERE userId = ?", (member.id,)
+            )
 
     async def _clear_roles(self, guild):
         if not guild.me.guild_permissions.manage_roles:
@@ -145,15 +171,7 @@ class Birthdays(commands.Cog):
             if not member or not role:
                 continue
 
-            if role >= guild.me.top_role:
-                continue
-
-            await member.remove_roles(role)
-
-            with self.bot.db.get(guild.id) as db:
-                db.execute(
-                    "UPDATE birthdays SET role = NULL WHERE userId = ?", (member.id,)
-                )
+            await self._clear_role(member, role)
 
     def _get_birthday_role(self, guild):
         role = self._var_role.get(guild.id)
