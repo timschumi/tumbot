@@ -98,6 +98,7 @@ class Birthdays(commands.Cog):
 
     @birthdays.command()
     @commands.guild_only()
+    @basedbot.has_permissions("birthday.add")
     async def add(self, ctx, birthdate):
         """Adds a birthday (DD.MM.) for the calling user"""
 
@@ -277,5 +278,6 @@ async def setup(bot):
         conv=Optional[discord.Role],
         description="The role that birthday-people should get.",
     )
+    bot.perm.register("birthday.add", base=True, pretty_name="Add birthdays")
     bot.perm.register("birthday.list", base=True, pretty_name="List birthdays")
     await bot.add_cog(Birthdays(bot))
